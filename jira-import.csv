@@ -1,0 +1,35 @@
+Issue Type,Epic Name,Epic Link,Summary,Description,Priority,Labels,Components,Story Points
+Epic,Product Discovery & Specifications,,Product Discovery & Specifications,"Fase inicial de SDD. Todo debe ser especificado, discutido y aprobado por negocio y técnica antes de cualquier desarrollo.",Highest,"sdd,product",Product,
+Epic,Project Setup,,Project Setup,Configuración base del proyecto una vez que se hayan tomado las decisiones de arquitectura y stack.,High,setup,Infrastructure,
+Epic,"Branding, UX & Design System",,"Branding, UX & Design System","Diseño de la identidad visual, experiencia de usuario, wireframes, prototipos, componentes reutilizables y Design System de Punto Papas App.",High,"ux,ui,branding,design-system",Design,
+Story,,"Branding, UX & Design System",Diseñar Wireframes del MVP,,High,ux,Design,5
+Story,,"Branding, UX & Design System",Diseñar Design System,,High,"ui,design-system",Design,5
+Story,,"Branding, UX & Design System",Diseñar Prototipo Navegable,,Medium,prototype,Design,5
+Epic,Authentication & Access,,Authentication & Access,"Desarrollo de los flujos de identidad, de acuerdo a su especificación aprobada.",High,"auth,users","Backend, Frontend",
+Epic,Tables & QR Experience,,Tables & QR Experience,Desarrollo del sistema de mesas y lectura de QR.,High,"qr,experience","Frontend, Backend",
+Epic,Game Engine,,Game Engine,Desarrollo del motor en tiempo real y trivia.,Highest,game-engine,"Backend, Frontend",
+Epic,AI Question Engine,,AI Question Engine,Desarrollo de la integración con IA y panel de aprobación.,Medium,"ai,content","Admin, Backend",
+Epic,Rewards & Loyalty,,Rewards & Loyalty,Desarrollo de la billetera de puntos y catálogo.,Medium,rewards,"Frontend, Backend",
+Epic,Admin Operations,,Admin Operations,Desarrollo del panel de gestión interna.,Medium,admin,Admin,
+Story,,Product Discovery & Specifications,Definir Product Vision,"Definir la visión del producto, objetivos del negocio, propuesta de valor, público objetivo y alcance general de Punto Papas App.",Highest,"sdd,product",Product,3
+Story,,Product Discovery & Specifications,Definir MVP y Roadmap,"Definir el alcance del MVP, funcionalidades incluidas, funcionalidades futuras, roadmap inicial y prioridades de desarrollo.",Highest,"sdd,mvp",Product,3
+Story,,Product Discovery & Specifications,Definir Arquitectura y Stack Tecnológico,Documentar y consensuar las decisiones sobre la infraestructura y el stack a utilizar para el proyecto.,Highest,architecture,Product,2
+Story,,Product Discovery & Specifications,Especificación SDD: Autenticación y Perfiles,Redactar el documento de especificación funcional definiendo cómo se registrarán los usuarios y gestionarán su perfil.,Highest,sdd,Product,2
+Story,,Product Discovery & Specifications,Especificación SDD: QRs y Sesiones de Mesa,Redactar la experiencia desde que el usuario escanea el código hasta que entra a la sala virtual de su mesa.,Highest,sdd,Product,3
+Story,,Product Discovery & Specifications,Especificación SDD: Game Engine y Puntuación,"Definir la mecánica del juego, temporizadores, reglas de puntuación y sincronización en tiempo real.",Highest,sdd,Product,5
+Story,,Product Discovery & Specifications,Especificación SDD: Motor IA y Banco de Preguntas,"Definir cómo el administrador solicitará preguntas a la IA, su categorización y el flujo de revisión antes de publicarlas.",High,sdd,Product,3
+Story,,Product Discovery & Specifications,Especificación SDD: Sistema de Puntos y Premios,"Definir las reglas de negocio sobre cómo se ganan, expiran y canjean los puntos.",High,sdd,Product,2
+Story,,Product Discovery & Specifications,Especificación SDD: Arquitectura Multi-Tenant (Colegios),"Diseñar teóricamente cómo el modelo de datos soportará la agrupación por colegios y cursos para el futuro, evitando deudas técnicas.",High,sdd,Product,3
+Story,,Project Setup,Configurar Repositorio y Entorno SDD,Crear el repositorio de código y el espacio para alojar las especificaciones SDD y los ADRs (Architecture Decision Records).,High,setup,Infrastructure,1
+Story,,Project Setup,Configurar Entornos Base,Provisionar la infraestructura inicial en base al stack definido en la fase de descubrimiento.,High,setup,Infrastructure,3
+Story,,MVP: Authentication & Access,Desarrollo: Registro e Inicio de Sesión,Implementar el flujo de autenticación siguiendo estrictamente su especificación SDD aprobada.,High,dev,"Frontend, Backend",5
+Story,,MVP: Authentication & Access,Desarrollo: Gestión de Perfil de Usuario,"Implementar la vista y actualización del perfil del usuario, según SDD.",Medium,dev,"Frontend, Backend",3
+Story,,MVP: Tables & QR Experience,Desarrollo: Generador de QRs para Mesas,"Implementar la utilidad para que el administrador genere y exporte los QRs de las mesas, según SDD.",Medium,dev,"Admin, Backend",3
+Story,,MVP: Tables & QR Experience,Desarrollo: Escáner QR y Acceso a la Mesa,"Implementar en la app la lectura del QR y la asignación del usuario a la sesión correspondiente, según SDD.",High,dev,Frontend,5
+Story,,MVP: Game Engine,Desarrollo: Sincronización de Sesión de Trivia,"Implementar el backend en tiempo real y la interfaz para mostrar la misma pregunta a toda la mesa, según SDD.",Highest,dev,"Frontend, Backend",8
+Story,,MVP: Game Engine,Desarrollo: Cálculo de Puntaje y Leaderboard Local,"Implementar la lógica de negocio que evalúa respuestas, tiempos y arma el podio de la mesa, según SDD.",Highest,dev,"Frontend, Backend",5
+Story,,MVP: AI Question Engine,Desarrollo: Pipeline de Prompts a IA,"Implementar la conexión con el modelo de lenguaje definido y el parseo de las preguntas, según SDD.",Medium,dev,Backend,5
+Story,,MVP: AI Question Engine,Desarrollo: Panel de Revisión de Preguntas,"Implementar la interfaz administrativa para aceptar, editar o rechazar preguntas generadas por IA, según SDD.",Medium,dev,Admin,3
+Story,,MVP: Rewards & Loyalty,Desarrollo: Billetera de Puntos del Usuario,"Implementar la visualización del saldo de puntos acumulados, según SDD.",Medium,dev,"Frontend, Backend",3
+Story,,MVP: Rewards & Loyalty,Desarrollo: Catálogo de Premios y Canje,"Implementar la vista de premios disponibles y el flujo transaccional de canje, según SDD.",Medium,dev,"Frontend, Backend",5
+Story,,Admin Operations,Desarrollo: Monitor de Mesas en Vivo,"Implementar el dashboard donde el staff visualiza la actividad del bar, según SDD.",Medium,dev,Admin,5
