@@ -6,6 +6,8 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/), y este proyecto adhiere de manera semántica a su evolución.
 
 ## [Unreleased]
+### Added
+- Especificación funcional de visión de producto (`PPA-002`) revisada y aprobada oficialmente (v1.0.0). Documenta el propósito, objetivos y límites del ecosistema de Punto Burger, priorizando a las escuelas desde el lanzamiento público.
 
 ## [v0.1.0] - Inicio del Proyecto
 ### Added

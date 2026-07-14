@@ -20,6 +20,9 @@ Actualmente, el repositorio contiene el **Bootstrap Kit** documental:
 - `CONTRIBUTING.md`: Guías y convenciones para aportar código.
 - `CHANGELOG.md`: Registro histórico de versiones y cambios.
 
+### Especificaciones (SDD)
+- [01-Product Vision](specs/01-product-vision.md): Visión, objetivos y reglas de negocio del ecosistema de Punto Burger.
+
 ## Metodología de Desarrollo
 Este proyecto se rige estrictamente por **Spec Driven Development (SDD)**. Ninguna funcionalidad se desarrolla sin una especificación previamente redactada, debatida y aprobada.
 
