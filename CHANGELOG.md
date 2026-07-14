@@ -7,6 +7,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [Unreleased]
 ### Added
+- Especificación de MVP y Roadmap (`PPA-003`) revisada y aprobada oficialmente (v1.0.0). Define el alcance de la validación interna, el lanzamiento público (incluyendo escuelas e IA) y el roadmap general sin ataduras tecnológicas.
 - Especificación funcional de visión de producto (`PPA-002`) revisada y aprobada oficialmente (v1.0.0). Documenta el propósito, objetivos y límites del ecosistema de Punto Burger, priorizando a las escuelas desde el lanzamiento público.
 
 ## [v0.1.0] - Inicio del Proyecto

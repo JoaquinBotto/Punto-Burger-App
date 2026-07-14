@@ -22,6 +22,7 @@ Actualmente, el repositorio contiene el **Bootstrap Kit** documental:
 
 ### Especificaciones (SDD)
 - [01-Product Vision](specs/01-product-vision.md): Visión, objetivos y reglas de negocio del ecosistema de Punto Burger.
+- [02-MVP Roadmap](specs/02-mvp-roadmap.md): Definición de las etapas de validación, alcance del MVP interno y de la primera versión pública.
 
 ## Metodología de Desarrollo
 Este proyecto se rige estrictamente por **Spec Driven Development (SDD)**. Ninguna funcionalidad se desarrolla sin una especificación previamente redactada, debatida y aprobada.
