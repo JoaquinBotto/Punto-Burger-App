@@ -23,6 +23,7 @@ Actualmente, el repositorio contiene el **Bootstrap Kit** documental:
 ### Especificaciones (SDD)
 - [01-Product Vision](specs/01-product-vision.md): Visión, objetivos y reglas de negocio del ecosistema de Punto Burger.
 - [02-MVP Roadmap](specs/02-mvp-roadmap.md): Definición de las etapas de validación, alcance del MVP interno y de la primera versión pública.
+- [03-Game Mechanics](specs/03-game-mechanics.md): Especificación funcional completa de la mecánica de juego, reglas operativas, flujos, puntuación, ranking y recuperación de errores.
 
 ## Metodología de Desarrollo
 Este proyecto se rige estrictamente por **Spec Driven Development (SDD)**. Ninguna funcionalidad se desarrolla sin una especificación previamente redactada, debatida y aprobada.
