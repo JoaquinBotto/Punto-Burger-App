@@ -1,0 +1,110 @@
+name: Deploy to DonWeb Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Impide despliegues simultáneos encolando ejecuciones
+concurrency:
+  group: production_deployment
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Mandatory CI Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check code formatting
+        run: npx prettier --check .
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Run Vitest unit tests
+        run: npm run test:run
+
+      - name: Verify Drizzle schema sync
+        run: npm run db:generate
+
+      - name: Build Next.js application
+        run: npm run build
+
+  deploy:
+    name: SSH Deploy to DonWeb Cloud Server
+    needs: validate
+    runs-on: ubuntu-latest
+
+    env:
+      APP_BASE_PATH: ${{ secrets.DONWEB_APP_PATH || '/var/www/punto-burger-app' }}
+      SSH_PORT: ${{ secrets.DONWEB_SSH_PORT || '22' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH agent and credentials
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DONWEB_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ env.SSH_PORT }}" "${{ secrets.DONWEB_HOST }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Prepare remote release directory
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ env.SSH_PORT }}" "${{ secrets.DONWEB_USER }}@${{ secrets.DONWEB_HOST }}" \
+            "mkdir -p ${{ env.APP_BASE_PATH }}/releases/${{ github.sha }} ${{ env.APP_BASE_PATH }}/shared"
+
+      - name: Transfer codebase to remote release (rsync)
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='.env*' \
+            --exclude='coverage' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }}" \
+            ./ "${{ secrets.DONWEB_USER }}@${{ secrets.DONWEB_HOST }}:${{ env.APP_BASE_PATH }}/releases/${{ github.sha }}/"
+
+      - name: Execute remote build, migration and PM2 reload
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ env.SSH_PORT }}" "${{ secrets.DONWEB_USER }}@${{ secrets.DONWEB_HOST }}" \
+            "APP_BASE_DIR=${{ env.APP_BASE_PATH }} bash ${{ env.APP_BASE_PATH }}/releases/${{ github.sha }}/deploy/scripts/deploy-release.sh ${{ github.sha }}"
+
+      - name: Verify production public health check
+        run: |
+          echo "Consultando https://app.puntoburger.com.ar/api/health..."
+          HEALTH_RESPONSE=""
+          for i in {1..12}; do
+            RESPONSE=$(curl -s -f --max-time 5 "https://app.puntoburger.com.ar/api/health" || true)
+            if echo "$RESPONSE" | grep -q '"status":"ok"'; then
+              echo "✓ Health check exitoso: $RESPONSE"
+              HEALTH_RESPONSE="ok"
+              break
+            fi
+            echo "Intento $i/12 fallido. Esperando 5 segundos..."
+            sleep 5
+          done
+
+          if [ "$HEALTH_RESPONSE" != "ok" ]; then
+            echo "::error::El health check en https://app.puntoburger.com.ar/api/health no respondió satisfactoriamente."
+            exit 1
+          fi

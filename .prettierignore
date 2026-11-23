@@ -1,0 +1,14 @@
+node_modules
+.next
+build
+dist
+coverage
+package-lock.json
+next-env.d.ts
+src/db/migrations
+specs
+*.csv
+AI_CONTEXT.md
+CONTRIBUTING.md
+DEVELOPMENT_WORKFLOW.md
+PROJECT_RULES.md
