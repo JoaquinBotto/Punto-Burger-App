@@ -198,6 +198,7 @@ El 25 de noviembre de 2026 se llevó a cabo el **Smoke Test Real** completo dire
 #### 1. Claim de Mesa y Emisión de Cookie
 
 Comando ejecutado:
+
 ```bash
 curl -s -i -c /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v1/tables/claim \
   -H "Content-Type: application/json" \
@@ -205,6 +206,7 @@ curl -s -i -c /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v
 ```
 
 Resultado:
+
 - `HTTP/2 200 OK`
 - `{"ok":true,"session":{"table":"Mesa 01","status":"active","expiresAt":"2026-11-25T18:00:29.492Z"},"next":"/play/setup"}`
 - Encabezado `Set-Cookie: pb_table_session=...; Path=/; HttpOnly; SameSite=Lax; Secure` recibido y guardado.
@@ -212,11 +214,13 @@ Resultado:
 #### 2. Carga Inicial de Wizard de Configuración
 
 Comando ejecutado:
+
 ```bash
 curl -s -i -b /tmp/ppa11_cookie.txt https://app.puntoburger.com.ar/play/setup
 ```
 
 Resultado:
+
 - `HTTP/2 200 OK`
 - Renderizó la pantalla del Paso 1 ("Paso 1 de 3: Nombre del equipo") para "Mesa 01".
 - Categorías activas cargadas desde PostgreSQL: 6 categorías activas con `isReady: true` (72 preguntas aprobadas en total, 12 por tema con estructura 4/4/4 satisfaciendo el umbral 3/4/3).
@@ -224,6 +228,7 @@ Resultado:
 #### 3. Configuración Inicial del Equipo (POST /api/v1/games/setup)
 
 Comando ejecutado:
+
 ```bash
 curl -s -i -b /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v1/games/setup \
   -H "Content-Type: application/json" \
@@ -238,6 +243,7 @@ curl -s -i -b /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v
 ```
 
 Respuesta del servidor (`HTTP/2 200 OK`):
+
 ```json
 {
   "ok": true,
@@ -246,8 +252,20 @@ Respuesta del servidor (`HTTP/2 200 OK`):
     "name": "SMOKE PPA-011"
   },
   "participants": [
-    { "id": "6128f122-565c-4fb8-8ea2-5b9dfbb1cf71", "alias": "Joaco", "ageRange": "adult", "educationLevel": "higher", "position": 1 },
-    { "id": "a2239eb6-cc8e-44c7-a5f1-97b582c81bb4", "alias": "Santi", "ageRange": "teen", "educationLevel": "secondary", "position": 2 }
+    {
+      "id": "6128f122-565c-4fb8-8ea2-5b9dfbb1cf71",
+      "alias": "Joaco",
+      "ageRange": "adult",
+      "educationLevel": "higher",
+      "position": 1
+    },
+    {
+      "id": "a2239eb6-cc8e-44c7-a5f1-97b582c81bb4",
+      "alias": "Santi",
+      "ageRange": "teen",
+      "educationLevel": "secondary",
+      "position": 2
+    }
   ],
   "gameSession": {
     "id": "9ab739f6-bd31-4fcf-a6c1-6e14aa5bb47c",
@@ -263,6 +281,7 @@ Respuesta del servidor (`HTTP/2 200 OK`):
 #### 4. Verificación Directa en Base de Datos PostgreSQL
 
 Consulta ejecutada en el host de producción:
+
 - `groups`: Registrado `id: 7ba5bf89-a27f-46df-ad0f-a5bbcff1771f`, `name: "SMOKE PPA-011"`, vinculado a `table_session_id: 2ebeac64-f49f-4e11-b656-802b7e34a940`.
 - `participants`: Exactamente 2 filas ordenadas por posición:
   - Posición 1: `id: 6128f122-565c-4fb8-8ea2-5b9dfbb1cf71`, `alias: "Joaco"`, `age_range: "adult"`, `education_level: "higher"`.
@@ -281,11 +300,13 @@ Consulta ejecutada en el host de producción:
 #### 5. Recuperación y Vista de Resumen tras Recarga
 
 Comando ejecutado:
+
 ```bash
 curl -s -i -b /tmp/ppa11_cookie.txt https://app.puntoburger.com.ar/play/setup
 ```
 
 Resultado:
+
 - `HTTP/2 200 OK`
 - Renderizó la pantalla de resumen:
   - Encabezado: "¡Equipo listo!"
@@ -299,6 +320,7 @@ Resultado:
 #### 6. Prueba de Edición e Idempotencia
 
 Se ejecutó una solicitud de modificación sobre la partida en estado `created`:
+
 ```bash
 curl -s -i -b /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v1/games/setup \
   -H "Content-Type: application/json" \
@@ -314,6 +336,7 @@ curl -s -i -b /tmp/ppa11_cookie.txt -X POST https://app.puntoburger.com.ar/api/v
 ```
 
 Resultado verificado:
+
 - `HTTP/2 200 OK`
 - `group.id: 7ba5bf89-a27f-46df-ad0f-a5bbcff1771f` (mismo ID de grupo preservado, sin duplicados).
 - `group.name: "SMOKE PPA-011 EDITADO"`.
@@ -326,6 +349,7 @@ Resultado verificado:
 #### 7. Limpieza de Sesión y Restauración de Mesa
 
 Se realizó la liberación controlada de la sesión de prueba:
+
 1. `devices`: Estado actualizado a `revoked` con `revoked_at = NOW()`.
 2. `table_sessions`: Estado actualizado a `closed` con `closed_at = NOW()`, `cooldown_until = NOW() + 120s`, y `active_device_id = NULL`.
 3. `tables`: Estado actualizado a `cooldown`.
