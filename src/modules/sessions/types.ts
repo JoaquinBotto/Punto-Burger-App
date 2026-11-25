@@ -8,6 +8,10 @@ export interface ClaimTableInput {
   accessCode: string;
 }
 
+export interface ClaimTableQrInput {
+  qrToken: string;
+}
+
 export interface ClaimTableResult {
   ok: true;
   session: {

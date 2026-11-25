@@ -30,3 +30,9 @@ yarn-error.log*
 .env.test
 .env.production
 !.env.example
+
+# Temporary and local QR print manifests
+tmp/
+qr-print/
+table-qr-manifest.*
+*.csv

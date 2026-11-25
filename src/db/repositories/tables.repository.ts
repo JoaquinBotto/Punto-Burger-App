@@ -38,6 +38,10 @@ export async function getTableById(db: DbClient, tableId: string): Promise<Table
   return result[0] ?? null;
 }
 
+export async function getTablesByVenueId(db: DbClient, venueId: string): Promise<Table[]> {
+  return db.select().from(tables).where(eq(tables.venueId, venueId)).orderBy(tables.code);
+}
+
 export async function updateTableStatus(
   db: DbClient,
   tableId: string,
@@ -54,6 +58,26 @@ export async function updateTableStatus(
 
   if (!updated) {
     throw new Error(`Mesa ${tableId} no encontrada para actualizar estado.`);
+  }
+  return updated;
+}
+
+export async function updateTableQrToken(
+  db: DbClient,
+  tableId: string,
+  qrToken: string
+): Promise<Table> {
+  const [updated] = await db
+    .update(tables)
+    .set({
+      qrToken,
+      updatedAt: new Date(),
+    })
+    .where(eq(tables.id, tableId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Mesa ${tableId} no encontrada para actualizar token QR.`);
   }
   return updated;
 }

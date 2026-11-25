@@ -17,7 +17,10 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seeds/index.ts",
     "db:studio": "drizzle-kit studio",
-    "dev:access-code": "tsx scripts/dev-access-code.ts"
+    "dev:access-code": "tsx scripts/dev-access-code.ts",
+    "tables:provision": "tsx scripts/provision-tables.ts",
+    "qr:export": "tsx scripts/export-table-qr-manifest.ts",
+    "qr:rotate": "tsx scripts/rotate-table-qr.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

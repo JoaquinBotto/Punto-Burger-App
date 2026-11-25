@@ -1,5 +1,9 @@
 import type { Database } from '../../db/client';
-import { getTableByCode, updateTableStatus } from '../../db/repositories/tables.repository';
+import {
+  getTableByCode,
+  getTableByQrToken,
+  updateTableStatus,
+} from '../../db/repositories/tables.repository';
 import { getVenueById } from '../../db/repositories/venues.repository';
 import {
   getActiveSessionByTableId,
@@ -9,25 +13,18 @@ import {
 import { createAuditEvent } from '../../db/repositories/audit-events.repository';
 import { TableNotFoundError } from './errors';
 import type { ResolvedTableState, TableStatus } from './types';
+import type { Table } from '../../db/schema/tables';
 
 export const COOLDOWN_DURATION_MS = 2 * 60 * 1000; // 2 minutos
 
 /**
- * Resuelve la mesa a partir de su código público (ej. "mesa-01"), normalizando de forma perezosa
- * (lazy normalization) su estado en caso de expiración de sesión o finalización de cooldown.
+ * Normaliza de forma perezosa el estado de una mesa y su sesión/cooldown.
  */
-export async function resolveTableState(
+async function normalizeAndResolveTableState(
   db: Database,
-  tableCode: string,
-  now = new Date()
+  table: Table,
+  now: Date
 ): Promise<ResolvedTableState> {
-  const normalizedCode = tableCode.trim().toLowerCase();
-  const table = await getTableByCode(db, normalizedCode);
-
-  if (!table) {
-    throw new TableNotFoundError();
-  }
-
   const venue = await getVenueById(db, table.venueId);
   if (!venue) {
     throw new TableNotFoundError('El local asociado a la mesa no se encuentra disponible.');
@@ -42,7 +39,7 @@ export async function resolveTableState(
     if (activeSession.expiresAt <= now) {
       const cooldownUntil = new Date(now.getTime() + COOLDOWN_DURATION_MS);
 
-      // Transición sesión: active -> expired
+      // Transición sesión: active -> expired (limpia active_device_id automáticamente)
       await updateSessionStatus(db, activeSession.id, 'expired', now, cooldownUntil);
 
       // Transición mesa: in_use -> cooldown
@@ -113,4 +110,42 @@ export async function resolveTableState(
     effectiveStatus,
     cooldownRemainingSeconds,
   };
+}
+
+/**
+ * Resuelve la mesa a partir de su código público (ej. "mesa-01"), normalizando de forma perezosa
+ * (lazy normalization) su estado en caso de expiración de sesión o finalización de cooldown.
+ */
+export async function resolveTableState(
+  db: Database,
+  tableCode: string,
+  now = new Date()
+): Promise<ResolvedTableState> {
+  const normalizedCode = tableCode.trim().toLowerCase();
+  const table = await getTableByCode(db, normalizedCode);
+
+  if (!table) {
+    throw new TableNotFoundError();
+  }
+
+  return normalizeAndResolveTableState(db, table, now);
+}
+
+/**
+ * Resuelve la mesa a partir de su token QR físico permanente, normalizando de forma perezosa
+ * (lazy normalization) su estado en caso de expiración de sesión o finalización de cooldown.
+ */
+export async function resolveTableStateByQrToken(
+  db: Database,
+  qrToken: string,
+  now = new Date()
+): Promise<ResolvedTableState> {
+  const normalizedToken = qrToken.trim();
+  const table = await getTableByQrToken(db, normalizedToken);
+
+  if (!table) {
+    throw new TableNotFoundError('Mesa no encontrada con el código QR provisto.');
+  }
+
+  return normalizeAndResolveTableState(db, table, now);
 }

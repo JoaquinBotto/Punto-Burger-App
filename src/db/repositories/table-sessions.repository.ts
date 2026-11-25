@@ -72,6 +72,9 @@ export async function updateSessionStatus(
   if (cooldownUntil !== undefined) {
     updateData.cooldownUntil = cooldownUntil;
   }
+  if (status === 'closed' || status === 'expired') {
+    updateData.activeDeviceId = null;
+  }
 
   const [updated] = await db
     .update(tableSessions)
@@ -81,6 +84,28 @@ export async function updateSessionStatus(
 
   if (!updated) {
     throw new Error(`Sesión ${sessionId} no encontrada para actualizar estado.`);
+  }
+  return updated;
+}
+
+/**
+ * Desvincula el dispositivo activo de una sesión (limpia active_device_id).
+ */
+export async function clearSessionActiveDevice(
+  db: DbClient,
+  sessionId: string
+): Promise<TableSession> {
+  const [updated] = await db
+    .update(tableSessions)
+    .set({
+      activeDeviceId: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(tableSessions.id, sessionId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Sesión ${sessionId} no encontrada.`);
   }
   return updated;
 }

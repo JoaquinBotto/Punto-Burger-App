@@ -98,6 +98,27 @@ describe('tables.service - resolveTableState', () => {
     expect(result.cooldownRemainingSeconds).toBe(120); // 2 minutos
   });
 
+  it('resuelve una mesa por qrToken exitosamente', async () => {
+    vi.spyOn(tablesRepo, 'getTableByQrToken').mockResolvedValue(mockTable);
+    vi.spyOn(venuesRepo, 'getVenueById').mockResolvedValue(mockVenue);
+    vi.spyOn(sessionsRepo, 'getActiveSessionByTableId').mockResolvedValue(null);
+
+    const { resolveTableStateByQrToken } = await import('./tables.service');
+    const result = await resolveTableStateByQrToken(dummyDb, 'qr-123');
+    expect(result.table.code).toBe('mesa-01');
+    expect(result.effectiveStatus).toBe('available');
+    expect(result.activeSession).toBeNull();
+  });
+
+  it('lanza TableNotFoundError si el qrToken no existe', async () => {
+    vi.spyOn(tablesRepo, 'getTableByQrToken').mockResolvedValue(null);
+
+    const { resolveTableStateByQrToken } = await import('./tables.service');
+    await expect(resolveTableStateByQrToken(dummyDb, 'qr-inexistente')).rejects.toThrow(
+      TableNotFoundError
+    );
+  });
+
   it('libera automáticamente una mesa en cooldown una vez transcurridos los 2 minutos', async () => {
     const now = new Date('2026-11-25T12:05:00Z');
     const cooldownTable = { ...mockTable, status: 'cooldown' as const };

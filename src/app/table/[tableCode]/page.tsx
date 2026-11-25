@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { getDb } from '@/db/client';
 import { resolveTableState, TableNotFoundError } from '@/modules/tables';
 import { TABLE_SESSION_COOKIE_NAME, resolveSessionFromCookie } from '@/modules/sessions';
-import { TableClaimForm } from './table-claim-form';
 import { BrandCard, BrandHeader } from '@/components/ui';
 
 interface TablePageProps {
@@ -172,16 +171,43 @@ export default async function TablePage({ params }: TablePageProps) {
           </div>
         )}
 
-        {/* 7. Caso Normal: Mesa disponible para ingresar código temporal */}
+        {/* 7. Caso Informativo: Acceso por QR físico permanente */}
         {!errorState && !activeSessionForDevice && resolvedTable && (
           <div className="mt-2">
             <h1 className="text-3xl font-black tracking-tight text-pb-charcoal sm:text-4xl">
               {tableDisplayName}
             </h1>
-            <p className="mt-2 text-sm text-pb-charcoal-muted">
-              Ingresá el código que ves en las pantallas del local.
-            </p>
-            <TableClaimForm tableCode={resolvedTable.table.code} />
+            <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-6 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-pb-cream text-pb-red mb-3">
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-lg font-black text-pb-charcoal">Accedé desde el QR de tu mesa</h2>
+              <p className="mt-2 text-sm text-pb-charcoal-muted">
+                Para comenzar a jugar, escaneá directamente el código QR ubicado en tu mesa física.
+                Ya no es necesario ingresar ningún código de pantalla.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/ranking"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-pb-cream px-5 py-2.5 text-xs font-bold text-pb-charcoal hover:bg-pb-cream-border transition-all"
+                >
+                  Ver ranking del día
+                </Link>
+              </div>
+            </div>
           </div>
         )}
 

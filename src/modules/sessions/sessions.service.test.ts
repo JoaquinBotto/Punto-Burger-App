@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as tablesService from '../tables/tables.service';
 import * as sessionsRepo from '../../db/repositories/table-sessions.repository';
 import * as auditRepo from '../../db/repositories/audit-events.repository';
-import { claimTableSession, resolveSessionFromCookie } from './sessions.service';
+import {
+  claimTableSession,
+  claimTableSessionByQr,
+  resolveSessionFromCookie,
+} from './sessions.service';
 import { resetRateLimiter } from './rate-limiter';
 import {
   TableAlreadyInUseError,
@@ -500,5 +504,158 @@ describe('sessions.service - claimTableSession y resolveSessionFromCookie', () =
     expect(result).not.toBeNull();
     expect(result?.table.code).toBe('mesa-01');
     expect(result?.device.id).toBe('dev-1');
+  });
+
+  describe('claimTableSessionByQr', () => {
+    it('reclama una mesa disponible exitosamente usando qrToken sin requerir accessCode', async () => {
+      const now = new Date('2026-11-25T12:00:00Z');
+
+      vi.spyOn(tablesService, 'resolveTableStateByQrToken').mockResolvedValue({
+        table: mockTable,
+        venue: mockVenue,
+        activeSession: null,
+        effectiveStatus: 'available',
+      });
+
+      let insertedSession: TableSession | null = null;
+      let insertedDevice: Device | null = null;
+      let tableStatusSet = '';
+      let auditMetadata: Record<string, unknown> = {};
+
+      const mockTx = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([mockTable]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockImplementation(() => ({
+          values: vi.fn().mockImplementation((val) => {
+            if (val.tableId) {
+              insertedSession = { id: 'sess-qr-1', ...val };
+              return { returning: vi.fn().mockResolvedValue([insertedSession]) };
+            }
+            if (val.tableSessionId) {
+              insertedDevice = { id: 'dev-qr-1', ...val };
+              return { returning: vi.fn().mockResolvedValue([insertedDevice]) };
+            }
+            if (val.eventType === 'session_created') {
+              auditMetadata = val.metadata;
+            }
+            return { returning: vi.fn().mockResolvedValue([val]) };
+          }),
+        })),
+        update: vi.fn().mockImplementation(() => ({
+          set: vi.fn().mockImplementation((data) => ({
+            where: vi.fn().mockImplementation(() => {
+              if (data.status === 'in_use') {
+                tableStatusSet = 'in_use';
+              }
+              return { returning: vi.fn().mockResolvedValue([data]) };
+            }),
+          })),
+        })),
+      };
+
+      const mockDb = {
+        transaction: vi.fn().mockImplementation(async (cb) => cb(mockTx)),
+      } as unknown as Database;
+
+      const result = await claimTableSessionByQr(
+        mockDb,
+        { qrToken: 'qr-123' },
+        undefined,
+        '192.168.1.50',
+        now
+      );
+
+      expect(result.ok).toBe(true);
+      expect(result.session.table).toBe('Mesa 01');
+      expect(result.session.status).toBe('active');
+      expect(result.next).toBe('/play/setup');
+      expect(result.rawDeviceToken).toBeDefined();
+      expect(tableStatusSet).toBe('in_use');
+      expect(auditMetadata.claimMethod).toBe('qr');
+      // Asegurar que el qrToken NUNCA se guarde en los metadatos de auditoría
+      expect(auditMetadata.qrToken).toBeUndefined();
+    });
+
+    it('rechaza el reclamo por QR si la mesa está en cooldown', async () => {
+      vi.spyOn(tablesService, 'resolveTableStateByQrToken').mockResolvedValue({
+        table: { ...mockTable, status: 'cooldown' },
+        venue: mockVenue,
+        activeSession: null,
+        effectiveStatus: 'cooldown',
+        cooldownRemainingSeconds: 90,
+      });
+
+      const mockDb = {} as Database;
+
+      await expect(
+        claimTableSessionByQr(mockDb, { qrToken: 'qr-123' }, undefined, '127.0.0.1')
+      ).rejects.toThrow(TableCooldownError);
+    });
+
+    it('retorna la sesión existente si el mismo dispositivo re-escanea el QR (idempotencia)', async () => {
+      const existingCookieToken = 'existing-cookie-123';
+      const mockDb = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue([]),
+              }),
+            }),
+          }),
+        }),
+      } as unknown as Database;
+
+      vi.spyOn(tablesService, 'resolveTableStateByQrToken').mockResolvedValue({
+        table: mockTable,
+        venue: mockVenue,
+        activeSession: null,
+        effectiveStatus: 'in_use',
+      });
+
+      vi.spyOn(sessionsRepo, 'getSessionWithDetailsByTokenHash').mockResolvedValue({
+        device: {
+          id: 'dev-1',
+          tableSessionId: 'sess-1',
+          tokenHash: 'h',
+          status: 'active',
+          claimedAt: new Date(),
+          revokedAt: null,
+          lastSeenAt: new Date(),
+          createdAt: new Date(),
+        },
+        session: {
+          id: 'sess-1',
+          venueId: 'venue-1',
+          tableId: 'table-1',
+          status: 'active',
+          activeDeviceId: 'dev-1',
+          startedAt: new Date(),
+          expiresAt: new Date(Date.now() + 60000),
+          closedAt: null,
+          cooldownUntil: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        table: mockTable,
+        venue: mockVenue,
+      });
+
+      const result = await claimTableSessionByQr(
+        mockDb,
+        { qrToken: 'qr-123' },
+        existingCookieToken
+      );
+
+      expect(result.ok).toBe(true);
+      expect(result.session.table).toBe('Mesa 01');
+      expect(result.next).toBe('/play/setup');
+      expect(result.rawDeviceToken).toBe(existingCookieToken);
+    });
   });
 });
