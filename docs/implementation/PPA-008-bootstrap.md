@@ -80,10 +80,10 @@ Se documentaron y validaron mediante un esquema estricto de **Zod**:
 - `PORT`: Opcional con valor por defecto `3000`
 - `APP_URL`: URL base obligatoria validada como `url()`
 - Variables preparadas para PPA-009 (marcadas opcionales en PPA-008 para permitir bootstrap sin BD):
-  - `DATABASE_URL`: Connection string de runtime (PostgreSQL / Supabase Transaction Pooler)
-  - `DATABASE_MIGRATION_URL`: Connection string directa para Drizzle Kit
-  - `SUPABASE_URL` y `SUPABASE_ANON_KEY`: Credenciales cliente/servidor de Supabase
-  - `SUPABASE_SERVICE_ROLE_KEY`: Credencial privilegiada para tareas administrativas server-only
+  - `DATABASE_URL`: Connection string de runtime (PostgreSQL / Supabase Direct Connection :5432)
+  - `DATABASE_MIGRATION_URL`: Connection string directa para Drizzle Kit (:5432)
+  - `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY`: Credenciales cliente/servidor de Supabase
+  - `SUPABASE_SECRET_KEY`: Credencial privilegiada administrativa server-only (reemplaza a SUPABASE_SERVICE_ROLE_KEY)
   - `SESSION_COOKIE_SECRET`: Secreto criptográfico de al menos 32 caracteres para firmado de cookies
 
 ### 4.3 ESLint 9 (`eslint.config.mjs`)

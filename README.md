@@ -122,6 +122,8 @@ cd Punto-Papas-App
 cp .env.example .env.local
 ```
 
+Completar las credenciales requeridas en `.env.local` (`DATABASE_URL` y `DATABASE_MIGRATION_URL` en puerto 5432 Direct Connection, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, etc.).
+
 3. Instalar las dependencias del proyecto:
 
 ```bash

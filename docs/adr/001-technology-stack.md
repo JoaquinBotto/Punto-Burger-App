@@ -95,7 +95,7 @@ $$\mathbf{Next.js\ 16.x\ (App\ Router\ /\ TypeScript)\ +\ Tailwind\ CSS\ +\ Zod\
 ### Desafíos y Mitigaciones
 
 - **Responsabilidad de Mantenimiento del Servidor DonWeb:**
-  - _Mitigación:_ Se aplican buenas prácticas de endurecimiento de Linux: acceso por clave SSH exclusiva, firewall UFW estricto (solo puertos 22, 80 y 443 expuestos), ejecución bajo usuario no-root, actualizaciones de seguridad desatendidas y snapshots periódicos en DonWeb.
+  - _Mitigación:_ Se aplican buenas prácticas de endurecimiento de Linux: acceso por clave SSH exclusiva, firewall UFW estricto (puerto SSH parametrizado por defecto 5098, además de 80 y 443 expuestos), ejecución bajo usuario no-root, actualizaciones de seguridad desatendidas y snapshots periódicos en DonWeb.
 - **Riesgo de Inconsistencia en Conexiones a PostgreSQL desde Node.js:**
   - _Mitigación:_ Se separa la cadena de conexión de runtime (`DATABASE_URL` con pool persistente dimensionado a 5–10 conexiones) de la cadena de migraciones (`DATABASE_MIGRATION_URL` directa para Drizzle Kit), alimentadas desde variables de entorno seguras sin credenciales hardcodeadas.
 - **Riesgo de Dependencia Excesiva de Middleware:**

@@ -148,10 +148,15 @@ Para sincronizar las tablas y sembrar los datos cuando las credenciales de Supab
    ```bash
    cp .env.example .env.local
    ```
-2. Completar las cadenas de conexión obtenidas del panel de Supabase:
+2. Completar las cadenas de conexión obtenidas del panel de Supabase (Dashboard -> Connect -> Direct connection):
    ```ini
-   DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:6543/postgres?pgbouncer=true"
+   # Conexión directa (puerto 5432) aprovechando IPv6 funcional en el Cloud Server
+   # (Fallback: Si en el futuro se requiriera IPv4 exclusiva, usar Session Pooler en puerto 5432)
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
    DATABASE_MIGRATION_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
+   SUPABASE_URL="https://[PROJECT_ID].supabase.co"
+   SUPABASE_PUBLISHABLE_KEY="[PUBLISHABLE_KEY]"
+   SUPABASE_SECRET_KEY="[SECRET_KEY]"
    ACCESS_CODE_SECRET="un-secreto-aleatorio-seguro-de-mas-de-32-caracteres"
    SESSION_SECRET="un-secreto-aleatorio-seguro-de-mas-de-32-caracteres"
    ```

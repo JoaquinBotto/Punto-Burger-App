@@ -92,17 +92,20 @@ APP_URL=https://app.puntoburger.com.ar
 PORT=3000
 
 # Base de Datos PostgreSQL en Supabase
-# DATABASE_URL: Cadena de conexión para backend Node.js persistente (puerto 5432 modo sesión o pooler persistente)
+# DATABASE_URL: Direct Connection Supabase (puerto 5432) copiada desde Supabase Dashboard -> Connect -> Direct connection
+# El Cloud Server DonWeb corre Ubuntu 24.04 y cuenta con IPv6 funcional.
+# (Fallback: Si en el futuro se requiriera IPv4 exclusiva, usar Session Pooler en puerto 5432).
 DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
 
-# DATABASE_MIGRATION_URL: Conexión directa utilizada por Drizzle Kit para migraciones
+# DATABASE_MIGRATION_URL: Conexión directa (puerto 5432) utilizada por Drizzle Kit para migraciones
 DATABASE_MIGRATION_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres"
 
-# Supabase Auth & Servicios
+# Supabase Auth & Servicios (Nuevas API Keys modernas de Supabase)
 SUPABASE_URL="https://[PROJECT_ID].supabase.co"
-SUPABASE_ANON_KEY="[ANON_PUBLIC_KEY]"
-# Llave de rol de servicio (NUNCA exponer al cliente móvil)
-SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
+# Llave pública de cliente (reemplaza a SUPABASE_ANON_KEY)
+SUPABASE_PUBLISHABLE_KEY="[PUBLISHABLE_KEY]"
+# Llave secreta administrativa (reemplaza a SUPABASE_SERVICE_ROLE_KEY - NUNCA exponer al cliente móvil ni al navegador)
+SUPABASE_SECRET_KEY="[SECRET_KEY]"
 
 # Secretos Criptográficos Exclusivos del Servidor (Mínimo 32 caracteres cada uno)
 SESSION_SECRET="[GENERAR_SECRET_ALEATORIO_DE_32_CARACTERES_MINIMO]"
@@ -120,7 +123,7 @@ Para habilitar el despliegue automático mediante SSH en cada push a `main`, con
 | `DONWEB_HOST`            | Dirección IP pública o hostname del Cloud Server DonWeb                                           | `181.xxx.xxx.xxx` o `server.puntoburger.com.ar` |
 | `DONWEB_USER`            | Usuario sin privilegios root configurado para el deploy                                           | `deploy`                                        |
 | `DONWEB_SSH_PRIVATE_KEY` | Clave privada SSH (formato OpenSSH / PEM) correspondiente a la clave pública en `authorized_keys` | `-----BEGIN OPENSSH PRIVATE KEY----- ...`       |
-| `DONWEB_SSH_PORT`        | Puerto de conexión SSH del servidor                                                               | `22` (o puerto remapeado si aplica)             |
+| `DONWEB_SSH_PORT`        | Puerto de conexión SSH del servidor                                                               | `5098` (puerto SSH en DonWeb Cloud Server)      |
 | `DONWEB_APP_PATH`        | (Opcional) Ruta base en el servidor                                                               | `/var/www/punto-burger-app`                     |
 
 ---
@@ -133,10 +136,11 @@ En el Cloud Server de DonWeb, como usuario `root` (o con `sudo`):
 
 ```bash
 # Descargar o copiar el script de bootstrap al servidor
-sudo bash deploy/scripts/bootstrap-server.sh
+# Nota: SSH_PORT es parametrizable (por defecto 5098 para DonWeb Cloud Server)
+sudo SSH_PORT=5098 bash deploy/scripts/bootstrap-server.sh
 ```
 
-El script instala automáticamente Node.js 24 LTS, npm, Git, rsync, PM2, Nginx, Certbot, crea el usuario `deploy`, genera las carpetas en `/var/www/punto-burger-app/` y habilita el firewall UFW (bloqueando todo salvo puertos 22, 80 y 443).
+El script instala automáticamente Node.js 24 LTS, npm, Git, rsync, PM2, Nginx, Certbot, crea el usuario `deploy`, genera las carpetas en `/var/www/punto-burger-app/` y habilita el firewall UFW (garantizando el puerto SSH efectivo —por defecto 5098— antes de habilitarlo para no bloquear el acceso al servidor, además de los puertos 80 y 443, y sin ejecutar `apt-get upgrade` automático en servidores existentes).
 
 ### Paso 6.2: Configurar Clave SSH para GitHub Actions
 

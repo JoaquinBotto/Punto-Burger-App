@@ -54,7 +54,7 @@ jobs:
 
     env:
       APP_BASE_PATH: ${{ secrets.DONWEB_APP_PATH || '/var/www/punto-burger-app' }}
-      SSH_PORT: ${{ secrets.DONWEB_SSH_PORT || '22' }}
+      SSH_PORT: ${{ secrets.DONWEB_SSH_PORT || '5098' }}
 
     steps:
       - name: Checkout repository

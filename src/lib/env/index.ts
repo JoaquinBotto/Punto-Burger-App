@@ -4,12 +4,12 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_URL: z.string().url().default('http://localhost:3000'),
 
-  // Variables de persistencia y Supabase (PPA-009 / PPA-010)
+  // Variables de persistencia y Supabase (PPA-009 / PPA-010 / INFRA-001)
   DATABASE_URL: z.string().optional(),
   DATABASE_MIGRATION_URL: z.string().optional(),
   SUPABASE_URL: z.string().url().optional(),
-  SUPABASE_ANON_KEY: z.string().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
+  SUPABASE_SECRET_KEY: z.string().optional(),
   SESSION_SECRET: z.string().min(32).optional(),
   ACCESS_CODE_SECRET: z.string().min(32).optional(),
 });

@@ -6,17 +6,20 @@
 #            Nginx, PM2, Certbot y la estructura de directorios /var/www.
 #
 # Uso en el servidor:
-#   sudo bash bootstrap-server.sh
+#   sudo SSH_PORT=5098 bash bootstrap-server.sh
+#   (Si se omite SSH_PORT, el valor por defecto configurable es 5098).
 # ==============================================================================
 
 set -euo pipefail
 
 APP_NAME="punto-burger-app"
 DEPLOY_USER="${DEPLOY_USER:-deploy}"
+SSH_PORT="${SSH_PORT:-5098}"
 APP_BASE_DIR="/var/www/${APP_NAME}"
 
 echo "================================================================="
 echo "Iniciando aprovisionamiento base del servidor para Punto Burger..."
+echo "Configuración: Usuario=${DEPLOY_USER} | Puerto SSH=${SSH_PORT}"
 echo "================================================================="
 
 # 1. Comprobar ejecución como root
@@ -25,11 +28,10 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-# 2. Actualizar paquetes del sistema
+# 2. Actualizar paquetes del sistema (no ejecutar upgrade automático en servidores existentes)
 echo ">>> Actualizando lista de paquetes..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get upgrade -y
 
 # 3. Instalar utilidades esenciales
 echo ">>> Instalando utilidades base (curl, git, rsync, ufw, ca-certificates)..."
@@ -99,14 +101,15 @@ if [ ! -f "${APP_BASE_DIR}/shared/.env.production" ]; then
 NODE_ENV=production
 APP_URL=https://app.puntoburger.com.ar
 
-# Conexiones PostgreSQL (Supabase / DonWeb)
+# Conexiones PostgreSQL Directas (Supabase Dashboard → Connect → Direct connection :5432)
+# En DonWeb Cloud Server con IPv6 se utiliza conexión directa persistente.
 DATABASE_URL=
 DATABASE_MIGRATION_URL=
 
-# Supabase Auth & Servicios
+# Supabase Auth & Servicios (API Keys Modernas de Supabase)
 SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
 
 # Secretos Criptográficos (Mínimo 32 caracteres cada uno)
 SESSION_SECRET=
@@ -121,10 +124,19 @@ chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_BASE_DIR}"
 chown -R www-data:www-data /var/www/certbot
 
 # 9. Configuración del Firewall (UFW)
-echo ">>> Configurando Firewall UFW (Permitiendo únicamente SSH, HTTP y HTTPS)..."
+echo ">>> Configurando Firewall UFW (Permitiendo SSH puerto ${SSH_PORT}, HTTP y HTTPS)..."
 ufw default deny incoming
 ufw default allow outgoing
-ufw allow 22/tcp comment 'SSH'
+
+# Permitir puerto SSH efectivo ANTES de habilitar UFW para evitar bloqueo de acceso al servidor
+echo ">>> Habilitando regla para puerto SSH ${SSH_PORT}/tcp..."
+ufw allow "${SSH_PORT}/tcp" comment "SSH port ${SSH_PORT}"
+
+# Si el puerto configurado difiere del estándar 22, permitir también 22 preventivamente
+if [ "${SSH_PORT}" != "22" ]; then
+    ufw allow 22/tcp comment 'SSH port 22 standard'
+fi
+
 ufw allow 80/tcp comment 'HTTP (Nginx)'
 ufw allow 443/tcp comment 'HTTPS (Nginx)'
 # Aseguramos que el puerto 3000 de Next.js NUNCA quede expuesto públicamente
