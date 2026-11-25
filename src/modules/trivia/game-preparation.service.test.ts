@@ -90,6 +90,7 @@ describe('Game Preparation Service (PPA-012)', () => {
     groupId: fakeGroupId,
     categoryId: fakeCategoryId,
     status: 'created' as const,
+    rankingEligible: true,
     startedAt: null,
     finishedAt: null,
     totalScore: 0,

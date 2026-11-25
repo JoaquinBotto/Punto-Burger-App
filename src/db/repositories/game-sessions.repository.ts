@@ -165,3 +165,24 @@ export async function updateGameSessionScoreAndCounts(
 
   return updated;
 }
+
+export async function updateGameSessionRankingEligibility(
+  db: DbClient,
+  gameSessionId: string,
+  rankingEligible: boolean
+): Promise<GameSession> {
+  const [updated] = await db
+    .update(gameSessions)
+    .set({
+      rankingEligible,
+      updatedAt: new Date(),
+    })
+    .where(eq(gameSessions.id, gameSessionId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Sesión de juego ${gameSessionId} no encontrada.`);
+  }
+
+  return updated;
+}

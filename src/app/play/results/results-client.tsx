@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BrandCard, BrandHeader, PrimaryButton } from '@/components/ui';
 import type { GameResultsView } from '@/modules/trivia/types';
+import type { TableRankingContext } from '@/modules/rankings/types';
 
 interface ResultsClientProps {
   results: GameResultsView['game'];
+  ranking?: TableRankingContext | null;
 }
 
-export function ResultsClient({ results }: ResultsClientProps) {
+export function ResultsClient({ results, ranking }: ResultsClientProps) {
   const router = useRouter();
   const [closing, setClosing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -135,6 +138,87 @@ export function ResultsClient({ results }: ResultsClientProps) {
             </div>
           </div>
         </div>
+
+        {/* Bloque de Ranking de Hoy (PPA-RANK-001) */}
+        {ranking && ranking.ranked && (
+          <div className="mt-4 rounded-2xl border border-pb-yellow-border bg-gradient-to-b from-white to-pb-cream/80 p-4 text-center shadow-xs">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider text-pb-yellow-hover">
+              <span>🏆</span>
+              <span>Ranking de Hoy</span>
+            </div>
+
+            <div className="mt-2.5 flex items-center justify-between rounded-xl bg-white px-3.5 py-2 border border-pb-yellow-border/60">
+              <span className="text-xs font-bold text-pb-charcoal">
+                {ranking.table?.name ?? results.table.displayName}
+              </span>
+              <span className="rounded-full bg-pb-yellow-light px-2.5 py-0.5 text-xs font-black text-pb-charcoal">
+                Puesto #{ranking.position}
+              </span>
+            </div>
+
+            <div className="mt-2.5 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-xl bg-white/90 p-2 border border-pb-yellow-border/40">
+                <span className="block text-[10px] uppercase font-bold text-pb-charcoal-muted">
+                  Tu partida
+                </span>
+                <span className="text-sm font-black text-pb-charcoal">
+                  {results.totalScore} pts
+                </span>
+              </div>
+              <div className="rounded-xl bg-white/90 p-2 border border-pb-yellow-border/40">
+                <span className="block text-[10px] uppercase font-bold text-pb-charcoal-muted">
+                  Récord de tu mesa
+                </span>
+                <span className="text-sm font-black text-pb-yellow-hover">
+                  {ranking.bestScore} pts
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-2.5">
+              {ranking.isNewRecord ? (
+                <p className="text-xs font-black text-pb-red">
+                  🔥 ¡Nuevo récord de {ranking.table?.name ?? results.table.displayName}!
+                </p>
+              ) : (
+                <p className="text-xs font-medium text-pb-charcoal-muted">
+                  Tu mesa mantiene su récord de {ranking.bestScore} puntos.
+                </p>
+              )}
+            </div>
+
+            <div className="mt-3">
+              <Link
+                href="/ranking"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-pb-yellow-border bg-white px-3.5 py-2 text-xs font-black text-pb-charcoal hover:bg-pb-yellow-light transition-colors shadow-2xs"
+              >
+                <span>Ver ranking completo</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {ranking && !ranking.ranked && (
+          <div className="mt-4 rounded-2xl border border-pb-yellow-border bg-white p-4 text-center shadow-xs">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pb-yellow-hover">
+              <span>🏆</span>
+              <span>Ranking de Hoy</span>
+            </div>
+            <p className="mt-2 text-xs text-pb-charcoal-muted">
+              Tu mesa todavía no tiene una partida en el ranking de hoy.
+            </p>
+            <div className="mt-3">
+              <Link
+                href="/ranking"
+                className="inline-flex items-center justify-center gap-1 rounded-xl bg-pb-yellow px-4 py-2 text-xs font-black text-white hover:bg-pb-yellow-hover transition-colors shadow-xs"
+              >
+                <span>Ver ranking completo</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Mensaje de Experiencia Gastronómica */}
         <div className="mt-4 rounded-2xl border border-pb-cream-border bg-white p-3.5 text-left text-xs text-pb-charcoal-muted">

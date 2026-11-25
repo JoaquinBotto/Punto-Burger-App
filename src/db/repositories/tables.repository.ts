@@ -33,6 +33,11 @@ export async function getTableByCode(db: DbClient, code: string): Promise<Table 
   return result[0] ?? null;
 }
 
+export async function getTableById(db: DbClient, tableId: string): Promise<Table | null> {
+  const result = await db.select().from(tables).where(eq(tables.id, tableId)).limit(1);
+  return result[0] ?? null;
+}
+
 export async function updateTableStatus(
   db: DbClient,
   tableId: string,

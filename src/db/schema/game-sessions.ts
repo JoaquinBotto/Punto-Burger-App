@@ -1,4 +1,13 @@
-import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 import { tableSessions } from './table-sessions';
 import { groups } from './groups';
@@ -22,6 +31,7 @@ export const gameSessions = pgTable(
     })
       .notNull()
       .default('created'),
+    rankingEligible: boolean('ranking_eligible').notNull().default(true),
     startedAt: timestamp('started_at', { withTimezone: true }),
     finishedAt: timestamp('finished_at', { withTimezone: true }),
     totalScore: integer('total_score').notNull().default(0),
@@ -34,6 +44,7 @@ export const gameSessions = pgTable(
   },
   (table) => [
     index('game_sessions_table_session_status_idx').on(table.tableSessionId, table.status),
+    index('game_sessions_ranking_idx').on(table.status, table.rankingEligible, table.finishedAt),
     uniqueIndex('game_sessions_active_table_session_idx')
       .on(table.tableSessionId)
       .where(sql`status IN ('created', 'active')`),

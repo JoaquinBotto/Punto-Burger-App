@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -42,7 +43,19 @@ export default function HomePage() {
           </ul>
         </div>
 
-        <p className="mt-6 text-[11px] font-medium text-pb-charcoal-light">
+        {/* Acceso discreto al Ranking Diario */}
+        <div className="mt-5">
+          <Link
+            href="/ranking"
+            className="inline-flex items-center gap-1.5 rounded-full border border-pb-yellow-border bg-pb-yellow-light/60 px-4 py-1.5 text-xs font-bold text-pb-charcoal hover:bg-pb-yellow-light transition-colors"
+          >
+            <span>🏆</span>
+            <span>Ranking de hoy</span>
+            <span className="text-pb-yellow-hover">→</span>
+          </Link>
+        </div>
+
+        <p className="mt-5 text-[11px] font-medium text-pb-charcoal-light">
           Escanear el código QR colocado en tu mesa para comenzar.
         </p>
       </div>

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import PlayResultsPage from './page';
 import * as triviaModule from '@/modules/trivia';
+import * as rankingsModule from '@/modules/rankings';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
@@ -33,7 +34,7 @@ describe('PlayResultsPage (/play/results)', () => {
     expect(redirect).toHaveBeenCalledWith('/');
   });
 
-  it('renderiza la pantalla de resultados con puntaje y métricas cuando la partida está completada', async () => {
+  it('renderiza la pantalla de resultados con puntaje, métricas y bloque de ranking cuando la partida está completada', async () => {
     vi.mocked(cookies).mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: 'session-token' }),
     } as unknown as Awaited<ReturnType<typeof cookies>>);
@@ -61,6 +62,18 @@ describe('PlayResultsPage (/play/results)', () => {
       },
     });
 
+    vi.spyOn(rankingsModule, 'getTableDailyRankingFromSessionCookie').mockResolvedValue({
+      authenticated: true,
+      ranked: true,
+      position: 3,
+      table: { code: 'mesa-01', name: 'Mesa 01' },
+      bestScore: 1150,
+      correctCount: 8,
+      gapToPrevious: 50,
+      previousPosition: 2,
+      isNewRecord: true,
+    });
+
     const jsx = await PlayResultsPage();
     render(jsx);
 
@@ -71,5 +84,11 @@ describe('PlayResultsPage (/play/results)', () => {
     expect(screen.getByText('8')).toBeDefined();
     expect(screen.getByText('2')).toBeDefined();
     expect(screen.getByText('Finalizar experiencia')).toBeDefined();
+
+    // Verificación del bloque de Ranking Diario (PPA-RANK-001)
+    expect(screen.getByText('Ranking de Hoy')).toBeDefined();
+    expect(screen.getByText('Puesto #3')).toBeDefined();
+    expect(screen.getByText('🔥 ¡Nuevo récord de Mesa 01!')).toBeDefined();
+    expect(screen.getByText('Ver ranking completo')).toBeDefined();
   });
 });
