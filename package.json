@@ -16,7 +16,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seeds/index.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "dev:access-code": "tsx scripts/dev-access-code.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

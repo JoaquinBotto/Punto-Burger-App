@@ -100,6 +100,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 
 - [PPA-008: Bootstrap del Proyecto](docs/implementation/PPA-008-bootstrap.md): Inicialización de la aplicación base Next.js 16, TypeScript strict, Tailwind CSS, Zod, Vitest, ESLint y estructura modular.
 - [PPA-009: Supabase, Drizzle, Modelo Inicial y Seeds](docs/implementation/PPA-009-database.md): Modelado de las 13 entidades fundacionales, esquema determinístico HMAC para códigos temporales de local, 72 preguntas de trivia aprobadas (12 por categoría), migraciones versionadas con Drizzle Kit y repositorios base.
+- [PPA-010: Acceso a Mesa, Código Temporal y Sesión](docs/implementation/PPA-010-table-access.md): Acceso autoservicio por QR/URL, validación de código temporal HMAC de local, creación atómica de sesión y dispositivo principal, cookie segura `pb_table_session`, concurrencia, expiración perezosa y cooldown.
 
 ## Desarrollo local
 
@@ -161,6 +162,7 @@ Respuesta esperada:
 - **Generar migraciones SQL**: `npm run db:generate` (analiza cambios en `src/db/schema/` y crea SQL versionado en `src/db/migrations/`).
 - **Ejecutar migraciones**: `npm run db:migrate` (aplica migraciones pendientes a la base de datos configurada en `DATABASE_MIGRATION_URL`).
 - **Ejecutar seed de datos**: `npm run db:seed` (siembra de forma idempotente local, Mesa 01, 6 categorías y 72 preguntas aprobadas).
+- **Consultar código temporal de salón (CLI)**: `npm run dev:access-code -- esperanza-central` (muestra el código temporal vigente y segundos para expirar para pruebas sin pantallas físicas).
 - **Inspección visual (Dev Only)**: `npm run db:studio` (interfaz visual Drizzle Studio para depuración en desarrollo).
 
 ### Scripts de calidad y compilación

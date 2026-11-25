@@ -27,3 +27,28 @@ export async function getTableByQrToken(db: Database, qrToken: string): Promise<
   const result = await db.select().from(tables).where(eq(tables.qrToken, qrToken)).limit(1);
   return result[0] ?? null;
 }
+
+export async function getTableByCode(db: Database, code: string): Promise<Table | null> {
+  const result = await db.select().from(tables).where(eq(tables.code, code)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function updateTableStatus(
+  db: Database,
+  tableId: string,
+  status: Table['status']
+): Promise<Table> {
+  const [updated] = await db
+    .update(tables)
+    .set({
+      status,
+      updatedAt: new Date(),
+    })
+    .where(eq(tables.id, tableId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Mesa ${tableId} no encontrada para actualizar estado.`);
+  }
+  return updated;
+}
