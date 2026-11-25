@@ -68,7 +68,8 @@ ln -sfn "${TARGET_DIR}" "${CURRENT_LINK}"
 
 echo ">>> Recargando aplicación en PM2..."
 cd "${CURRENT_LINK}"
-pm2 startOrReload ecosystem.config.cjs --update-env
+pm2 delete punto-burger-app 2>/dev/null || true
+pm2 start ecosystem.config.cjs --update-env
 pm2 save
 
 echo ">>> Verificando estado del servicio tras el rollback (/api/health)..."

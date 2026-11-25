@@ -68,7 +68,8 @@ ln -sfn "${TARGET_RELEASE_DIR}" "${CURRENT_LINK}"
 # 6. Recarga de procesos en PM2 sin corte de servicio
 echo ">>> Recargando aplicación en PM2..."
 cd "${CURRENT_LINK}"
-pm2 startOrReload ecosystem.config.cjs --update-env
+pm2 delete punto-burger-app 2>/dev/null || true
+pm2 start ecosystem.config.cjs --update-env
 pm2 save
 
 # 7. Verificación de Health Check local
