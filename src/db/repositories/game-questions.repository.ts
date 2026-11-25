@@ -34,3 +34,47 @@ export async function countGameQuestionsBySessionId(
 
   return result?.count ?? 0;
 }
+
+export async function getGameQuestionByPosition(
+  db: DbClient,
+  gameSessionId: string,
+  position: number
+): Promise<GameQuestion | null> {
+  const [result] = await db
+    .select()
+    .from(gameQuestions)
+    .where(
+      sql`${gameQuestions.gameSessionId} = ${gameSessionId} AND ${gameQuestions.position} = ${position}`
+    )
+    .limit(1);
+
+  return result ?? null;
+}
+
+export async function getGameQuestionById(db: DbClient, id: string): Promise<GameQuestion | null> {
+  const [result] = await db.select().from(gameQuestions).where(eq(gameQuestions.id, id)).limit(1);
+
+  return result ?? null;
+}
+
+export async function updateGameQuestionTiming(
+  db: DbClient,
+  id: string,
+  presentedAt: Date,
+  expiresAt: Date
+): Promise<GameQuestion> {
+  const [updated] = await db
+    .update(gameQuestions)
+    .set({
+      presentedAt,
+      expiresAt,
+    })
+    .where(eq(gameQuestions.id, id))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Pregunta de juego ${id} no encontrada para actualizar tiempos.`);
+  }
+
+  return updated;
+}

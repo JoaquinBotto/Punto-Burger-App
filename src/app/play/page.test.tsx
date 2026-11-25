@@ -11,6 +11,10 @@ vi.mock('next/headers', () => ({
 
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+  })),
 }));
 
 vi.mock('@/db/client', () => ({
@@ -76,12 +80,31 @@ describe('PlayPage (/play)', () => {
     expect(screen.getByText(/4 intermedias/i)).toBeDefined();
     expect(screen.getByText(/3 avanzadas/i)).toBeDefined();
 
-    // Botón de comenzar deshabilitado para PPA-013
+    // Botón de comenzar ahora habilitado para iniciar el juego en PPA-013
     const startButton = screen.getByRole('button', { name: /Comenzar/i });
-    expect(startButton.hasAttribute('disabled')).toBe(true);
+    expect(startButton.hasAttribute('disabled')).toBe(false);
 
     // Asegurarse de que no hay respuestas en el documento
     expect(screen.queryByText(/Opción A/i)).toBeNull();
     expect(screen.queryByText(/Opción Correcta/i)).toBeNull();
+  });
+
+  it('redirige a /play/results si la partida ya fue completada', async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'session-token' }),
+    } as unknown as Awaited<ReturnType<typeof cookies>>);
+
+    vi.spyOn(triviaModule, 'getPlayPageData').mockResolvedValue({
+      table: { code: 'mesa-01', displayName: 'Mesa 01' },
+      group: { name: 'Los Bacon', participantCount: 2 },
+      category: { slug: 'deportes', name: 'Deportes' },
+      structure: { initial: 3, medium: 4, advanced: 3, total: 10 },
+      gameStatus: 'completed',
+      isPrepared: true,
+    });
+
+    await PlayPage();
+
+    expect(redirect).toHaveBeenCalledWith('/play/results');
   });
 });

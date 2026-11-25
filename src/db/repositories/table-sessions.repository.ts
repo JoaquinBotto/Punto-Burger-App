@@ -1,5 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
-import type { Database } from '../client';
+import type { Database, DbClient } from '../client';
 import { tableSessions, type NewTableSession, type TableSession } from '../schema/table-sessions';
 import { devices, type Device, type NewDevice } from '../schema/devices';
 import { tables, type Table } from '../schema/tables';
@@ -9,7 +9,7 @@ import { venues, type Venue } from '../schema/venues';
  * Obtiene la sesión activa actual para una mesa dada (si existe).
  */
 export async function getActiveSessionByTableId(
-  db: Database,
+  db: DbClient,
   tableId: string
 ): Promise<TableSession | null> {
   const result = await db
@@ -25,7 +25,7 @@ export async function getActiveSessionByTableId(
  * Obtiene la sesión más reciente para una mesa (activa, expirada o cerrada).
  */
 export async function getLatestSessionByTableId(
-  db: Database,
+  db: DbClient,
   tableId: string
 ): Promise<TableSession | null> {
   const result = await db
@@ -42,7 +42,7 @@ export async function getLatestSessionByTableId(
  * Inserta una nueva sesión de mesa.
  */
 export async function createTableSession(
-  db: Database,
+  db: DbClient,
   data: NewTableSession
 ): Promise<TableSession> {
   const [created] = await db.insert(tableSessions).values(data).returning();
@@ -56,7 +56,7 @@ export async function createTableSession(
  * Actualiza el estado y marcas de cierre/cooldown de una sesión.
  */
 export async function updateSessionStatus(
-  db: Database,
+  db: DbClient,
   sessionId: string,
   status: TableSession['status'],
   closedAt?: Date | null,
@@ -89,7 +89,7 @@ export async function updateSessionStatus(
  * Asocia el dispositivo activo principal a una sesión de mesa.
  */
 export async function updateSessionActiveDevice(
-  db: Database,
+  db: DbClient,
   sessionId: string,
   deviceId: string
 ): Promise<TableSession> {
@@ -111,7 +111,7 @@ export async function updateSessionActiveDevice(
 /**
  * Registra un nuevo dispositivo vinculado a una sesión de mesa.
  */
-export async function createDevice(db: Database, data: NewDevice): Promise<Device> {
+export async function createDevice(db: DbClient, data: NewDevice): Promise<Device> {
   const [created] = await db.insert(devices).values(data).returning();
   if (!created) {
     throw new Error('No se pudo registrar el dispositivo.');
@@ -123,7 +123,7 @@ export async function createDevice(db: Database, data: NewDevice): Promise<Devic
  * Busca un dispositivo activo por el hash de su token criptográfico.
  */
 export async function getActiveDeviceByTokenHash(
-  db: Database,
+  db: DbClient,
   tokenHash: string
 ): Promise<Device | null> {
   const result = await db
@@ -157,4 +157,28 @@ export async function getSessionWithDetailsByTokenHash(
     .limit(1);
 
   return result[0] ?? null;
+}
+
+/**
+ * Revoca un dispositivo activo.
+ */
+export async function revokeDevice(
+  db: DbClient,
+  deviceId: string,
+  revokedAt = new Date()
+): Promise<Device> {
+  const [revoked] = await db
+    .update(devices)
+    .set({
+      status: 'revoked',
+      revokedAt,
+    })
+    .where(eq(devices.id, deviceId))
+    .returning();
+
+  if (!revoked) {
+    throw new Error(`Dispositivo ${deviceId} no encontrado.`);
+  }
+
+  return revoked;
 }

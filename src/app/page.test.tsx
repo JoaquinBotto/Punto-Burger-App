@@ -9,15 +9,15 @@ describe('HomePage', () => {
     expect(heading).toHaveTextContent('Punto Burger');
   });
 
-  it('displays the development status badge', () => {
+  it('displays the venue location badge', () => {
     render(<HomePage />);
-    expect(screen.getByText(/fase de desarrollo/i)).toBeInTheDocument();
+    expect(screen.getByText(/local esperanza, santa fe/i)).toBeInTheDocument();
   });
 
-  it('displays the descriptive text for the Esperanza local', () => {
+  it('displays the welcome text for the interactive experience', () => {
     render(<HomePage />);
     expect(
-      screen.getByText(/la experiencia digital interactiva de punto burger está en construcción/i)
+      screen.getByText(/¡bienvenidos a la experiencia digital interactiva de punto burger!/i)
     ).toBeInTheDocument();
   });
 });

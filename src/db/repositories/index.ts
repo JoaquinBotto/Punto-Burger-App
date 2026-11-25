@@ -8,3 +8,4 @@ export * from './groups.repository';
 export * from './participants.repository';
 export * from './game-sessions.repository';
 export * from './game-questions.repository';
+export * from './answers.repository';

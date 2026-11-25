@@ -49,3 +49,8 @@ export async function replaceGroupParticipants(
   // Ordenar por position antes de devolver
   return inserted.sort((a, b) => a.position - b.position);
 }
+
+export async function getParticipantById(db: DbClient, id: string): Promise<Participant | null> {
+  const [result] = await db.select().from(participants).where(eq(participants.id, id)).limit(1);
+  return result ?? null;
+}

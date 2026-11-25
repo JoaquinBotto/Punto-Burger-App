@@ -51,4 +51,134 @@ export interface PlayPageData {
   };
   gameStatus: string;
   isPrepared: boolean;
+  gameId?: string;
+}
+
+export interface ActiveQuestionView {
+  position: number;
+  difficulty: QuestionDifficulty;
+  targetAlias: string | null;
+  isGroup: boolean;
+  prompt: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  presentedAt: string | null;
+  expiresAt: string | null;
+  serverNow: string;
+}
+
+export interface AnswerFeedbackView {
+  result: 'correct' | 'incorrect' | 'unanswered';
+  selectedOption: 'A' | 'B' | 'C' | 'D' | null;
+  correctOption: 'A' | 'B' | 'C' | 'D';
+  explanation: string | null;
+  pointsAwarded: number;
+  totalScore: number;
+}
+
+export interface GameStateResult {
+  ok: true;
+  game: {
+    id: string;
+    status: 'created' | 'active' | 'completed' | 'abandoned' | 'invalidated';
+    currentQuestionIndex: number;
+    currentPosition: number;
+    totalQuestions: number;
+    totalScore: number;
+    correctCount: number;
+    incorrectCount: number;
+    unansweredCount: number;
+    category: {
+      slug: string;
+      name: string;
+    };
+    group: {
+      name: string;
+    };
+    table: {
+      code: string;
+      displayName: string;
+    };
+  };
+  question: ActiveQuestionView | null;
+  feedback: AnswerFeedbackView | null;
+  isResolved: boolean;
+  next?: string;
+}
+
+export interface StartGameResult {
+  ok: true;
+  game: {
+    id: string;
+    status: 'active';
+    currentQuestionIndex: number;
+    currentPosition: number;
+  };
+  question: ActiveQuestionView;
+}
+
+export interface SubmitAnswerResult {
+  ok: true;
+  answer: AnswerFeedbackView;
+  isLastQuestion: boolean;
+}
+
+export interface AdvanceGameResult {
+  ok: true;
+  advanced: boolean;
+  completed: boolean;
+  next?: string;
+  currentQuestionIndex?: number;
+  currentPosition?: number;
+  question?: ActiveQuestionView;
+}
+
+export interface DifficultyBreakdown {
+  initial: {
+    total: number;
+    correct: number;
+    score: number;
+    maxScore: number;
+  };
+  medium: {
+    total: number;
+    correct: number;
+    score: number;
+    maxScore: number;
+  };
+  advanced: {
+    total: number;
+    correct: number;
+    score: number;
+    maxScore: number;
+  };
+}
+
+export interface GameResultsView {
+  ok: true;
+  game: {
+    id: string;
+    status: 'completed';
+    startedAt: string | null;
+    finishedAt: string | null;
+    totalScore: number;
+    maxScore: number;
+    correctCount: number;
+    incorrectCount: number;
+    unansweredCount: number;
+    category: {
+      slug: string;
+      name: string;
+    };
+    group: {
+      name: string;
+    };
+    table: {
+      code: string;
+      displayName: string;
+    };
+    breakdown: DifficultyBreakdown;
+  };
 }

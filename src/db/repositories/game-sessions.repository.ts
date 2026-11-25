@@ -1,4 +1,5 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
+
 import type { DbClient } from '../client';
 import { gameSessions, type GameSession, type NewGameSession } from '../schema/game-sessions';
 import { categories, type Category } from '../schema/categories';
@@ -67,5 +68,100 @@ export async function updateGameSessionCategory(
   if (!updated) {
     throw new Error('No se pudo actualizar la categoría de la sesión de juego.');
   }
+  return updated;
+}
+
+export async function getGameSessionById(
+  db: DbClient,
+  gameSessionId: string
+): Promise<GameSession | null> {
+  const [result] = await db
+    .select()
+    .from(gameSessions)
+    .where(eq(gameSessions.id, gameSessionId))
+    .limit(1);
+
+  return result ?? null;
+}
+
+export async function updateGameSessionStatus(
+  db: DbClient,
+  gameSessionId: string,
+  status: GameSession['status'],
+  startedAt?: Date,
+  finishedAt?: Date
+): Promise<GameSession> {
+  const updateData: Partial<NewGameSession> = {
+    status,
+    updatedAt: new Date(),
+  };
+  if (startedAt !== undefined) {
+    updateData.startedAt = startedAt;
+  }
+  if (finishedAt !== undefined) {
+    updateData.finishedAt = finishedAt;
+  }
+
+  const [updated] = await db
+    .update(gameSessions)
+    .set(updateData)
+    .where(eq(gameSessions.id, gameSessionId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Sesión de juego ${gameSessionId} no encontrada.`);
+  }
+
+  return updated;
+}
+
+export async function advanceGameSessionQuestion(
+  db: DbClient,
+  gameSessionId: string,
+  newQuestionIndex: number
+): Promise<GameSession> {
+  const [updated] = await db
+    .update(gameSessions)
+    .set({
+      currentQuestionIndex: newQuestionIndex,
+      updatedAt: new Date(),
+    })
+    .where(eq(gameSessions.id, gameSessionId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Sesión de juego ${gameSessionId} no encontrada.`);
+  }
+
+  return updated;
+}
+
+export async function updateGameSessionScoreAndCounts(
+  db: DbClient,
+  gameSessionId: string,
+  pointsToAdd: number,
+  result: 'correct' | 'incorrect' | 'unanswered'
+): Promise<GameSession> {
+  const countField =
+    result === 'correct'
+      ? { correctCount: sql<number>`${gameSessions.correctCount} + 1` }
+      : result === 'incorrect'
+        ? { incorrectCount: sql<number>`${gameSessions.incorrectCount} + 1` }
+        : { unansweredCount: sql<number>`${gameSessions.unansweredCount} + 1` };
+
+  const [updated] = await db
+    .update(gameSessions)
+    .set({
+      totalScore: sql<number>`${gameSessions.totalScore} + ${pointsToAdd}`,
+      ...countField,
+      updatedAt: new Date(),
+    })
+    .where(eq(gameSessions.id, gameSessionId))
+    .returning();
+
+  if (!updated) {
+    throw new Error(`Sesión de juego ${gameSessionId} no encontrada.`);
+  }
+
   return updated;
 }

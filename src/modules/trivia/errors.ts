@@ -110,3 +110,50 @@ export class GamePreparationFailedError extends DomainError {
     super(message);
   }
 }
+
+export class GameNotActiveError extends DomainError {
+  readonly code = 'GAME_NOT_ACTIVE';
+  readonly statusCode = 400;
+
+  constructor(message = 'La partida no se encuentra activa.') {
+    super(message);
+  }
+}
+
+export class QuestionAlreadyAnsweredError extends DomainError {
+  readonly code = 'QUESTION_ALREADY_ANSWERED';
+  readonly statusCode = 409;
+
+  constructor(message = 'La pregunta actual ya fue respondida.') {
+    super(message);
+  }
+}
+
+export class QuestionNotResolvedError extends DomainError {
+  readonly code = 'QUESTION_NOT_RESOLVED';
+  readonly statusCode = 400;
+
+  constructor(
+    message = 'Debe responder o esperar a que expire el tiempo de la pregunta actual antes de avanzar.'
+  ) {
+    super(message);
+  }
+}
+
+export class GameAlreadyCompletedError extends DomainError {
+  readonly code = 'GAME_ALREADY_COMPLETED';
+  readonly statusCode = 400;
+
+  constructor(message = 'La partida ya ha finalizado.') {
+    super(message);
+  }
+}
+
+export class InvalidAnswerOptionError extends DomainError {
+  readonly code = 'INVALID_ANSWER_OPTION';
+  readonly statusCode = 400;
+
+  constructor(message = 'La opción seleccionada es inválida. Debe ser A, B, C o D.') {
+    super(message);
+  }
+}
