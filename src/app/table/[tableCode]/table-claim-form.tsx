@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { PrimaryButton } from '@/components/ui';
 
 interface TableClaimFormProps {
   tableCode: string;
@@ -68,10 +69,13 @@ export function TableClaimForm({ tableCode }: TableClaimFormProps) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 flex flex-col items-center">
       <div className="w-full">
-        <label htmlFor="accessCode" className="block text-xs font-medium text-slate-300">
+        <label
+          htmlFor="accessCode"
+          className="block text-xs font-bold uppercase tracking-wider text-pb-charcoal-muted"
+        >
           Código de pantalla
         </label>
-        <div className="mt-2">
+        <div className="mt-2.5">
           <input
             id="accessCode"
             name="accessCode"
@@ -86,10 +90,10 @@ export function TableClaimForm({ tableCode }: TableClaimFormProps) {
             placeholder="EJ: 7HK9P"
             disabled={loading}
             aria-label="Código de acceso temporal"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-center font-mono text-2xl font-bold tracking-widest text-amber-400 placeholder:text-slate-600 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50"
+            className="w-full rounded-2xl border-2 border-pb-cream-border bg-pb-cream/40 px-4 py-4 text-center font-mono text-3xl font-black tracking-[0.25em] text-pb-red placeholder:text-stone-300 focus:border-pb-red focus:bg-white focus:outline-none focus:ring-4 focus:ring-pb-red/20 disabled:opacity-50 transition-all"
           />
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-pb-charcoal-light">
           Ingresá los 5 caracteres que aparecen en la pantalla del bar.
         </p>
       </div>
@@ -97,19 +101,21 @@ export function TableClaimForm({ tableCode }: TableClaimFormProps) {
       {errorMessage && (
         <div
           role="alert"
-          className="mt-4 w-full rounded-lg border border-red-500/30 bg-red-950/40 p-3 text-xs text-red-300"
+          className="mt-4 w-full rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-pb-red text-center"
         >
           {errorMessage}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading || accessCode.trim().length !== 5}
-        className="mt-6 w-full rounded-xl bg-amber-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? 'Conectando...' : 'Comenzar'}
-      </button>
+      <div className="mt-6 w-full">
+        <PrimaryButton
+          type="submit"
+          loading={loading}
+          disabled={loading || accessCode.trim().length !== 5}
+        >
+          Comenzar
+        </PrimaryButton>
+      </div>
     </form>
   );
 }

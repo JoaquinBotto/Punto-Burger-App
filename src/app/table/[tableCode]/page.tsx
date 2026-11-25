@@ -4,6 +4,7 @@ import { getDb } from '@/db/client';
 import { resolveTableState, TableNotFoundError } from '@/modules/tables';
 import { TABLE_SESSION_COOKIE_NAME, resolveSessionFromCookie } from '@/modules/sessions';
 import { TableClaimForm } from './table-claim-form';
+import { BrandCard, BrandHeader } from '@/components/ui';
 
 interface TablePageProps {
   params: Promise<{
@@ -65,23 +66,22 @@ export default async function TablePage({ params }: TablePageProps) {
     }
   }
 
+  const tableDisplayName = resolvedTable?.table.displayName ?? 'Punto Burger';
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-sm">
-        {/* Marca Oficial */}
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
-          <span className="h-2 w-2 rounded-full bg-amber-400" />
-          Punto Burger
-        </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 text-center">
+      <BrandCard>
+        {/* Cabecera de Marca Oficial */}
+        <BrandHeader tableBadge={resolvedTable?.table.displayName} className="mb-6" />
 
         {/* 1. Caso: Mesa no encontrada */}
         {errorState === 'not_found' && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">Mesa no encontrada</h1>
-            <p className="mt-3 text-sm text-slate-300">
+            <h1 className="text-2xl font-black text-pb-charcoal">Mesa no encontrada</h1>
+            <p className="mt-3 text-sm text-pb-charcoal-muted">
               El código escaneado no corresponde a ninguna mesa activa en el local.
             </p>
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-pb-charcoal-light">
               Por favor, asegurate de escanear el código QR colocado en tu mesa.
             </p>
           </div>
@@ -90,11 +90,11 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 2. Caso: Mesa deshabilitada */}
         {errorState === 'disabled' && resolvedTable && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">{resolvedTable.table.displayName}</h1>
-            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-950/30 p-4 text-sm text-amber-200">
+            <h1 className="text-2xl font-black text-pb-charcoal">{tableDisplayName}</h1>
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
               Esta mesa no se encuentra disponible en este momento.
             </div>
-            <p className="mt-4 text-xs text-slate-400">
+            <p className="mt-4 text-xs text-pb-charcoal-muted">
               Consultá con el personal del local para que te asignen una mesa habilitada.
             </p>
           </div>
@@ -103,14 +103,14 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 3. Caso: Mesa en Cooldown */}
         {errorState === 'cooldown' && resolvedTable && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">{resolvedTable.table.displayName}</h1>
-            <div className="mt-4 rounded-xl border border-blue-500/30 bg-blue-950/30 p-4 text-sm text-blue-200">
+            <h1 className="text-2xl font-black text-pb-charcoal">{tableDisplayName}</h1>
+            <div className="mt-4 rounded-2xl border border-pb-yellow-border bg-pb-yellow-light p-4 text-sm font-semibold text-pb-charcoal">
               Mesa en preparación temporal.
             </div>
-            <p className="mt-3 text-xs text-slate-300">
+            <p className="mt-3 text-xs text-pb-charcoal-muted">
               La sesión anterior finalizó recientemente. Esta mesa se habilitará automáticamente en
               aproximadamente{' '}
-              <span className="font-semibold text-amber-400">
+              <span className="font-bold text-pb-red">
                 {cooldownRemainingSeconds > 0
                   ? `${cooldownRemainingSeconds} segundos`
                   : 'instantes'}
@@ -123,11 +123,11 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 4. Caso: Mesa ocupada por otro dispositivo */}
         {errorState === 'in_use' && resolvedTable && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">{resolvedTable.table.displayName}</h1>
-            <div className="mt-4 rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-200">
+            <h1 className="text-2xl font-black text-pb-charcoal">{tableDisplayName}</h1>
+            <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-medium text-pb-charcoal">
               Mesa actualmente en uso.
             </div>
-            <p className="mt-3 text-xs text-slate-300">
+            <p className="mt-3 text-xs text-pb-charcoal-muted">
               Esta mesa ya tiene una sesión iniciada por otro dispositivo.
             </p>
           </div>
@@ -136,17 +136,17 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 5. Caso: Dispositivo con sesión activa en otra mesa */}
         {errorState === 'other_table' && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">Sesión activa detectada</h1>
-            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-950/30 p-4 text-sm text-amber-200">
+            <h1 className="text-2xl font-black text-pb-charcoal">Sesión activa detectada</h1>
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
               Ya tenés una sesión activa en{' '}
               <span className="font-bold">{otherTableDisplayName}</span>.
             </div>
-            <p className="mt-3 text-xs text-slate-300">
+            <p className="mt-3 text-xs text-pb-charcoal-muted">
               Para cambiar de mesa deberás esperar a que expire tu sesión anterior o finalizarla.
             </p>
             <Link
               href="/play/setup"
-              className="mt-6 inline-block w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400"
+              className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-pb-red px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-red-950/10 hover:bg-pb-red-hover active:bg-pb-red-dark transition-all"
             >
               Ir a mi mesa actual
             </Link>
@@ -156,16 +156,16 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 6. Caso: El mismo dispositivo ya tiene la sesión activa de esta mesa (Idempotencia) */}
         {!errorState && activeSessionForDevice && resolvedTable && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">{resolvedTable.table.displayName}</h1>
-            <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-950/30 p-4 text-sm text-emerald-200">
+            <h1 className="text-2xl font-black text-pb-charcoal">{tableDisplayName}</h1>
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
               ✓ Tu mesa ya está conectada.
             </div>
-            <p className="mt-3 text-xs text-slate-300">
+            <p className="mt-3 text-xs text-pb-charcoal-muted">
               Podés continuar con la preparación de tu equipo.
             </p>
             <Link
               href="/play/setup"
-              className="mt-6 inline-block w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400"
+              className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-pb-red px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-red-950/10 hover:bg-pb-red-hover active:bg-pb-red-dark transition-all"
             >
               Continuar a la partida
             </Link>
@@ -175,10 +175,10 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 7. Caso Normal: Mesa disponible para ingresar código temporal */}
         {!errorState && !activeSessionForDevice && resolvedTable && (
           <div className="mt-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">
-              {resolvedTable.table.displayName}
+            <h1 className="text-3xl font-black tracking-tight text-pb-charcoal sm:text-4xl">
+              {tableDisplayName}
             </h1>
-            <p className="mt-3 text-sm text-slate-300">
+            <p className="mt-2 text-sm text-pb-charcoal-muted">
               Ingresá el código que ves en las pantallas del local.
             </p>
             <TableClaimForm tableCode={resolvedTable.table.code} />
@@ -188,14 +188,14 @@ export default async function TablePage({ params }: TablePageProps) {
         {/* 8. Caso de Falla de Base de Datos */}
         {!dbAvailable && (
           <div className="mt-2">
-            <h1 className="text-2xl font-bold text-white">Servicio no disponible</h1>
-            <p className="mt-3 text-sm text-slate-300">
+            <h1 className="text-2xl font-black text-pb-charcoal">Servicio no disponible</h1>
+            <p className="mt-3 text-sm text-pb-charcoal-muted">
               No pudimos conectar con el servidor en este momento. Por favor, reintentá en unos
               segundos.
             </p>
           </div>
         )}
-      </div>
+      </BrandCard>
     </main>
   );
 }

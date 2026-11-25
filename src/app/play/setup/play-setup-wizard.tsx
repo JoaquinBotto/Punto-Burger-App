@@ -16,6 +16,13 @@ import {
   MIN_GROUP_NAME_LENGTH,
   MIN_PARTICIPANTS,
 } from '@/modules/groups/constants';
+import {
+  BrandCard,
+  BrandHeader,
+  PrimaryButton,
+  ProgressIndicator,
+  SecondaryButton,
+} from '@/components/ui';
 
 interface PlaySetupWizardProps {
   initialData: PlaySetupInitialData;
@@ -184,21 +191,15 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-sm">
+      <BrandCard>
         {/* Encabezado e Identidad */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
-            <span className="h-2 w-2 rounded-full bg-amber-400" />
-            Punto Burger
-          </div>
-          <span className="text-xs font-semibold text-slate-400">{table.displayName}</span>
-        </div>
+        <BrandHeader tableBadge={table.displayName} className="mb-6" />
 
         {/* Mensaje de Error Global */}
         {errorMessage && (
           <div
             role="alert"
-            className="mt-4 rounded-xl border border-rose-500/40 bg-rose-950/40 p-3 text-xs text-rose-300"
+            className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-pb-red text-center"
           >
             {errorMessage}
           </div>
@@ -208,10 +209,10 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             ESTADO: RESUMEN / EQUIPO LISTO
            ============================================================================== */}
         {step === 'summary' && (
-          <div className="mt-6 text-center">
-            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+          <div className="text-center">
+            <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-xs">
               <svg
-                className="h-6 w-6"
+                className="h-7 w-7"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -221,55 +222,56 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               </svg>
             </div>
 
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">¡Equipo listo!</h1>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
+            <h1 className="text-3xl font-black tracking-tight text-pb-charcoal">¡Equipo listo!</h1>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-pb-red">
               {groupName}
             </p>
 
-            <p className="mt-2 text-sm text-slate-300">Ya está todo preparado para jugar.</p>
+            <p className="mt-2 text-sm text-pb-charcoal-muted">
+              Ya está todo preparado para jugar.
+            </p>
 
             {/* Ficha Resumen */}
-            <div className="mt-6 space-y-3 rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-left text-xs">
+            <div className="mt-6 space-y-3 rounded-2xl border border-pb-cream-border bg-pb-cream/40 p-4 text-left text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Jugadores ({participants.length}):</span>
-                <span className="font-medium text-slate-200">
+                <span className="font-semibold text-pb-charcoal-muted">
+                  Jugadores ({participants.length}):
+                </span>
+                <span className="font-bold text-pb-charcoal">
                   {participants.map((p) => p.alias).join(', ')}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Categoría elegida:</span>
-                <span className="font-semibold text-amber-400">
+                <span className="font-semibold text-pb-charcoal-muted">Categoría elegida:</span>
+                <span className="inline-flex items-center gap-1.5 font-bold text-pb-red">
+                  <span className="h-2 w-2 rounded-full bg-pb-yellow" />
                   {selectedCategory?.name ?? selectedCategorySlug}
                 </span>
               </div>
             </div>
 
             {/* Botón de Modificación */}
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="mt-6 w-full rounded-xl border border-slate-700 bg-slate-800/80 py-3 text-xs font-bold text-slate-200 transition-all hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
-            >
+            <SecondaryButton type="button" onClick={() => setStep(1)} className="mt-6 w-full">
               Modificar equipo o categoría
-            </button>
+            </SecondaryButton>
 
             {/* Botón Empezar Partida (PPA-012) */}
-            <div className="mt-4">
+            <div className="mt-3">
               {prepareError && (
-                <div className="mb-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-400">
+                <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-pb-red">
                   {prepareError}
                 </div>
               )}
-              <button
+              <PrimaryButton
                 type="button"
+                loading={isPreparing}
                 disabled={isPreparing}
                 onClick={handleStartGame}
-                className="w-full rounded-xl bg-amber-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPreparing ? 'Preparando preguntas...' : 'Empezar partida'}
-              </button>
-              <p className="mt-2 text-[11px] text-slate-400">
+              </PrimaryButton>
+              <p className="mt-2 text-[11px] text-pb-charcoal-light">
                 Se seleccionarán y congelarán 10 preguntas para tu equipo.
               </p>
             </div>
@@ -280,27 +282,28 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             PASO 1: TU EQUIPO
            ============================================================================== */}
         {step === 1 && (
-          <div className="mt-6">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
                 Paso 1 de 3
               </span>
-              <span className="text-xs text-slate-400">Tu equipo</span>
+              <span className="text-xs font-semibold text-pb-charcoal-muted">Tu equipo</span>
             </div>
 
-            <div className="h-1.5 w-full rounded-full bg-slate-800">
-              <div className="h-1.5 w-1/3 rounded-full bg-amber-400 transition-all duration-300" />
-            </div>
+            <ProgressIndicator currentStep={1} />
 
-            <h1 className="mt-6 text-2xl font-bold tracking-tight text-white">
+            <h1 className="mt-6 text-2xl font-black tracking-tight text-pb-charcoal">
               ¿Cómo se llama tu equipo?
             </h1>
-            <p className="mt-1 text-xs text-slate-300">
+            <p className="mt-1 text-xs text-pb-charcoal-muted">
               Elegí un nombre para representar a tu mesa en la partida.
             </p>
 
             <div className="mt-6">
-              <label htmlFor="groupName" className="block text-xs font-medium text-slate-300">
+              <label
+                htmlFor="groupName"
+                className="block text-xs font-bold uppercase tracking-wider text-pb-charcoal-muted"
+              >
                 Nombre del equipo
               </label>
               <input
@@ -310,9 +313,9 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="Ej: Los Bacon"
-                className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-base font-semibold text-white placeholder:text-slate-600 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="mt-2 w-full rounded-2xl border-2 border-pb-cream-border bg-pb-cream/40 px-4 py-3.5 text-base font-bold text-pb-charcoal placeholder:text-stone-400 focus:border-pb-red focus:bg-white focus:outline-none focus:ring-4 focus:ring-pb-red/20 transition-all"
               />
-              <div className="mt-1 flex justify-between text-[11px] text-slate-500">
+              <div className="mt-1.5 flex justify-between text-[11px] font-medium text-pb-charcoal-light">
                 <span>Mínimo {MIN_GROUP_NAME_LENGTH} caracteres</span>
                 <span>
                   {groupName.length}/{MAX_GROUP_NAME_LENGTH}
@@ -322,14 +325,16 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
 
             {/* Sugerencias Opcionales */}
             <div className="mt-4">
-              <span className="text-[11px] text-slate-400">Inspiración rápida:</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-pb-charcoal-light">
+                Inspiración rápida:
+              </span>
               <div className="mt-2 flex flex-wrap gap-2">
                 {NAME_SUGGESTIONS.map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
                     onClick={() => setGroupName(suggestion)}
-                    className="rounded-lg border border-slate-700 bg-slate-800/60 px-2.5 py-1 text-xs text-slate-300 transition-colors hover:border-amber-400 hover:text-amber-400"
+                    className="rounded-xl border border-pb-cream-border bg-pb-cream/50 px-3 py-1.5 text-xs font-bold text-pb-charcoal transition-all hover:border-pb-red hover:bg-pb-red-subtle hover:text-pb-red active:scale-95"
                   >
                     {suggestion}
                   </button>
@@ -337,14 +342,11 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               </div>
             </div>
 
-            <button
-              type="button"
-              disabled={!isStep1Valid}
-              onClick={() => setStep(2)}
-              className="mt-8 w-full rounded-xl bg-amber-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Siguiente: ¿Quiénes juegan?
-            </button>
+            <div className="mt-8">
+              <PrimaryButton type="button" disabled={!isStep1Valid} onClick={() => setStep(2)}>
+                Siguiente: ¿Quiénes juegan?
+              </PrimaryButton>
+            </div>
           </div>
         )}
 
@@ -352,41 +354,41 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             PASO 2: ¿QUIÉNES JUEGAN? (PARTICIPANTES)
            ============================================================================== */}
         {step === 2 && (
-          <div className="mt-6">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
                 Paso 2 de 3
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs font-semibold text-pb-charcoal-muted">
                 {participants.length} de {MAX_PARTICIPANTS} jugadores
               </span>
             </div>
 
-            <div className="h-1.5 w-full rounded-full bg-slate-800">
-              <div className="h-1.5 w-2/3 rounded-full bg-amber-400 transition-all duration-300" />
-            </div>
+            <ProgressIndicator currentStep={2} />
 
-            <h1 className="mt-6 text-2xl font-bold tracking-tight text-white">¿Quiénes juegan?</h1>
-            <p className="mt-1 text-xs text-slate-300">
+            <h1 className="mt-6 text-2xl font-black tracking-tight text-pb-charcoal">
+              ¿Quiénes juegan?
+            </h1>
+            <p className="mt-1 text-xs text-pb-charcoal-muted">
               Registrá a los participantes para calibrar las preguntas de la partida.
             </p>
 
             {/* Lista de Tarjetas de Participantes */}
-            <div className="mt-4 max-h-[46vh] space-y-3 overflow-y-auto pr-1">
+            <div className="mt-4 max-h-[44vh] space-y-3 overflow-y-auto pr-1">
               {participants.map((participant, index) => (
                 <div
                   key={participant.id}
-                  className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 transition-all"
+                  className="rounded-2xl border border-pb-cream-border bg-pb-cream/40 p-4 transition-all"
                 >
-                  <div className="flex items-center justify-between pb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <div className="flex items-center justify-between pb-2 border-b border-pb-cream-border/60">
+                    <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
                       Jugador {index + 1}
                     </span>
                     {participants.length > MIN_PARTICIPANTS && (
                       <button
                         type="button"
                         onClick={() => handleRemoveParticipant(index)}
-                        className="text-xs text-slate-500 hover:text-rose-400 focus:outline-none"
+                        className="text-xs font-bold text-stone-400 hover:text-pb-red focus:outline-none transition-colors"
                         aria-label={`Eliminar Jugador ${index + 1}`}
                       >
                         ✕ Eliminar
@@ -394,11 +396,11 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                     )}
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="mt-3 space-y-3">
                     <div>
                       <label
                         htmlFor={`alias-${participant.id}`}
-                        className="block text-[11px] font-medium text-slate-300"
+                        className="block text-[11px] font-bold uppercase tracking-wider text-pb-charcoal-muted"
                       >
                         Nombre / Alias *
                       </label>
@@ -409,15 +411,15 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                         value={participant.alias}
                         onChange={(e) => handleUpdateParticipant(index, 'alias', e.target.value)}
                         placeholder="Ej: Joaco"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        className="mt-1.5 w-full rounded-xl border border-pb-cream-border bg-white px-3.5 py-2.5 text-sm font-semibold text-pb-charcoal placeholder:text-stone-300 focus:border-pb-red focus:outline-none focus:ring-2 focus:ring-pb-red/20 transition-all"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                       <div>
                         <label
                           htmlFor={`age-${participant.id}`}
-                          className="block text-[11px] font-medium text-slate-300"
+                          className="block text-[11px] font-bold uppercase tracking-wider text-pb-charcoal-muted"
                         >
                           Rango etario *
                         </label>
@@ -431,7 +433,7 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                               e.target.value as CanonicalAgeRange
                             )
                           }
-                          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                          className="mt-1.5 w-full rounded-xl border border-pb-cream-border bg-white px-3 py-2 text-xs font-semibold text-pb-charcoal focus:border-pb-red focus:outline-none focus:ring-2 focus:ring-pb-red/20 transition-all"
                         >
                           {CANONICAL_AGE_RANGES.map((range) => (
                             <option key={range.value} value={range.value}>
@@ -444,7 +446,7 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                       <div>
                         <label
                           htmlFor={`edu-${participant.id}`}
-                          className="block text-[11px] font-medium text-slate-300"
+                          className="block text-[11px] font-bold uppercase tracking-wider text-pb-charcoal-muted"
                         >
                           Nivel educativo
                         </label>
@@ -460,7 +462,7 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                                 : (e.target.value as CanonicalEducationLevel)
                             )
                           }
-                          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                          className="mt-1.5 w-full rounded-xl border border-pb-cream-border bg-white px-3 py-2 text-xs font-semibold text-pb-charcoal focus:border-pb-red focus:outline-none focus:ring-2 focus:ring-pb-red/20 transition-all"
                         >
                           {CANONICAL_EDUCATION_LEVELS.map((level) => (
                             <option key={level.value} value={level.value}>
@@ -480,28 +482,21 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               <button
                 type="button"
                 onClick={handleAddParticipant}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950/40 py-2.5 text-xs font-semibold text-slate-300 hover:border-amber-400 hover:text-amber-400"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-stone-300 bg-white py-3 text-xs font-bold text-pb-charcoal hover:border-pb-red hover:text-pb-red active:scale-[0.99] transition-all"
               >
                 + Agregar jugador ({participants.length}/{MAX_PARTICIPANTS})
               </button>
             )}
 
             <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="w-1/3 rounded-xl border border-slate-700 bg-slate-800/80 py-3 text-xs font-bold text-slate-300 hover:bg-slate-700"
-              >
+              <SecondaryButton type="button" onClick={() => setStep(1)} className="w-1/3">
                 Volver
-              </button>
-              <button
-                type="button"
-                disabled={!isStep2Valid}
-                onClick={() => setStep(3)}
-                className="w-2/3 rounded-xl bg-amber-500 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Siguiente: Categoría
-              </button>
+              </SecondaryButton>
+              <div className="w-2/3">
+                <PrimaryButton type="button" disabled={!isStep2Valid} onClick={() => setStep(3)}>
+                  Siguiente: Categoría
+                </PrimaryButton>
+              </div>
             </div>
           </div>
         )}
@@ -510,27 +505,25 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             PASO 3: ELEGÍ UNA CATEGORÍA
            ============================================================================== */}
         {step === 3 && (
-          <div className="mt-6">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
                 Paso 3 de 3
               </span>
-              <span className="text-xs text-slate-400">Categoría</span>
+              <span className="text-xs font-semibold text-pb-charcoal-muted">Categoría</span>
             </div>
 
-            <div className="h-1.5 w-full rounded-full bg-slate-800">
-              <div className="h-1.5 w-full rounded-full bg-amber-400 transition-all duration-300" />
-            </div>
+            <ProgressIndicator currentStep={3} />
 
-            <h1 className="mt-6 text-2xl font-bold tracking-tight text-white">
+            <h1 className="mt-6 text-2xl font-black tracking-tight text-pb-charcoal">
               Elegí una categoría
             </h1>
-            <p className="mt-1 text-xs text-slate-300">
+            <p className="mt-1 text-xs text-pb-charcoal-muted">
               Seleccioná la temática principal para la trivia de tu mesa.
             </p>
 
             {/* Cuadrícula de Categorías */}
-            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 max-h-[46vh] overflow-y-auto pr-1">
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 max-h-[44vh] overflow-y-auto pr-1">
               {categories.map((category) => {
                 const isSelected = selectedCategorySlug === category.slug;
                 const isReady = category.isReady;
@@ -541,32 +534,48 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                     type="button"
                     disabled={!isReady}
                     onClick={() => setSelectedCategorySlug(category.slug)}
-                    className={`flex flex-col justify-between rounded-xl border p-3.5 text-left transition-all ${
+                    className={`flex flex-col justify-between rounded-2xl border-2 p-4 text-left transition-all ${
                       isSelected
-                        ? 'border-amber-400 bg-amber-400/10 shadow-md shadow-amber-400/10'
+                        ? 'border-pb-red bg-red-50/70 shadow-md shadow-red-950/5 scale-[1.01]'
                         : isReady
-                          ? 'border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900'
-                          : 'cursor-not-allowed border-slate-900 bg-slate-950/30 opacity-50'
+                          ? 'border-pb-cream-border bg-white hover:border-stone-300 hover:bg-stone-50/60 shadow-xs'
+                          : 'cursor-not-allowed border-stone-200 bg-stone-100/70 opacity-60'
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
                         <span
                           className={`text-sm font-bold ${
-                            isSelected ? 'text-amber-400' : 'text-white'
+                            isSelected ? 'text-pb-red' : 'text-pb-charcoal'
                           }`}
                         >
                           {category.name}
                         </span>
-                        {isSelected && <span className="h-2 w-2 rounded-full bg-amber-400" />}
+                        {isSelected && (
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-pb-red text-white">
+                            <svg
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </span>
+                        )}
                       </div>
-                      <p className="mt-1 text-[11px] text-slate-400 line-clamp-2">
+                      <p className="mt-1 text-[11px] text-pb-charcoal-muted line-clamp-2">
                         {category.description || 'Preguntas sobre esta temática.'}
                       </p>
                     </div>
 
                     {!isReady && (
-                      <span className="mt-2 text-[10px] font-semibold text-rose-400">
+                      <span className="mt-2 text-[10px] font-bold text-red-600">
                         Esta categoría está temporalmente no disponible.
                       </span>
                     )}
@@ -576,26 +585,28 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             </div>
 
             <div className="mt-6 flex gap-3">
-              <button
+              <SecondaryButton
                 type="button"
                 onClick={() => setStep(2)}
                 disabled={isSubmitting}
-                className="w-1/3 rounded-xl border border-slate-700 bg-slate-800/80 py-3 text-xs font-bold text-slate-300 hover:bg-slate-700"
+                className="w-1/3"
               >
                 Volver
-              </button>
-              <button
-                type="button"
-                disabled={!isStep3Valid || isSubmitting}
-                onClick={handleSubmitSetup}
-                className="w-2/3 rounded-xl bg-amber-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSubmitting ? 'Guardando...' : 'Confirmar y preparar equipo'}
-              </button>
+              </SecondaryButton>
+              <div className="w-2/3">
+                <PrimaryButton
+                  type="button"
+                  loading={isSubmitting}
+                  disabled={!isStep3Valid || isSubmitting}
+                  onClick={handleSubmitSetup}
+                >
+                  Confirmar y preparar equipo
+                </PrimaryButton>
+              </div>
             </div>
           </div>
         )}
-      </div>
+      </BrandCard>
     </main>
   );
 }
