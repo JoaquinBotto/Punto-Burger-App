@@ -223,3 +223,36 @@ Se crearon y aprobaron **78 tests automatizados** distribuidos en 18 suites:
 - `src/modules/sessions/rate-limiter.test.ts`: 4 pruebas (intentos permitidos, decremento, bloqueo al 5to fallo, limpieza por éxito).
 - `src/app/api/v1/tables/claim/route.test.ts`: 4 pruebas (body inválido, Zod validation, claim exitoso con cookie emitida, sanitización de errores internos).
 - `src/app/table/[tableCode]/table-claim-form.test.tsx`: 4 pruebas (renderizado, conversión a mayúsculas, envío y redirección, mensaje de error en pantalla).
+
+---
+
+## 10. Validación Final: Smoke Test Real en Producción
+
+El 25 de noviembre de 2026 se llevó a cabo el Smoke Test Real completo directamente contra el entorno productivo en DonWeb Cloud Server (`https://app.puntoburger.com.ar`) bajo el commit `6c79939506e056726313d4ee5d27e840bfba61c3`.
+
+### Resultados de la Verificación:
+
+1. **Código Temporal Vigente:** Obtenido en el servidor de producción mediante `npm run dev:access-code -- esperanza-central` (`Venue: Punto Burger Esperanza`, código `T6SNU`, 293 segundos restantes).
+2. **Claim Real Exitoso:** `POST /api/v1/tables/claim` con `tableCode: "mesa-01"` y `accessCode: "T6SNU"` devolvió `HTTP 200 OK`, `ok: true`, `table: "Mesa 01"`, `status: "active"`, `next: "/play/setup"`.
+3. **Cookie Segura Emitida:** Encabezado `Set-Cookie` presente con `pb_table_session` y todos sus atributos de seguridad confirmados (`HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, `Max-Age=5400`).
+4. **Recuperación e Idempotencia:**
+   - `GET /table/mesa-01` con la cookie reconoció al mismo dispositivo, devolviendo HTTP 200 y el estado "Tu mesa ya está conectada", con enlace a `/play/setup`.
+   - `GET /play/setup` con la cookie devolvió HTTP 200, recuperando la sesión de Mesa 01. Múltiples recargas mantuvieron la sesión sin duplicar registros.
+5. **Segundo Dispositivo Rechazado:** Un segundo cliente sin cookie intentó reclamar Mesa 01 con el código vigente y fue inmediatamente rechazado con `HTTP 409 TABLE_ALREADY_IN_USE`.
+6. **Invariantes en PostgreSQL:** Se verificó directamente en Supabase PostgreSQL:
+   - Exactamente 1 `table_sessions` activa vinculada a Mesa 01.
+   - Exactamente 1 dispositivo en `devices` con `status: 'active'`.
+   - `active_device_id` de la sesión coincide exactamente con `devices.id`.
+   - `token_hash` almacenado (SHA-256 de 64 caracteres); el token original jamás se almacena en la DB.
+   - `tables.status = 'in_use'`.
+   - Evento inmutable `session_created` registrado en `audit_events`.
+7. **Código Incorrecto:** Al enviar un código inválido (`00000`) se validó el rechazo por dominio con `HTTP 400 INVALID_ACCESS_CODE` (o `409` si la mesa ya está ocupada).
+8. **Limpieza de Sesión y Cooldown:** Se cerró controladamente la sesión de smoke test (`table_session` a `closed`, `devices` a `revoked`, `active_device_id` a `null`, y `tables.status` a `cooldown` por 2 minutos con eventos de auditoría `session_closed` y `table_cooldown_started`).
+9. **Comportamiento en Cooldown:**
+   - `GET /table/mesa-01` mostró "Mesa en preparación temporal" y el conteo regresivo de segundos.
+   - `POST /api/v1/tables/claim` fue rechazado con `HTTP 409 TABLE_COOLDOWN`.
+10. **Liberación Automática a Disponible:** Transcurridos los 2 minutos de cooldown, la siguiente consulta `GET /table/mesa-01` normalizó el estado de Mesa 01 automáticamente a `available` mediante lazy normalization, reapareciendo el formulario de acceso sin requerir intervención del personal del local.
+11. **Estado Final:** Mesa 01 libre (`available`), 0 sesiones activas, 0 dispositivos activos.
+
+**Resultado de Validación Oficial:**
+`PPA-010 PRODUCTION SMOKE TEST = PASSED`
