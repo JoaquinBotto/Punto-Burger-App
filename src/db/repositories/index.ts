@@ -4,3 +4,6 @@ export * from './table-sessions.repository';
 export * from './audit-events.repository';
 export * from './categories.repository';
 export * from './questions.repository';
+export * from './groups.repository';
+export * from './participants.repository';
+export * from './game-sessions.repository';

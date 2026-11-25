@@ -1,0 +1,3 @@
+CREATE UNIQUE INDEX "groups_table_session_id_unique" ON "groups" USING btree ("table_session_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "participants_group_position_unique" ON "participants" USING btree ("group_id","position");--> statement-breakpoint
+CREATE UNIQUE INDEX "game_sessions_active_table_session_idx" ON "game_sessions" USING btree ("table_session_id") WHERE status IN ('created', 'active');

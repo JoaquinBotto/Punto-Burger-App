@@ -1,5 +1,5 @@
-import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 import { tableSessions } from './table-sessions';
 import { groups } from './groups';
 import { categories } from './categories';
@@ -34,6 +34,9 @@ export const gameSessions = pgTable(
   },
   (table) => [
     index('game_sessions_table_session_status_idx').on(table.tableSessionId, table.status),
+    uniqueIndex('game_sessions_active_table_session_idx')
+      .on(table.tableSessionId)
+      .where(sql`status IN ('created', 'active')`),
   ]
 );
 

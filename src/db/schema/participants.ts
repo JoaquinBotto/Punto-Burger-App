@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { groups } from './groups';
 
@@ -15,7 +15,10 @@ export const participants = pgTable(
     position: integer('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('participants_group_id_idx').on(table.groupId)]
+  (table) => [
+    index('participants_group_id_idx').on(table.groupId),
+    uniqueIndex('participants_group_position_unique').on(table.groupId, table.position),
+  ]
 );
 
 export const participantsRelations = relations(participants, ({ one }) => ({

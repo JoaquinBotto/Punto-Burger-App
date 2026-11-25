@@ -26,7 +26,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 ├── docs/
 │   ├── adr/                    # Architecture Decision Records (ADR 001)
 │   ├── deployment/             # Guías de infraestructura de producción (DonWeb)
-│   └── implementation/         # Informes de implementación (PPA-008, PPA-009)
+│   └── implementation/         # Informes de implementación (PPA-008 a PPA-011)
 ├── specs/                      # Especificaciones funcionales y técnicas (SDD)
 ├── src/
 │   ├── app/                    # Next.js App Router (layout, landing, APIs)
@@ -101,6 +101,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 - [PPA-008: Bootstrap del Proyecto](docs/implementation/PPA-008-bootstrap.md): Inicialización de la aplicación base Next.js 16, TypeScript strict, Tailwind CSS, Zod, Vitest, ESLint y estructura modular.
 - [PPA-009: Supabase, Drizzle, Modelo Inicial y Seeds](docs/implementation/PPA-009-database.md): Modelado de las 13 entidades fundacionales, esquema determinístico HMAC para códigos temporales de local, 72 preguntas de trivia aprobadas (12 por categoría), migraciones versionadas con Drizzle Kit y repositorios base.
 - [PPA-010: Acceso a Mesa, Código Temporal y Sesión](docs/implementation/PPA-010-table-access.md): Acceso autoservicio por QR/URL, validación de código temporal HMAC de local, creación atómica de sesión y dispositivo principal, cookie segura `pb_table_session`, concurrencia, expiración perezosa y cooldown.
+- [PPA-011: Configuración de Grupo, Participantes y Categoría](docs/implementation/PPA-011-group-setup.md): Wizard mobile-first de 3 pasos en `/play/setup`, validación de nombre de equipo, registro de 1 a 8 participantes temporales con rangos etarios y niveles educativos, selección de categorías activas con cálculo de readiness (3/4/3), persistencia atómica en `groups`, `participants` y `game_sessions` (`status: created`), e idempotencia.
 
 ## Desarrollo local
 
