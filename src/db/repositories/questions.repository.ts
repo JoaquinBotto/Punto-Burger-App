@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import type { Database } from '../client';
+import type { DbClient } from '../client';
 import { questions, type Question } from '../schema/questions';
 
 export interface QuestionFilters {
@@ -8,7 +8,7 @@ export interface QuestionFilters {
 }
 
 export async function getApprovedQuestions(
-  db: Database,
+  db: DbClient,
   filters?: QuestionFilters
 ): Promise<Question[]> {
   const conditions = [eq(questions.status, 'approved')];
@@ -24,4 +24,14 @@ export async function getApprovedQuestions(
     .select()
     .from(questions)
     .where(and(...conditions));
+}
+
+export async function getApprovedQuestionsForCategory(
+  db: DbClient,
+  categoryId: string
+): Promise<Question[]> {
+  return db
+    .select()
+    .from(questions)
+    .where(and(eq(questions.status, 'approved'), eq(questions.categoryId, categoryId)));
 }

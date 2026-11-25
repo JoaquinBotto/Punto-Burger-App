@@ -1,6 +1,7 @@
 import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { groups } from './groups';
+import { gameQuestions } from './game-questions';
 
 export const participants = pgTable(
   'participants',
@@ -21,11 +22,12 @@ export const participants = pgTable(
   ]
 );
 
-export const participantsRelations = relations(participants, ({ one }) => ({
+export const participantsRelations = relations(participants, ({ one, many }) => ({
   group: one(groups, {
     fields: [participants.groupId],
     references: [groups.id],
   }),
+  gameQuestions: many(gameQuestions),
 }));
 
 export type Participant = typeof participants.$inferSelect;

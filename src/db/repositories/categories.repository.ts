@@ -1,11 +1,11 @@
 import { and, asc, eq, sql } from 'drizzle-orm';
-import type { Database } from '../client';
+import type { DbClient } from '../client';
 import { categories, type Category } from '../schema/categories';
 import { questions } from '../schema/questions';
 import { CATEGORY_READINESS_REQUIREMENTS } from '../../modules/groups/constants';
 import type { CategoryReadinessInfo, CategoryWithReadiness } from '../../modules/groups/types';
 
-export async function getActiveCategories(db: Database): Promise<Category[]> {
+export async function getActiveCategories(db: DbClient): Promise<Category[]> {
   return db
     .select()
     .from(categories)
@@ -13,8 +13,14 @@ export async function getActiveCategories(db: Database): Promise<Category[]> {
     .orderBy(asc(categories.sortOrder), asc(categories.name));
 }
 
-export async function getCategoryBySlug(db: Database, slug: string): Promise<Category | null> {
+export async function getCategoryBySlug(db: DbClient, slug: string): Promise<Category | null> {
   const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function getCategoryById(db: DbClient, id: string): Promise<Category | null> {
+  const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
 
   return result[0] ?? null;
 }
@@ -23,7 +29,7 @@ export async function getCategoryBySlug(db: Database, slug: string): Promise<Cat
  * Comprueba el readiness de preguntas aprobadas para una categoría (3 initial, 4 medium, 3 advanced).
  */
 export async function checkCategoryReadiness(
-  db: Database,
+  db: DbClient,
   categoryId: string
 ): Promise<CategoryReadinessInfo> {
   const counts = await db
@@ -62,7 +68,7 @@ export async function checkCategoryReadiness(
  * Obtiene todas las categorías activas con su flag isReady calculado server-side.
  */
 export async function getActiveCategoriesWithReadiness(
-  db: Database
+  db: DbClient
 ): Promise<CategoryWithReadiness[]> {
   const activeList = await getActiveCategories(db);
 

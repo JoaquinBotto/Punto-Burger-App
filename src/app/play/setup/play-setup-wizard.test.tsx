@@ -3,7 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PlaySetupWizard from './play-setup-wizard';
 import type { PlaySetupInitialData } from '@/modules/groups';
 
-describe('PlaySetupWizard Component (PPA-011)', () => {
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
+describe('PlaySetupWizard Component', () => {
   const mockInitialData: PlaySetupInitialData = {
     table: { id: 't-1', code: 'mesa-01', displayName: 'Mesa 01' },
     venue: { id: 'v-1', name: 'Punto Burger Esperanza', slug: 'esperanza-central' },
@@ -142,5 +149,48 @@ describe('PlaySetupWizard Component (PPA-011)', () => {
     // Modificar equipo regresa a paso 1
     fireEvent.click(screen.getByText('Modificar equipo o categoría'));
     expect(screen.getByText('Paso 1 de 3')).toBeDefined();
+  });
+
+  it('permite llamar a /api/v1/games/prepare al hacer click en Empezar partida y redirige a /play', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        game: { status: 'created', prepared: true, questionCount: 10 },
+        next: '/play',
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const savedData: PlaySetupInitialData = {
+      ...mockInitialData,
+      existingSetup: {
+        groupName: 'Los Bacon',
+        participants: [
+          { alias: 'Joaco', ageRange: 'adult', educationLevel: 'higher', position: 1 },
+        ],
+        categorySlug: 'deportes',
+        isSaved: true,
+      },
+    };
+
+    render(<PlaySetupWizard initialData={savedData} />);
+
+    expect(screen.getByText('¡Equipo listo!')).toBeDefined();
+
+    const startButton = screen.getByRole('button', { name: /Empezar partida/i });
+    expect(startButton.hasAttribute('disabled')).toBe(false);
+
+    fireEvent.click(startButton);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/v1/games/prepare',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      );
+      expect(mockPush).toHaveBeenCalledWith('/play');
+    });
   });
 });

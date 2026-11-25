@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type {
   PlaySetupInitialData,
   CanonicalAgeRange,
@@ -30,6 +31,7 @@ interface ParticipantFormState {
 const NAME_SUGGESTIONS = ['Los Cracks', 'Mesa Picante', 'Los Bacon', 'Team Punto'];
 
 export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
+  const router = useRouter();
   const { table, categories, existingSetup } = initialData;
 
   const [step, setStep] = useState<1 | 2 | 3 | 'summary'>(existingSetup?.isSaved ? 'summary' : 1);
@@ -61,6 +63,8 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
 
   // --- Handlers de Participantes ---
   const handleAddParticipant = () => {
@@ -149,6 +153,33 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
     }
   };
 
+  const handleStartGame = async () => {
+    if (isPreparing) return;
+    setIsPreparing(true);
+    setPrepareError(null);
+
+    try {
+      const response = await fetch('/api/v1/games/prepare', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        setPrepareError(data.error?.message || 'No se pudo preparar la partida.');
+        setIsPreparing(false);
+        return;
+      }
+
+      router.push(data.next || '/play');
+    } catch {
+      setPrepareError('Error de conexión al preparar la partida.');
+      setIsPreparing(false);
+    }
+  };
+
   const selectedCategory = categories.find((c) => c.slug === selectedCategorySlug);
 
   return (
@@ -223,17 +254,23 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               Modificar equipo o categoría
             </button>
 
-            {/* Placeholder Visual PPA-012 */}
+            {/* Botón Empezar Partida (PPA-012) */}
             <div className="mt-4">
+              {prepareError && (
+                <div className="mb-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-400">
+                  {prepareError}
+                </div>
+              )}
               <button
                 type="button"
-                disabled
-                className="w-full cursor-not-allowed rounded-xl bg-amber-500/40 py-3.5 text-sm font-bold text-slate-950 opacity-60"
+                disabled={isPreparing}
+                onClick={handleStartGame}
+                className="w-full rounded-xl bg-amber-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Empezar partida
+                {isPreparing ? 'Preparando preguntas...' : 'Empezar partida'}
               </button>
-              <p className="mt-2 text-[11px] text-slate-500">
-                La trivia de 10 preguntas se activará en el próximo paso (PPA-012).
+              <p className="mt-2 text-[11px] text-slate-400">
+                Se seleccionarán y congelarán 10 preguntas para tu equipo.
               </p>
             </div>
           </div>

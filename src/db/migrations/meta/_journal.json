@@ -15,6 +15,13 @@
       "when": 1795623266655,
       "tag": "0001_youthful_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795636828817,
+      "tag": "0002_sad_gamora",
+      "breakpoints": true
     }
   ]
 }

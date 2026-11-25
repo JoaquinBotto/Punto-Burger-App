@@ -7,3 +7,4 @@ export * from './questions.repository';
 export * from './groups.repository';
 export * from './participants.repository';
 export * from './game-sessions.repository';
+export * from './game-questions.repository';

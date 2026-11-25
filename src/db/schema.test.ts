@@ -39,4 +39,15 @@ describe('Database Schema & 13 Entities Architecture', () => {
   it('verifies game session status default is created', () => {
     expect(schema.gameSessions.status.default).toBe('created');
   });
+
+  it('verifies game_questions snapshot columns and targetParticipantId (PPA-012)', () => {
+    expect(schema.gameQuestions.promptSnapshot).toBeDefined();
+    expect(schema.gameQuestions.optionASnapshot).toBeDefined();
+    expect(schema.gameQuestions.optionBSnapshot).toBeDefined();
+    expect(schema.gameQuestions.optionCSnapshot).toBeDefined();
+    expect(schema.gameQuestions.optionDSnapshot).toBeDefined();
+    expect(schema.gameQuestions.correctOptionSnapshot).toBeDefined();
+    expect(schema.gameQuestions.ageRangeSnapshot).toBeDefined();
+    expect(schema.gameQuestions.targetParticipantId).toBeDefined();
+  });
 });
