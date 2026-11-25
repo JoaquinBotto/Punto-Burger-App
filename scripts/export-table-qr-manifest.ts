@@ -88,7 +88,9 @@ export async function exportTableQrManifest(venueSlug = 'esperanza-central') {
     console.log(`[✓] Manifiesto QR exportado exitosamente.`);
     console.log(`    Total de mesas: ${tableList.length}`);
     console.log(`    Directorio: ${targetDir}`);
-    console.log(`    Archivos generados: table-qr-manifest.csv, table-qr-manifest.json (permisos 600)`);
+    console.log(
+      `    Archivos generados: table-qr-manifest.csv, table-qr-manifest.json (permisos 600)`
+    );
   } finally {
     await sql.end();
   }
