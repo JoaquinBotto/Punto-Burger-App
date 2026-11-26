@@ -4,6 +4,7 @@ import { getDb } from '@/db/client';
 import { resolveTableStateByQrToken, TableNotFoundError } from '@/modules/tables';
 import { TABLE_SESSION_COOKIE_NAME, resolveSessionFromCookie } from '@/modules/sessions';
 import { getGameSessionByTableSessionId } from '@/db/repositories/game-sessions.repository';
+import { getCurrentCompetition } from '@/modules/competitions';
 import { TableQrClaimClient } from './table-qr-claim-client';
 import { BrandCard, BrandHeader } from '@/components/ui';
 
@@ -25,12 +26,35 @@ export default async function TableQrPage({ params }: TableQrPageProps) {
   let errorState: 'not_found' | 'disabled' | 'in_use' | 'cooldown' | 'other_table' | null = null;
   let cooldownRemainingSeconds = 0;
   let otherTableDisplayName = '';
+  let competitionData: {
+    name?: string | null;
+    status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
+    startsAt: string;
+    endsAt: string;
+  } | null = null;
 
   try {
     const db = getDb();
 
     // 1. Resolver el estado de la mesa a partir del qrToken
     resolvedTable = await resolveTableStateByQrToken(db, qrToken);
+
+    // 1.1 Consultar si hay competencia activa o programada
+    try {
+      const comp = await getCurrentCompetition(db, resolvedTable.table.venueId, {
+        allowTest: true,
+      });
+      if (comp) {
+        competitionData = {
+          name: comp.name,
+          status: comp.status,
+          startsAt: comp.startsAt.toISOString(),
+          endsAt: comp.endsAt.toISOString(),
+        };
+      }
+    } catch {
+      // Ignorar fallo de competencia para no bloquear acceso a mesa
+    }
 
     // 2. Verificar si el dispositivo ya cuenta con una sesión válida
     if (sessionCookie) {
@@ -225,7 +249,7 @@ export default async function TableQrPage({ params }: TableQrPageProps) {
               Armá tu equipo y competí contra las otras mesas del local.
             </p>
 
-            <TableQrClaimClient qrToken={qrToken} />
+            <TableQrClaimClient qrToken={qrToken} competition={competitionData} />
 
             <div className="mt-6 border-t border-pb-cream-border pt-4">
               <Link

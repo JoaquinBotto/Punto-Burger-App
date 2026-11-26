@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import PlayResultsPage from './page';
 import * as triviaModule from '@/modules/trivia';
 import * as rankingsModule from '@/modules/rankings';
+import * as competitionsModule from '@/modules/competitions';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
@@ -72,6 +73,12 @@ describe('PlayResultsPage (/play/results)', () => {
       gapToPrevious: 50,
       previousPosition: 2,
       isNewRecord: true,
+    });
+
+    vi.spyOn(competitionsModule, 'getCompetitionState').mockResolvedValue({
+      competition: null,
+      entry: null,
+      presence: { mode: 'off', verified: true, required: false },
     });
 
     const jsx = await PlayResultsPage();

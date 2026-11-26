@@ -1,7 +1,29 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getDb } from '@/db/client';
+import { getCurrentCompetition } from '@/modules/competitions';
+import { venues } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const db = getDb();
+  let competition = null;
+
+  try {
+    const [defaultVenue] = await db
+      .select({ id: venues.id })
+      .from(venues)
+      .where(eq(venues.slug, 'esperanza-central'))
+      .limit(1);
+
+    const venueId = defaultVenue?.id ?? '00000000-0000-0000-0000-000000000001';
+    competition = await getCurrentCompetition(db, venueId, { allowTest: false });
+  } catch {
+    // Fallback silencioso si DB no está disponible
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 text-center">
       <div className="w-full max-w-md rounded-3xl border border-pb-cream-border bg-white p-6 sm:p-8 shadow-xl shadow-stone-200/60">
@@ -22,6 +44,34 @@ export default function HomePage() {
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Local Esperanza, Santa Fe
         </div>
+
+        {/* Banner de Competencia Diaria (si está activa o programada) */}
+        {competition && (competition.status === 'scheduled' || competition.status === 'active') && (
+          <div className="mb-5 rounded-2xl border border-pb-yellow-border bg-gradient-to-r from-amber-50 via-white to-amber-50/70 p-3.5 text-center shadow-2xs">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider text-pb-yellow-hover">
+              <span>🏆</span>
+              <span>
+                {competition.status === 'active'
+                  ? 'Competencia en vivo'
+                  : 'Competencia programada para hoy'}
+              </span>
+            </div>
+            <p className="mt-1 text-xs font-black text-pb-charcoal">{competition.name}</p>
+            <p className="text-[11px] font-semibold text-pb-charcoal-muted">
+              Horario:{' '}
+              {new Date(competition.startsAt).toLocaleTimeString('es-AR', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}{' '}
+              a{' '}
+              {new Date(competition.endsAt).toLocaleTimeString('es-AR', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}{' '}
+              hs
+            </p>
+          </div>
+        )}
 
         <h1 className="text-2xl font-black tracking-tight text-pb-charcoal sm:text-3xl">
           Punto Burger

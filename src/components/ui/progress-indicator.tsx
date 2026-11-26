@@ -2,12 +2,15 @@ import React from 'react';
 
 interface ProgressIndicatorProps {
   currentStep: 1 | 2 | 3;
+  totalSteps?: 2 | 3;
 }
 
-export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
+export function ProgressIndicator({ currentStep, totalSteps = 3 }: ProgressIndicatorProps) {
+  const steps = totalSteps === 2 ? [1, 2] : [1, 2, 3];
+
   return (
     <div className="flex items-center justify-center gap-2 py-1">
-      {[1, 2, 3].map((stepNumber, idx) => {
+      {steps.map((stepNumber, idx) => {
         const isCurrent = currentStep === stepNumber;
         const isCompleted = currentStep > stepNumber;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type {
   PlaySetupInitialData,
@@ -23,9 +23,21 @@ import {
   ProgressIndicator,
   SecondaryButton,
 } from '@/components/ui';
+import { PresenceRefresher } from '@/components/presence/presence-refresher';
+
+interface CompetitionInfo {
+  id: string;
+  name: string | null;
+  status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
+  startsAt: string;
+  endsAt: string;
+  registrationOpensAt: string;
+  joinCutoffAt: string;
+}
 
 interface PlaySetupWizardProps {
   initialData: PlaySetupInitialData;
+  competition?: CompetitionInfo | null;
 }
 
 interface ParticipantFormState {
@@ -37,9 +49,13 @@ interface ParticipantFormState {
 
 const NAME_SUGGESTIONS = ['Los Cracks', 'Mesa Picante', 'Los Bacon', 'Team Punto'];
 
-export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
+export default function PlaySetupWizard({ initialData, competition }: PlaySetupWizardProps) {
   const router = useRouter();
   const { table, categories, existingSetup } = initialData;
+
+  const isCompetition = Boolean(
+    competition && (competition.status === 'scheduled' || competition.status === 'active')
+  );
 
   const [step, setStep] = useState<1 | 2 | 3 | 'summary'>(existingSetup?.isSaved ? 'summary' : 1);
 
@@ -72,6 +88,17 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState<string | null>(null);
+  const [isJoined, setIsJoined] = useState(false);
+
+  const [now, setNow] = useState<Date>(new Date());
+  useEffect(() => {
+    if (!isCompetition) return;
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, [isCompetition]);
+
+  const startsAtDate = competition ? new Date(competition.startsAt) : null;
+  const isStarted = startsAtDate ? now >= startsAtDate : true;
 
   // --- Handlers de Participantes ---
   const handleAddParticipant = () => {
@@ -187,6 +214,98 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
     }
   };
 
+  const handleStartCompetition = async () => {
+    if (isPreparing) return;
+    setIsPreparing(true);
+    setPrepareError(null);
+
+    try {
+      // 1. Guardar grupo y participantes
+      const payload = {
+        groupName: groupName.trim(),
+        participants: participants.map((p) => ({
+          alias: p.alias.trim(),
+          ageRange: p.ageRange,
+          educationLevel: p.educationLevel,
+        })),
+        categorySlug: categories[0]?.slug ?? 'cultura-general',
+      };
+
+      const setupRes = await fetch('/api/v1/games/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const setupData = await setupRes.json();
+      if (!setupRes.ok || !setupData.ok) {
+        setPrepareError(setupData?.error?.message || 'Error al guardar el equipo.');
+        setIsPreparing(false);
+        return;
+      }
+
+      // 2. Unirse a la competencia
+      const joinRes = await fetch('/api/v1/competitions/current/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const joinData = await joinRes.json();
+      if (!joinRes.ok || !joinData.ok) {
+        setPrepareError(joinData?.error?.message || 'Error al registrarse en la competencia.');
+        setIsPreparing(false);
+        return;
+      }
+
+      // 3. Si la competencia ya empezó, iniciar ciclo 1
+      if (isStarted) {
+        const roundRes = await fetch('/api/v1/competitions/current/rounds/next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const roundData = await roundRes.json();
+        if (!roundRes.ok || !roundData.ok) {
+          setPrepareError(roundData?.error?.message || 'Error al preparar el primer ciclo.');
+          setIsPreparing(false);
+          return;
+        }
+        router.push(roundData.next || '/play');
+      } else {
+        setIsJoined(true);
+        setIsPreparing(false);
+      }
+    } catch {
+      setPrepareError('Error de conexión al registrarse.');
+      setIsPreparing(false);
+    }
+  };
+
+  const handleStartRound1AfterWaiting = async () => {
+    if (isPreparing) return;
+    setIsPreparing(true);
+    setPrepareError(null);
+    try {
+      const roundRes = await fetch('/api/v1/competitions/current/rounds/next', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const roundData = await roundRes.json();
+      if (!roundRes.ok || !roundData.ok) {
+        setPrepareError(roundData?.error?.message || 'Error al preparar el primer ciclo.');
+        setIsPreparing(false);
+        return;
+      }
+      router.push(roundData.next || '/play');
+    } catch {
+      setPrepareError('Error de conexión al iniciar el ciclo.');
+      setIsPreparing(false);
+    }
+  };
+
+  const msLeft = startsAtDate ? Math.max(0, startsAtDate.getTime() - now.getTime()) : 0;
+  const minutesLeft = Math.floor(msLeft / 60000);
+  const secondsLeft = Math.floor((msLeft % 60000) / 1000);
+  const countdownText = `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+
   const selectedCategory = categories.find((c) => c.slug === selectedCategorySlug);
 
   return (
@@ -210,25 +329,43 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
            ============================================================================== */}
         {step === 'summary' && (
           <div className="text-center">
-            <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-xs">
-              <svg
-                className="h-7 w-7"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+            <div
+              className={`mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full border shadow-xs ${
+                isCompetition
+                  ? 'border-pb-yellow-border bg-pb-yellow-light text-2xl'
+                  : 'border-emerald-200 bg-emerald-50 text-emerald-600'
+              }`}
+            >
+              {isCompetition ? (
+                '🏆'
+              ) : (
+                <svg
+                  className="h-7 w-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </div>
 
-            <h1 className="text-3xl font-black tracking-tight text-pb-charcoal">¡Equipo listo!</h1>
+            <h1 className="text-3xl font-black tracking-tight text-pb-charcoal">
+              {isCompetition
+                ? isJoined
+                  ? '¡Inscripción lista!'
+                  : '¡Equipo listo!'
+                : '¡Equipo listo!'}
+            </h1>
             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-pb-red">
               {groupName}
             </p>
 
             <p className="mt-2 text-sm text-pb-charcoal-muted">
-              Ya está todo preparado para jugar.
+              {isCompetition
+                ? 'Competencia oficial de 3 ciclos entre mesas de Punto Burger.'
+                : 'Ya está todo preparado para jugar.'}
             </p>
 
             {/* Ficha Resumen */}
@@ -243,37 +380,109 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-pb-charcoal-muted">Categoría elegida:</span>
+                <span className="font-semibold text-pb-charcoal-muted">
+                  {isCompetition ? 'Modalidad:' : 'Categoría elegida:'}
+                </span>
                 <span className="inline-flex items-center gap-1.5 font-bold text-pb-red">
                   <span className="h-2 w-2 rounded-full bg-pb-yellow" />
-                  {selectedCategory?.name ?? selectedCategorySlug}
+                  {isCompetition
+                    ? '3 ciclos progresivos (30 preguntas mixtas)'
+                    : (selectedCategory?.name ?? selectedCategorySlug)}
                 </span>
               </div>
+
+              {isCompetition && (
+                <div className="flex items-center justify-between border-t border-pb-cream-border/60 pt-2 text-[11px] text-pb-charcoal-muted">
+                  <span>Dificultad por ciclo:</span>
+                  <span className="font-medium text-pb-charcoal">
+                    C1 (1300 pts) · C2 (1500 pts) · C3 (1700 pts)
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Botón de Modificación */}
-            <SecondaryButton type="button" onClick={() => setStep(1)} className="mt-6 w-full">
-              Modificar equipo o categoría
-            </SecondaryButton>
+            {!isJoined && (
+              <SecondaryButton type="button" onClick={() => setStep(1)} className="mt-6 w-full">
+                Modificar equipo {isCompetition ? '' : 'o categoría'}
+              </SecondaryButton>
+            )}
 
-            {/* Botón Empezar Partida (PPA-012) */}
+            {/* Botón Empezar Partida o Competencia */}
             <div className="mt-3">
               {prepareError && (
                 <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-pb-red">
                   {prepareError}
                 </div>
               )}
-              <PrimaryButton
-                type="button"
-                loading={isPreparing}
-                disabled={isPreparing}
-                onClick={handleStartGame}
-              >
-                {isPreparing ? 'Preparando preguntas...' : 'Empezar partida'}
-              </PrimaryButton>
-              <p className="mt-2 text-[11px] text-pb-charcoal-light">
-                Se seleccionarán y congelarán 10 preguntas para tu equipo.
-              </p>
+
+              {isCompetition ? (
+                <div>
+                  {isJoined && !isStarted ? (
+                    <div className="space-y-3">
+                      <div className="rounded-2xl border border-pb-yellow-border bg-pb-yellow-light/60 p-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-pb-charcoal-muted block">
+                          Esperando inicio de la competencia
+                        </span>
+                        <span className="text-3xl font-black text-pb-charcoal block mt-1">
+                          {countdownText}
+                        </span>
+                        <span className="text-[11px] text-pb-charcoal-light block mt-1">
+                          Comienza a las{' '}
+                          {startsAtDate?.toLocaleTimeString('es-AR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      <PrimaryButton type="button" disabled>
+                        Esperando inicio...
+                      </PrimaryButton>
+                    </div>
+                  ) : isJoined && isStarted ? (
+                    <PrimaryButton
+                      type="button"
+                      loading={isPreparing}
+                      disabled={isPreparing}
+                      onClick={handleStartRound1AfterWaiting}
+                    >
+                      {isPreparing ? 'Preparando preguntas...' : '¡Comenzar Ciclo 1!'}
+                    </PrimaryButton>
+                  ) : (
+                    <PrimaryButton
+                      type="button"
+                      loading={isPreparing}
+                      disabled={isPreparing}
+                      onClick={handleStartCompetition}
+                    >
+                      {isPreparing
+                        ? 'Registrando equipo...'
+                        : isStarted
+                          ? 'Entrar a la competencia y comenzar'
+                          : 'Inscribir equipo en la competencia'}
+                    </PrimaryButton>
+                  )}
+                  <p className="mt-2 text-[11px] text-pb-charcoal-light">
+                    {isStarted
+                      ? 'Se seleccionarán 10 preguntas equilibradas para el Ciclo 1.'
+                      : `La competencia iniciará a las ${startsAtDate?.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}.`}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <PrimaryButton
+                    type="button"
+                    loading={isPreparing}
+                    disabled={isPreparing}
+                    onClick={handleStartGame}
+                  >
+                    {isPreparing ? 'Preparando preguntas...' : 'Empezar partida'}
+                  </PrimaryButton>
+                  <p className="mt-2 text-[11px] text-pb-charcoal-light">
+                    Se seleccionarán y congelarán 10 preguntas para tu equipo.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -285,12 +494,12 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
           <div>
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
-                Paso 1 de 3
+                Paso 1 de {isCompetition ? 2 : 3}
               </span>
               <span className="text-xs font-semibold text-pb-charcoal-muted">Tu equipo</span>
             </div>
 
-            <ProgressIndicator currentStep={1} />
+            <ProgressIndicator currentStep={1} totalSteps={isCompetition ? 2 : 3} />
 
             <h1 className="mt-6 text-2xl font-black tracking-tight text-pb-charcoal">
               ¿Cómo se llama tu equipo?
@@ -357,14 +566,14 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
           <div>
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
-                Paso 2 de 3
+                Paso 2 de {isCompetition ? 2 : 3}
               </span>
               <span className="text-xs font-semibold text-pb-charcoal-muted">
                 {participants.length} de {MAX_PARTICIPANTS} jugadores
               </span>
             </div>
 
-            <ProgressIndicator currentStep={2} />
+            <ProgressIndicator currentStep={2} totalSteps={isCompetition ? 2 : 3} />
 
             <h1 className="mt-6 text-2xl font-black tracking-tight text-pb-charcoal">
               ¿Quiénes juegan?
@@ -493,8 +702,12 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
                 Volver
               </SecondaryButton>
               <div className="w-2/3">
-                <PrimaryButton type="button" disabled={!isStep2Valid} onClick={() => setStep(3)}>
-                  Siguiente: Categoría
+                <PrimaryButton
+                  type="button"
+                  disabled={!isStep2Valid}
+                  onClick={() => (isCompetition ? setStep('summary') : setStep(3))}
+                >
+                  {isCompetition ? 'Siguiente: Confirmar equipo' : 'Siguiente: Categoría'}
                 </PrimaryButton>
               </div>
             </div>
@@ -502,9 +715,9 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
         )}
 
         {/* ==============================================================================
-            PASO 3: ELEGÍ UNA CATEGORÍA
+            PASO 3: ELEGÍ UNA CATEGORÍA (SÓLO CASUAL)
            ============================================================================== */}
-        {step === 3 && (
+        {!isCompetition && step === 3 && (
           <div>
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-pb-red">
@@ -606,6 +819,8 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
             </div>
           </div>
         )}
+
+        {isCompetition && <PresenceRefresher />}
       </BrandCard>
     </main>
   );

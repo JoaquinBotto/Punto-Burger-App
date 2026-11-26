@@ -12,6 +12,11 @@ const envSchema = z.object({
   SUPABASE_SECRET_KEY: z.string().optional(),
   SESSION_SECRET: z.string().min(32).optional(),
   ACCESS_CODE_SECRET: z.string().min(32).optional(),
+
+  // Presencia Wi-Fi en local (PPA-CONTEST-001)
+  VENUE_PRESENCE_MODE: z.enum(['off', 'observe', 'enforce']).default('off'),
+  VENUE_ALLOWED_PUBLIC_IPS: z.string().default(''),
+  VENUE_PRESENCE_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(90),
 });
 
 export type Env = z.infer<typeof envSchema>;

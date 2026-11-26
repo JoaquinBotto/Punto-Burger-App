@@ -726,6 +726,14 @@ export async function advanceGame(
     // Posición 10: Finalizar la partida
     await updateGameSessionStatus(tx, lockedGame.id, 'completed', undefined, now);
 
+    // Si corresponde a una competencia, actualizar ciclo/entrada
+    try {
+      const { handleGameSessionCompletion } = await import('@/modules/competitions');
+      await handleGameSessionCompletion(tx, lockedGame.id);
+    } catch {
+      // No bloquear avance si no pertenece a competencia
+    }
+
     await createAuditEvent(tx, {
       venueId: session.venueId,
       eventType: 'game_completed',

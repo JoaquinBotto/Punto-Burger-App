@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/db/client';
 import { TABLE_SESSION_COOKIE_NAME } from '@/modules/sessions';
 import { getPlaySetupData } from '@/modules/groups';
+import { getCurrentCompetition } from '@/modules/competitions';
 import PlaySetupWizard from './play-setup-wizard';
 
 export default async function PlaySetupPage() {
@@ -14,9 +15,25 @@ export default async function PlaySetupPage() {
   }
 
   let setupData = null;
+  let competition = null;
+  const db = getDb();
+
   try {
-    const db = getDb();
     setupData = await getPlaySetupData(db, sessionCookie);
+    if (setupData) {
+      const comp = await getCurrentCompetition(db, setupData.venue.id, { allowTest: true });
+      if (comp) {
+        competition = {
+          id: comp.id,
+          name: comp.name,
+          status: comp.status,
+          startsAt: comp.startsAt.toISOString(),
+          endsAt: comp.endsAt.toISOString(),
+          registrationOpensAt: comp.registrationOpensAt.toISOString(),
+          joinCutoffAt: comp.joinCutoffAt.toISOString(),
+        };
+      }
+    }
   } catch (error) {
     console.error('Error al resolver la sesión en /play/setup:', error);
     redirect('/');
@@ -26,5 +43,5 @@ export default async function PlaySetupPage() {
     redirect('/');
   }
 
-  return <PlaySetupWizard initialData={setupData} />;
+  return <PlaySetupWizard initialData={setupData} competition={competition} />;
 }

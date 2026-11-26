@@ -6,6 +6,9 @@ import {
   getDailyDateRange,
   getTableDailyRankingFromSessionCookie,
 } from '@/modules/rankings';
+import { getCurrentCompetition, getCompetitionRanking } from '@/modules/competitions';
+import { venues } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { RankingClient } from './ranking-client';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +26,39 @@ export default async function RankingPage() {
   const now = new Date();
   const { dateString } = getDailyDateRange(now);
 
+  const [defaultVenue] = await db
+    .select({ id: venues.id })
+    .from(venues)
+    .where(eq(venues.slug, 'esperanza-central'))
+    .limit(1);
+
+  const venueId = defaultVenue?.id ?? '00000000-0000-0000-0000-000000000001';
+
+  // Comprobar si hay competencia oficial hoy (excluyendo test)
+  const competition = await getCurrentCompetition(db, venueId, { allowTest: false });
+
+  if (competition && competition.status !== 'cancelled') {
+    const compRanking = await getCompetitionRanking(db, competition.id);
+
+    return (
+      <RankingClient
+        initialDate={dateString}
+        initialRanking={[]}
+        initialContext={null}
+        competition={{
+          id: competition.id,
+          name: competition.name,
+          status: competition.status,
+          startsAt: competition.startsAt.toISOString(),
+          endsAt: competition.endsAt.toISOString(),
+          localDate: competition.localDate,
+        }}
+        initialCompetitionRanking={compRanking}
+      />
+    );
+  }
+
+  // Fallback a ranking casual diario si no hay competencia hoy
   const [rankingEntries, tableContext] = await Promise.all([
     getDailyRanking(db, { date: now, limit: 10 }),
     sessionCookie ? getTableDailyRankingFromSessionCookie(db, sessionCookie, undefined, now) : null,
@@ -43,6 +79,8 @@ export default async function RankingPage() {
       initialDate={dateString}
       initialRanking={initialRanking}
       initialContext={tableContext}
+      competition={null}
+      initialCompetitionRanking={null}
     />
   );
 }

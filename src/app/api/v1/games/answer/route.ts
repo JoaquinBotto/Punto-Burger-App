@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getDb } from '@/db/client';
 import { TABLE_SESSION_COOKIE_NAME } from '@/modules/sessions';
 import { DomainError, submitAnswer } from '@/modules/trivia';
+import { assertCompetitionPresence } from '@/modules/competitions';
 
 const answerSchema = z.object({
   selectedOption: z.enum(['A', 'B', 'C', 'D'], {
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
   const db = getDb();
 
   try {
+    await assertCompetitionPresence(db, sessionCookie, request.headers, request.cookies);
     const result = await submitAnswer(db, sessionCookie, parseResult.data.selectedOption);
 
     return NextResponse.json(result, {

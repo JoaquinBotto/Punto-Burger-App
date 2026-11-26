@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/db/client';
 import { TABLE_SESSION_COOKIE_NAME } from '@/modules/sessions';
 import { DomainError, startGame } from '@/modules/trivia';
+import { assertCompetitionPresence } from '@/modules/competitions';
 
 export async function POST(request: NextRequest) {
   const sessionCookie = request.cookies.get(TABLE_SESSION_COOKIE_NAME)?.value;
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
   const db = getDb();
 
   try {
+    await assertCompetitionPresence(db, sessionCookie, request.headers, request.cookies);
     const result = await startGame(db, sessionCookie);
 
     return NextResponse.json(result, {

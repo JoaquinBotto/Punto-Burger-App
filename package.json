@@ -22,7 +22,10 @@
     "qr:export": "tsx scripts/export-table-qr-manifest.ts",
     "qr:rotate": "tsx scripts/rotate-table-qr.ts",
     "questions:validate": "tsx scripts/validate-question-bank.ts",
-    "questions:verify:production": "tsx scripts/verify-question-bank-production.ts"
+    "questions:verify:production": "tsx scripts/verify-question-bank-production.ts",
+    "competition:create": "tsx scripts/competition-create.ts",
+    "competition:status": "tsx scripts/competition-status.ts",
+    "competition:finalize": "tsx scripts/competition-finalize.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

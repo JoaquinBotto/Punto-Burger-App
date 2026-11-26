@@ -11,3 +11,7 @@ export * from './game-sessions';
 export * from './game-questions';
 export * from './answers';
 export * from './audit-events';
+export * from './competitions';
+export * from './competition-blueprint-slots';
+export * from './competition-entries';
+export * from './competition-rounds';
