@@ -62,8 +62,12 @@ export async function provisionTables(venueSlug = 'esperanza-central') {
         createdCount++;
         console.log(`[+] ${displayName} (${code}) creada con token QR permanente.`);
       } else {
-        // Verificar si tiene el token QR predecible legacy
-        if (existingTable.qrToken === `pb_${code.replace('-', '_')}_${venue.slug}`) {
+        // Verificar si tiene un token QR predecible legacy o de baja entropía
+        if (
+          existingTable.qrToken.startsWith('pb_mesa') ||
+          existingTable.qrToken === `pb_${code.replace('-', '_')}_${venue.slug}` ||
+          existingTable.qrToken.length < 20
+        ) {
           const newQrToken = generateSecureQrToken();
           await db
             .update(schema.tables)

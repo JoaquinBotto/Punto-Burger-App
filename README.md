@@ -26,10 +26,10 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 ├── docs/
 │   ├── adr/                    # Architecture Decision Records (ADR 001)
 │   ├── deployment/             # Guías de infraestructura de producción (DonWeb)
-│   └── implementation/         # Informes de implementación (PPA-008 a PPA-011)
+│   └── implementation/         # Informes de implementación (PPA-008 a PPA-ACCESS-002)
 ├── specs/                      # Especificaciones funcionales y técnicas (SDD)
 ├── src/
-│   ├── app/                    # Next.js App Router (layout, landing, APIs)
+│   ├── app/                    # Next.js App Router (layout, landing, APIs, /t/[qrToken], /play, /ranking)
 │   │   ├── api/health/         # Endpoint de monitoreo y health check
 │   │   ├── layout.tsx          # Layout raíz con viewport mobile-first
 │   │   └── page.tsx            # Landing inicial de Punto Burger
@@ -167,7 +167,10 @@ Respuesta esperada:
 - **Generar migraciones SQL**: `npm run db:generate` (analiza cambios en `src/db/schema/` y crea SQL versionado en `src/db/migrations/`).
 - **Ejecutar migraciones**: `npm run db:migrate` (aplica migraciones pendientes a la base de datos configurada en `DATABASE_MIGRATION_URL`).
 - **Ejecutar seed de datos**: `npm run db:seed` (siembra de forma idempotente local, Mesa 01, 6 categorías y 72 preguntas aprobadas).
-- **Consultar código temporal de salón (CLI)**: `npm run dev:access-code -- esperanza-central` (muestra el código temporal vigente y segundos para expirar para pruebas sin pantallas físicas).
+- **Aprovisionar 30 mesas físicas**: `npm run tables:provision` (aprovisiona de forma idempotente las 30 mesas oficiales `mesa-01` a `mesa-30` con tokens QR criptográficos permanentes).
+- **Exportar manifiesto QR para imprenta**: `npm run qr:export` (exporta manifiesto en formato CSV y JSON con URLs completas a `/var/www/punto-burger-app/shared/qr-print/` con permisos `chmod 600`).
+- **Rotar token QR de mesa individual**: `npm run qr:rotate -- mesa-XX` (rota de emergencia el token QR de una mesa física preservando su historial de juego).
+- **Consultar código temporal de salón (CLI)**: `npm run dev:access-code -- esperanza-central` (herramienta de desarrollo para depuración de códigos temporales de TV).
 - **Inspección visual (Dev Only)**: `npm run db:studio` (interfaz visual Drizzle Studio para depuración en desarrollo).
 
 ### Scripts de calidad y compilación
