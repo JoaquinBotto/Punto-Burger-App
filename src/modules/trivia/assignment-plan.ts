@@ -4,11 +4,12 @@ import type { SlotAssignment } from './types';
 
 /**
  * Builds an immutable assignment plan for 10 trivia question slots.
- * Follows specs/03-game-mechanics.md and PPA-012 guidelines:
- * - 1 participant: all questions adapted to their profile.
- * - Homogeneous group (all same ageRange): all questions are group questions adapted to the common ageRange.
- * - Mixed group: balanced distribution where every participant receives at least 1 directed question,
- *   age ranges alternate, and group questions are included when space exists.
+ * Follows PPA-LAUNCH-001 competitive fairness guidelines:
+ * - Completely independent of ageRange and educationLevel.
+ * - Dynamic assignment depends ONLY on participant count and stable position.
+ * - 1 participant: 10 directed questions.
+ * - 2+ participants: combination of directed (round robin) and group questions.
+ * - Question difficulty is determined strictly by position (3 initial, 4 medium, 3 advanced).
  */
 export function buildAssignmentPlan(participants: Participant[]): SlotAssignment[] {
   if (participants.length === 0 || participants.length > 8) {
@@ -17,13 +18,11 @@ export function buildAssignmentPlan(participants: Participant[]): SlotAssignment
 
   // Sort stably by position
   const sorted = [...participants].sort((a, b) => a.position - b.position);
+  const n = sorted.length;
 
   // Case 1: Exactly 1 participant
-  if (sorted.length === 1) {
-    const single = sorted[0];
-    if (!single) {
-      throw new Error('Participante no encontrado.');
-    }
+  if (n === 1) {
+    const single = sorted[0]!;
     return Array.from({ length: 10 }, (_, i) => {
       const position = i + 1;
       return {
@@ -38,32 +37,12 @@ export function buildAssignmentPlan(participants: Participant[]): SlotAssignment
     });
   }
 
-  // Check if all participants share the exact same ageRange (homogeneous)
-  const firstAgeRange = sorted[0]?.ageRange;
-  const isHomogeneous = sorted.every((p) => p.ageRange === firstAgeRange);
-
-  if (isHomogeneous && firstAgeRange) {
-    return Array.from({ length: 10 }, (_, i) => {
-      const position = i + 1;
-      return {
-        position,
-        difficulty: getPositionDifficulty(position),
-        targetParticipantId: null,
-        targetAlias: null,
-        targetAgeRange: firstAgeRange,
-        targetEducationLevel: null,
-        isGroup: true,
-      };
-    });
-  }
-
-  // Case 3: Mixed group (different age ranges)
-  const n = sorted.length;
-  // Determine how many directed questions each participant receives:
-  // - n=2: 3 directed each (6 directed, 4 group)
-  // - n=3: 2 directed each (6 directed, 4 group)
-  // - n=4: 2 directed each (8 directed, 2 group)
-  // - n=5..8: 1 directed each (5..8 directed, 5..2 group)
+  // Case 2: 2 or more participants
+  // Reparto de turnos según número de jugadores:
+  // - n=2: 3 dirigidas cada uno (6 dirigidas, 4 grupales)
+  // - n=3: 2 dirigidas cada uno (6 dirigidas, 4 grupales)
+  // - n=4: 2 dirigidas cada uno (8 dirigidas, 2 grupales)
+  // - n=5..8: 1 dirigida cada uno (5..8 dirigidas, 5..2 grupales)
   let directedPerParticipant: number;
   if (n === 2) {
     directedPerParticipant = 3;
@@ -76,7 +55,7 @@ export function buildAssignmentPlan(participants: Participant[]): SlotAssignment
   const totalDirected = n * directedPerParticipant;
   const totalGroup = 10 - totalDirected;
 
-  // Determine group positions based on totalGroup count
+  // Determinar posiciones fijas para preguntas grupales
   const groupPositions = new Set<number>();
   if (totalGroup === 5) {
     [2, 4, 6, 8, 10].forEach((p) => groupPositions.add(p));
@@ -88,43 +67,7 @@ export function buildAssignmentPlan(participants: Participant[]): SlotAssignment
     [6, 10].forEach((p) => groupPositions.add(p));
   }
 
-  // Interleave participants to alternate age ranges
-  // 1. Bucket participants by ageRange in order of first appearance
-  const buckets = new Map<string, Participant[]>();
-  for (const p of sorted) {
-    if (!buckets.has(p.ageRange)) {
-      buckets.set(p.ageRange, []);
-    }
-    buckets.get(p.ageRange)!.push(p);
-  }
-
-  // 2. Round-robin through distinct ageRange buckets
-  const interleavedParticipants: Participant[] = [];
-  const bucketList = Array.from(buckets.values());
-  let added = true;
-  let round = 0;
-  while (added) {
-    added = false;
-    for (const bucket of bucketList) {
-      if (round < bucket.length) {
-        const item = bucket[round];
-        if (item) {
-          interleavedParticipants.push(item);
-          added = true;
-        }
-      }
-    }
-    round++;
-  }
-
-  // 3. Build directed sequence (repeat interleaved sequence if directedPerParticipant > 1)
-  const directedSequence: Participant[] = [];
-  for (let rep = 0; rep < directedPerParticipant; rep++) {
-    for (const p of interleavedParticipants) {
-      directedSequence.push(p);
-    }
-  }
-
+  // Asignación Round Robin de preguntas dirigidas por posición estable
   let directedIndex = 0;
   const slots: SlotAssignment[] = [];
 
@@ -143,10 +86,8 @@ export function buildAssignmentPlan(participants: Participant[]): SlotAssignment
         isGroup: true,
       });
     } else {
-      const target = directedSequence[directedIndex++];
-      if (!target) {
-        throw new Error(`Secuencia de participantes insuficiente para la posición ${position}.`);
-      }
+      const target = sorted[directedIndex % n]!;
+      directedIndex++;
       slots.push({
         position,
         difficulty,

@@ -8,78 +8,14 @@ export function defaultRng(): number {
 }
 
 /**
- * Calculates a compatibility score between a candidate question and a target profile.
- * Higher scores mean better compatibility:
- * - Specific ageRange exact match + educationLevel match (Score: 5)
- * - Specific ageRange exact match + no educationLevel constraint (Score: 4)
- * - Specific ageRange exact match + different educationLevel (Score: 3)
- * - General ageRange + educationLevel match (Score: 2)
- * - General ageRange + no educationLevel constraint (Score: 1 - Current seed default)
- * - Incompatible ageRange (Score: 0 - Rejected)
- */
-export function scoreCompatibility(
-  question: Question,
-  targetAgeRange: string,
-  targetEducationLevel: string | null
-): number {
-  // If target is general (e.g. group question in mixed group)
-  if (targetAgeRange === 'general') {
-    if (question.ageRange === 'general') {
-      if (
-        targetEducationLevel &&
-        question.educationLevel &&
-        question.educationLevel === targetEducationLevel
-      ) {
-        return 4;
-      }
-      if (!question.educationLevel || question.educationLevel === 'none') {
-        return 3;
-      }
-      return 2;
-    }
-    // Specific questions for a general group slot have lowest compatibility
-    return 1;
-  }
-
-  // Target is a specific ageRange (child, teen, adult)
-  if (question.ageRange === targetAgeRange) {
-    if (
-      targetEducationLevel &&
-      question.educationLevel &&
-      question.educationLevel === targetEducationLevel
-    ) {
-      return 5;
-    }
-    if (!question.educationLevel || question.educationLevel === 'none') {
-      return 4;
-    }
-    return 3;
-  }
-
-  // Fallback to general questions
-  if (question.ageRange === 'general') {
-    if (
-      targetEducationLevel &&
-      question.educationLevel &&
-      question.educationLevel === targetEducationLevel
-    ) {
-      return 2;
-    }
-    return 1;
-  }
-
-  // Incompatible ageRange (e.g. child target with adult question)
-  return 0;
-}
-
-/**
  * Selects 10 unique questions strictly respecting:
  * - 3 initial (positions 1..3)
  * - 4 medium (positions 4..7)
  * - 3 advanced (positions 8..10)
  * - Category and approved status
- * - No duplicate question IDs
- * - Highest available compatibility score per slot with fallback to general
+ * - No duplicate question IDs within the game
+ * - 100% competitive fairness: uniform random selection within difficulty pool,
+ *   completely independent of participant age or education level
  * - Server-side randomization using injectable RNG
  */
 export function selectQuestionsForSlots(
@@ -117,37 +53,24 @@ export function selectQuestionsForSlots(
       pool = advancedPool;
     }
 
-    // Available candidates not yet chosen
+    // Available candidates not yet chosen in this game
     const available = pool.filter((q) => !usedQuestionIds.has(q.id));
 
-    // Calculate score for each
-    const scored = available
-      .map((q) => ({
-        question: q,
-        score: scoreCompatibility(q, slot.targetAgeRange, slot.targetEducationLevel),
-      }))
-      .filter((item) => item.score > 0);
-
-    if (scored.length === 0) {
+    if (available.length === 0) {
       throw new QuestionPoolInsufficientError(
-        `No hay preguntas compatibles disponibles para la posición ${slot.position} (${slot.difficulty}).`
+        `No hay preguntas disponibles para la posición ${slot.position} (${slot.difficulty}).`
       );
     }
 
-    // Find highest score
-    const maxScore = Math.max(...scored.map((item) => item.score));
-    const topTier = scored.filter((item) => item.score === maxScore);
-
-    // Pick randomly from top tier
+    // Pick uniformly at random from all available questions in this difficulty pool
     const randomFraction = rng();
-    const clampedIndex = Math.floor(randomFraction * topTier.length) % topTier.length;
-    const chosenCandidate = topTier[clampedIndex];
-    if (!chosenCandidate) {
+    const clampedIndex = Math.floor(randomFraction * available.length) % available.length;
+    const chosen = available[clampedIndex];
+    if (!chosen) {
       throw new QuestionPoolInsufficientError(
-        `No compatible question found for position ${slot.position} (${slot.difficulty})`
+        `No question found for position ${slot.position} (${slot.difficulty})`
       );
     }
-    const chosen = chosenCandidate.question;
 
     usedQuestionIds.add(chosen.id);
     selected.push({

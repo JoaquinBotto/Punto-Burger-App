@@ -370,7 +370,7 @@ export default function PlaySetupWizard({ initialData }: PlaySetupWizardProps) {
               ¿Quiénes juegan?
             </h1>
             <p className="mt-1 text-xs text-pb-charcoal-muted">
-              Registrá a los participantes para calibrar las preguntas de la partida.
+              Registrá a los jugadores para repartir los turnos de la partida.
             </p>
 
             {/* Lista de Tarjetas de Participantes */}
