@@ -25,7 +25,8 @@
     "questions:verify:production": "tsx scripts/verify-question-bank-production.ts",
     "competition:create": "tsx scripts/competition-create.ts",
     "competition:status": "tsx scripts/competition-status.ts",
-    "competition:finalize": "tsx scripts/competition-finalize.ts"
+    "competition:finalize": "tsx scripts/competition-finalize.ts",
+    "table:renew": "tsx scripts/table-renew.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

@@ -172,6 +172,10 @@ Respuesta esperada:
 - **Ejecutar migraciones**: `npm run db:migrate` (aplica migraciones pendientes a la base de datos configurada en `DATABASE_MIGRATION_URL`).
 - **Ejecutar seed de datos**: `npm run db:seed` (siembra de forma idempotente local, Mesa 01, 6 categorías y 72 preguntas aprobadas).
 - **Aprovisionar 30 mesas físicas**: `npm run tables:provision` (aprovisiona de forma idempotente las 30 mesas oficiales `mesa-01` a `mesa-30` con tokens QR criptográficos permanentes).
+- **Renovación operativa de mesa**: `npm run table:renew -- mesa-XX [--force]` (libera operativamente una mesa para nuevos clientes, cerrando la sesión anterior y preservando el historial).
+- **Crear competencia de 3 ciclos**: `npm run competition:create -- [--open] [--name "..."]` (crea una competencia oficial programada o abierta).
+- **Consultar estado de competencia**: `npm run competition:status` (consulta métricas de inscripciones, ciclos y podio actual).
+- **Finalizar competencia**: `npm run competition:finalize` (finaliza manualmente una competencia oficial o abierta).
 - **Exportar manifiesto QR para imprenta**: `npm run qr:export` (exporta manifiesto en formato CSV y JSON con URLs completas a `/var/www/punto-burger-app/shared/qr-print/` con permisos `chmod 600`).
 - **Rotar token QR de mesa individual**: `npm run qr:rotate -- mesa-XX` (rota de emergencia el token QR de una mesa física preservando su historial de juego).
 - **Consultar código temporal de salón (CLI)**: `npm run dev:access-code -- esperanza-central` (herramienta de desarrollo para depuración de códigos temporales de TV).

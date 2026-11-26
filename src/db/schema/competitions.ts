@@ -11,13 +11,16 @@ export const competitions = pgTable(
     venueId: uuid('venue_id')
       .notNull()
       .references(() => venues.id, { onDelete: 'restrict' }),
-    localDate: date('local_date', { mode: 'string' }).notNull(),
+    timingMode: text('timing_mode', { enum: ['scheduled', 'open'] })
+      .default('scheduled')
+      .notNull(),
+    localDate: date('local_date', { mode: 'string' }),
     name: text('name'),
-    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
-    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
-    registrationOpensAt: timestamp('registration_opens_at', { withTimezone: true }).notNull(),
-    joinCutoffAt: timestamp('join_cutoff_at', { withTimezone: true }).notNull(),
-    finalizationGraceUntil: timestamp('finalization_grace_until', { withTimezone: true }).notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }),
+    endsAt: timestamp('ends_at', { withTimezone: true }),
+    registrationOpensAt: timestamp('registration_opens_at', { withTimezone: true }),
+    joinCutoffAt: timestamp('join_cutoff_at', { withTimezone: true }),
+    finalizationGraceUntil: timestamp('finalization_grace_until', { withTimezone: true }),
     status: text('status', {
       enum: ['scheduled', 'active', 'finalized', 'cancelled'],
     })

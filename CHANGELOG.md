@@ -10,6 +10,16 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ### Added
 
+- `PPA-TESTMODE-001`: Competencia Abierta + Renovación Operativa de Mesas. Soporte de modalidad de competencia abierta y renovación operativa para pruebas reales en el local físico de Punto Burger Esperanza:
+  - Concepto de `timingMode: 'scheduled' | 'open'` en `competitions`: el modo abierto se activa inmediatamente (`status = 'active'`), no depende de horarios ni fechas calendario y permanece activo hasta su finalización manual mediante `npm run competition:finalize`.
+  - Nueva identidad de participación por sesión: constraint cambiada a `UNIQUE(competition_id, table_session_id)` mediante migración incremental `0005_glorious_mordo.sql`, permitiendo que una misma mesa física (`tables.id`) compita múltiples veces con diferentes grupos de comensales en la misma competencia abierta.
+  - QR físico permanente inmutable: `tables.qr_token` se mantiene estrictamente fijo, permitiendo que el mismo código QR adhesivo sirva para todas las ocupaciones sucesivas.
+  - Clasificación del ranking por participación (`competition_entries`): visualización de `table.displayName · group.name` (ej. `Mesa 01 · Los Bacon` vs `Mesa 01 · Los Cracks`), con copy en wizard `/play/setup` ("Este nombre aparecerá en el ranking de la competencia.") y criterios oficiales de desempate ordenados sin PII de participantes individuales.
+  - Herramienta CLI de renovación operativa: `npm run table:renew -- <tableCode> [--force]`, que cierra la sesión activa, revoca dispositivos, limpia cooldown, establece `table.status = 'available'` y emite eventos de auditoría (`table_renewed`, `table_session_closed_by_operator`, `competition_entry_abandoned_by_operator`), protegiendo partidas en curso salvo uso de `--force` y conservando todo el historial previo en el ranking.
+  - Extensión dinámica de sesión: garantía de 120 minutos al unirse en modo abierto y extensión a `now + 60m` al iniciar los Ciclos 2 o 3 si restan menos de 30 minutos.
+  - Actualización de CLIs: soporte de `--open` en `competition:create`, vista detallada de inscripciones y líder en `competition:status`.
+  - Suite de 249 pruebas automatizadas (47 test suites) pasando al 100%; documentado en `docs/implementation/PPA-TESTMODE-001-open-competition-and-table-renewal.md`.
+
 - `PPA-CONTEST-001`: Competencia Diaria de 3 Ciclos + Presencia Wi-Fi. Transformación de la experiencia casual en una plataforma de competencia diaria programable entre mesas físicas de Punto Burger en Esperanza, Santa Fe:
   - Definición de competencia oficial diaria ligada a local (`venues`) y fecha local (`local_date` en zona `America/Argentina/Cordoba`), restringida a como máximo una competencia oficial por día y local (`(venue_id, local_date) WHERE is_test = false`), con ventanas configurables de apertura de registro (`registration_opens_at`), inicio (`starts_at`), fin de juego (`ends_at`), corte de inscripciones (`join_cutoff_at`) y gracia para finalización (`finalization_grace_until`).
   - Estructura fija en 3 ciclos de 10 preguntas cada uno (30 preguntas totales por mesa), utilizando sesiones de juego secuenciales (`game_sessions`) ligadas a la misma ocupación física (`table_sessions`), extendiendo automáticamente la duración de la mesa hasta el fin del torneo.

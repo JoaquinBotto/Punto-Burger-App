@@ -39,6 +39,7 @@ describe('GET /api/v1/competitions/current/ranking', () => {
     vi.spyOn(compModule, 'getCurrentCompetition').mockResolvedValue({
       id: 'comp-uuid',
       venueId: 'v-01',
+      timingMode: 'scheduled',
       localDate: '2026-11-26',
       name: 'Competencia Oficial',
       status: 'active',
@@ -55,8 +56,11 @@ describe('GET /api/v1/competitions/current/ranking', () => {
     vi.spyOn(compModule, 'getCompetitionRanking').mockResolvedValue([
       {
         position: 1,
+        entryId: 'entry-01',
         table: 'Mesa 01',
         tableCode: 'mesa-01',
+        groupName: 'Los Bacon',
+        displayName: 'Mesa 01 · Los Bacon',
         roundsCompleted: 3,
         totalScore: 4100,
         correctCount: 27,
@@ -77,9 +81,9 @@ describe('GET /api/v1/competitions/current/ranking', () => {
     expect(data.ranking).toHaveLength(1);
     expect(data.ranking[0].position).toBe(1);
     expect(data.ranking[0].table).toBe('Mesa 01');
+    expect(data.ranking[0].displayName).toBe('Mesa 01 · Los Bacon');
 
     const str = JSON.stringify(data);
-    expect(str).not.toContain('groupName');
     expect(str).not.toContain('participants');
     expect(str).not.toContain('tableSessionId');
   });

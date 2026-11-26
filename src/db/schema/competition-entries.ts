@@ -33,9 +33,9 @@ export const competitionEntries = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('competition_entries_competition_table_unique').on(
+    uniqueIndex('competition_entries_competition_table_session_unique').on(
       table.competitionId,
-      table.tableId
+      table.tableSessionId
     ),
     index('competition_entries_competition_status_idx').on(table.competitionId, table.status),
   ]

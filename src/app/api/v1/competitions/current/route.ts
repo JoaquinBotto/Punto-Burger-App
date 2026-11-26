@@ -36,12 +36,17 @@ export async function GET(request: NextRequest) {
       competition: {
         id: comp.id,
         name: comp.name,
+        timingMode: comp.timingMode,
         localDate: comp.localDate,
-        startsAt: comp.startsAt.toISOString(),
-        endsAt: comp.endsAt.toISOString(),
-        registrationOpensAt: comp.registrationOpensAt.toISOString(),
-        joinCutoffAt: comp.joinCutoffAt.toISOString(),
-        finalizationGraceUntil: comp.finalizationGraceUntil.toISOString(),
+        startsAt: comp.startsAt ? comp.startsAt.toISOString() : null,
+        endsAt: comp.endsAt ? comp.endsAt.toISOString() : null,
+        registrationOpensAt: comp.registrationOpensAt
+          ? comp.registrationOpensAt.toISOString()
+          : null,
+        joinCutoffAt: comp.joinCutoffAt ? comp.joinCutoffAt.toISOString() : null,
+        finalizationGraceUntil: comp.finalizationGraceUntil
+          ? comp.finalizationGraceUntil.toISOString()
+          : null,
         status: comp.status,
         isTest: comp.isTest,
       },

@@ -27,10 +27,13 @@ export default async function PlaySetupPage() {
           id: comp.id,
           name: comp.name,
           status: comp.status,
-          startsAt: comp.startsAt.toISOString(),
-          endsAt: comp.endsAt.toISOString(),
-          registrationOpensAt: comp.registrationOpensAt.toISOString(),
-          joinCutoffAt: comp.joinCutoffAt.toISOString(),
+          timingMode: comp.timingMode,
+          startsAt: comp.startsAt ? comp.startsAt.toISOString() : null,
+          endsAt: comp.endsAt ? comp.endsAt.toISOString() : null,
+          registrationOpensAt: comp.registrationOpensAt
+            ? comp.registrationOpensAt.toISOString()
+            : null,
+          joinCutoffAt: comp.joinCutoffAt ? comp.joinCutoffAt.toISOString() : null,
         };
       }
     }

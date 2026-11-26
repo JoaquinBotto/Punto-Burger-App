@@ -49,8 +49,9 @@ export default async function RankingPage() {
           id: competition.id,
           name: competition.name,
           status: competition.status,
-          startsAt: competition.startsAt.toISOString(),
-          endsAt: competition.endsAt.toISOString(),
+          timingMode: competition.timingMode,
+          startsAt: competition.startsAt ? competition.startsAt.toISOString() : null,
+          endsAt: competition.endsAt ? competition.endsAt.toISOString() : null,
           localDate: competition.localDate,
         }}
         initialCompetitionRanking={compRanking}

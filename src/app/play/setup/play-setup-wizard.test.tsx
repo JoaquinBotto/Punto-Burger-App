@@ -55,6 +55,26 @@ describe('PlaySetupWizard Component', () => {
     expect(nextButton.hasAttribute('disabled')).toBe(true);
   });
 
+  it('muestra el copy de ranking cuando está en modo competencia', () => {
+    render(
+      <PlaySetupWizard
+        initialData={mockInitialData}
+        competition={{
+          id: 'comp-1',
+          name: 'Prueba Punto Burger',
+          status: 'active',
+          startsAt: '2026-11-26T20:00:00Z',
+          endsAt: '2026-11-26T23:00:00Z',
+          localDate: '2026-11-26',
+        }}
+      />
+    );
+
+    expect(
+      screen.getByText('Este nombre aparecerá en el ranking de la competencia.')
+    ).toBeDefined();
+  });
+
   it('permite avanzar al paso 2 cuando el nombre del equipo es válido', () => {
     render(<PlaySetupWizard initialData={mockInitialData} />);
 

@@ -10,8 +10,9 @@ interface TableQrClaimClientProps {
   competition?: {
     name?: string | null;
     status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
-    startsAt: string;
-    endsAt: string;
+    timingMode?: 'scheduled' | 'open';
+    startsAt?: string | null;
+    endsAt?: string | null;
   } | null;
 }
 
@@ -90,7 +91,7 @@ export function TableQrClaimClient({
           </div>
           <p className="mt-1 text-xs text-pb-charcoal-muted">
             {competition.status === 'scheduled'
-              ? `La competencia comienza a las ${new Date(competition.startsAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}. Registrá a tu equipo con tiempo.`
+              ? `La competencia comienza a las ${competition.startsAt ? new Date(competition.startsAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''}. Registrá a tu equipo con tiempo.`
               : '¡La competencia oficial está en curso! 3 ciclos de dificultad progresiva.'}
           </p>
         </div>

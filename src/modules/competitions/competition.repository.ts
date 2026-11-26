@@ -94,10 +94,32 @@ export async function getCompetitionBlueprintSlots(
     .orderBy(competitionBlueprintSlots.roundNumber, competitionBlueprintSlots.position);
 }
 
+export async function getActiveOpenCompetitionByVenue(
+  db: DbClient,
+  venueId: string,
+  allowTest = false
+): Promise<Competition | null> {
+  const conditions = [
+    eq(competitions.venueId, venueId),
+    eq(competitions.timingMode, 'open'),
+    eq(competitions.status, 'active'),
+  ];
+  if (!allowTest) {
+    conditions.push(eq(competitions.isTest, false));
+  }
+  const [comp] = await db
+    .select()
+    .from(competitions)
+    .where(and(...conditions))
+    .orderBy(desc(competitions.createdAt))
+    .limit(1);
+  return comp ?? null;
+}
+
 export async function getCompetitionEntry(
   db: DbClient,
   competitionId: string,
-  tableId: string
+  tableSessionId: string
 ): Promise<CompetitionEntry | null> {
   const [entry] = await db
     .select()
@@ -105,7 +127,7 @@ export async function getCompetitionEntry(
     .where(
       and(
         eq(competitionEntries.competitionId, competitionId),
-        eq(competitionEntries.tableId, tableId)
+        eq(competitionEntries.tableSessionId, tableSessionId)
       )
     )
     .limit(1);

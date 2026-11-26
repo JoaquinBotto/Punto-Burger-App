@@ -29,10 +29,12 @@ interface CompetitionInfo {
   id: string;
   name: string | null;
   status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
-  startsAt: string;
-  endsAt: string;
-  registrationOpensAt: string;
-  joinCutoffAt: string;
+  timingMode?: 'scheduled' | 'open';
+  localDate?: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  registrationOpensAt?: string | null;
+  joinCutoffAt?: string | null;
 }
 
 interface PlaySetupWizardProps {
@@ -97,7 +99,7 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
     return () => clearInterval(interval);
   }, [isCompetition]);
 
-  const startsAtDate = competition ? new Date(competition.startsAt) : null;
+  const startsAtDate = competition && competition.startsAt ? new Date(competition.startsAt) : null;
   const isStarted = startsAtDate ? now >= startsAtDate : true;
 
   // --- Handlers de Participantes ---
@@ -505,7 +507,9 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
               ¿Cómo se llama tu equipo?
             </h1>
             <p className="mt-1 text-xs text-pb-charcoal-muted">
-              Elegí un nombre para representar a tu mesa en la partida.
+              {isCompetition
+                ? 'Este nombre aparecerá en el ranking de la competencia.'
+                : 'Elegí un nombre para representar a tu mesa en la partida.'}
             </p>
 
             <div className="mt-6">

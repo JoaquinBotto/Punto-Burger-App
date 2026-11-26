@@ -16,7 +16,7 @@ function parseArgs() {
     const arg = args[i] ?? '';
     if (arg.startsWith('--')) {
       const key = arg.slice(2);
-      if (key === 'is-test') {
+      if (key === 'is-test' || key === 'open') {
         params[key] = true;
       } else if (i + 1 < args.length && !(args[i + 1] ?? '').startsWith('--')) {
         params[key] = args[i + 1] ?? '';
@@ -60,10 +60,12 @@ async function main() {
       day: '2-digit',
     }).format(new Date());
 
+    const isOpen = Boolean(params['open']);
     const localDate = (params['date'] as string) || todayDate;
     const startTime = (params['start'] as string) || '20:00';
     const endTime = (params['end'] as string) || '23:00';
-    const name = (params['name'] as string) || `Competencia ${localDate}`;
+    const name =
+      (params['name'] as string) || (isOpen ? 'Prueba Punto Burger' : `Competencia ${localDate}`);
     const registrationMinutesBefore = params['registration-minutes-before']
       ? parseInt(params['registration-minutes-before'] as string, 10)
       : 30;
@@ -76,14 +78,21 @@ async function main() {
     const isTest = Boolean(params['is-test']);
 
     console.log(`Creando competencia para ${venue.name} (${venueSlug})...`);
-    console.log(`- Fecha: ${localDate}`);
-    console.log(`- Horario: ${startTime} a ${endTime} (America/Argentina/Cordoba)`);
+    console.log(`- Modo: ${isOpen ? 'OPEN' : 'SCHEDULED'}`);
+    if (isOpen) {
+      console.log(`- Nombre: ${name}`);
+      console.log(`- Estado inicial: ACTIVE`);
+    } else {
+      console.log(`- Fecha: ${localDate}`);
+      console.log(`- Horario: ${startTime} a ${endTime} (America/Argentina/Cordoba)`);
+    }
     console.log(`- Test mode: ${isTest}`);
 
     const comp = await createCompetition(db, venue.id, {
-      localDate,
-      startTime,
-      endTime,
+      timingMode: isOpen ? 'open' : 'scheduled',
+      localDate: isOpen ? undefined : localDate,
+      startTime: isOpen ? undefined : startTime,
+      endTime: isOpen ? undefined : endTime,
       name,
       registrationMinutesBefore,
       joinCutoffMinutesBeforeEnd,
@@ -92,20 +101,33 @@ async function main() {
     });
 
     console.log('\n✅ COMPETENCIA CREADA EXITOSAMENTE:');
-    console.table([
-      {
-        ID: comp.id,
-        Nombre: comp.name,
-        Fecha: comp.localDate,
-        Estado: comp.status,
-        'Abre Registro': comp.registrationOpensAt.toISOString(),
-        Inicio: comp.startsAt.toISOString(),
-        'Cierre Registro': comp.joinCutoffAt.toISOString(),
-        Fin: comp.endsAt.toISOString(),
-        'Gracia Hasta': comp.finalizationGraceUntil.toISOString(),
-        'Es Test': comp.isTest ? 'SÍ' : 'NO',
-      },
-    ]);
+    if (comp.timingMode === 'open') {
+      console.table([
+        {
+          ID: comp.id,
+          Nombre: comp.name,
+          Modo: 'OPEN',
+          Estado: comp.status.toUpperCase(),
+          'Es Test': comp.isTest ? 'SÍ' : 'NO',
+        },
+      ]);
+    } else {
+      console.table([
+        {
+          ID: comp.id,
+          Nombre: comp.name,
+          Modo: 'SCHEDULED',
+          Fecha: comp.localDate,
+          Estado: comp.status.toUpperCase(),
+          'Abre Registro': comp.registrationOpensAt?.toISOString(),
+          Inicio: comp.startsAt?.toISOString(),
+          'Cierre Registro': comp.joinCutoffAt?.toISOString(),
+          Fin: comp.endsAt?.toISOString(),
+          'Gracia Hasta': comp.finalizationGraceUntil?.toISOString(),
+          'Es Test': comp.isTest ? 'SÍ' : 'NO',
+        },
+      ]);
+    }
 
     await sql.end();
   } catch (err) {

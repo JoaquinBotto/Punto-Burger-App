@@ -53,28 +53,75 @@ async function main() {
       GROUP BY status
     `);
 
+    const summaryMap: Record<string, number> = {};
+    let totalEntries = 0;
+    for (const row of Array.from(entriesSummary) as Array<{ status: string; count: number }>) {
+      const s = String(row.status);
+      const c = Number(row.count);
+      summaryMap[s] = c;
+      totalEntries += c;
+    }
+    const activeEntries = (summaryMap['active'] ?? 0) + (summaryMap['registered'] ?? 0);
+    const completedEntries = summaryMap['completed'] ?? 0;
+    const abandonedEntries = summaryMap['abandoned'] ?? 0;
+
     const ranking = await getCompetitionRanking(db, comp.id);
     const leader = ranking[0];
 
     console.log(`\n🏆 ESTADO DE COMPETENCIA — ${venue.name}`);
+    if (comp.timingMode === 'open') {
+      console.table([
+        {
+          ID: comp.id,
+          Nombre: comp.name,
+          Modo: 'OPEN',
+          Estado: comp.status.toUpperCase(),
+          'Entradas Totales': totalEntries,
+          Activas: activeEntries,
+          Completadas: completedEntries,
+          Abandonadas: abandonedEntries,
+          Test: comp.isTest ? 'SÍ' : 'NO',
+        },
+      ]);
+    } else {
+      console.table([
+        {
+          ID: comp.id,
+          Nombre: comp.name,
+          Modo: 'SCHEDULED',
+          Fecha: comp.localDate,
+          Estado: comp.status.toUpperCase(),
+          Inicio: comp.startsAt?.toLocaleTimeString('es-AR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          Fin: comp.endsAt?.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+          'Entradas Totales': totalEntries,
+          Activas: activeEntries,
+          Completadas: completedEntries,
+          Abandonadas: abandonedEntries,
+          Test: comp.isTest ? 'SÍ' : 'NO',
+        },
+      ]);
+    }
+
+    console.log('\n📊 DETALLE DE INSCRIPCIONES:');
     console.table([
       {
-        ID: comp.id,
-        Nombre: comp.name,
-        Fecha: comp.localDate,
-        Estado: comp.status.toUpperCase(),
-        Inicio: comp.startsAt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-        Fin: comp.endsAt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-        Test: comp.isTest ? 'SÍ' : 'NO',
+        'Entradas Totales': totalEntries,
+        Activas: activeEntries,
+        Completadas: completedEntries,
+        Abandonadas: abandonedEntries,
       },
     ]);
 
-    console.log('\n📊 INSCRIPCIONES POR ESTADO:');
-    console.table(entriesSummary);
-
     if (leader) {
-      console.log(`\n🥇 ${comp.status === 'finalized' ? 'MESA GANADORA' : 'LÍDER ACTUAL'}:`);
+      console.log(`\n🥇 ${comp.status === 'finalized' ? 'GANADOR' : 'LÍDER ACTUAL'}:`);
+      console.log(`- Competidor: ${leader.displayName ?? leader.table}`);
       console.log(`- Mesa: ${leader.table}`);
+      if (leader.groupName) {
+        console.log(`- Equipo: ${leader.groupName}`);
+      }
       console.log(`- Puntaje: ${leader.totalScore} pts`);
       console.log(`- Ciclos completados: ${leader.roundsCompleted}/3`);
       console.log(`- Preguntas correctas: ${leader.correctCount}`);

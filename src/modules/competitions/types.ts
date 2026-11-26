@@ -1,4 +1,5 @@
 export type CompetitionStatus = 'scheduled' | 'active' | 'finalized' | 'cancelled';
+export type CompetitionTimingMode = 'scheduled' | 'open';
 export type CompetitionEntryStatus =
   'registered' | 'active' | 'completed' | 'abandoned' | 'disqualified';
 
@@ -11,8 +12,11 @@ export interface CompetitionBlueprintSlotData {
 
 export interface CompetitionRankingEntry {
   position: number;
+  entryId: string;
   table: string; // e.g. 'Mesa 01'
   tableCode: string;
+  groupName: string; // e.g. 'Los Bacon'
+  displayName: string; // e.g. 'Mesa 01 · Los Bacon'
   totalScore: number;
   roundsCompleted: number; // 0..3
   correctCount: number;
@@ -26,12 +30,13 @@ export interface CompetitionStateResponse {
     id: string;
     name: string | null;
     status: CompetitionStatus;
-    localDate: string;
-    startsAt: string;
-    endsAt: string;
-    registrationOpensAt: string;
-    joinCutoffAt: string;
-    finalizationGraceUntil: string;
+    timingMode: CompetitionTimingMode;
+    localDate: string | null;
+    startsAt: string | null;
+    endsAt: string | null;
+    registrationOpensAt: string | null;
+    joinCutoffAt: string | null;
+    finalizationGraceUntil: string | null;
     isTest: boolean;
   } | null;
   entry: {

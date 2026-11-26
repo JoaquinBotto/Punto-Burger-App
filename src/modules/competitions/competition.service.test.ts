@@ -65,6 +65,22 @@ describe('CompetitionService', () => {
         })
       ).rejects.toThrow('Se requieren exactamente 6 categorías activas');
     });
+
+    it('falla al crear open competition si ya existe una abierta activa para el venue', async () => {
+      const mockDb = createMockDb();
+      vi.spyOn(compRepo, 'getActiveOpenCompetitionByVenue').mockResolvedValue({
+        id: 'comp-open-1',
+        status: 'active',
+        timingMode: 'open',
+      } as unknown as Competition);
+
+      await expect(
+        createCompetition(mockDb, 'v-1', {
+          timingMode: 'open',
+          name: 'Prueba',
+        })
+      ).rejects.toThrow('Ya existe una competencia abierta activa en este local.');
+    });
   });
 
   describe('getCurrentCompetition', () => {
@@ -91,6 +107,7 @@ describe('CompetitionService', () => {
       } as unknown as Competition;
 
       const mockDb = createMockDb([mockComp]);
+      vi.spyOn(compRepo, 'getActiveOpenCompetitionByVenue').mockResolvedValue(null);
       const updateSpy = vi.spyOn(compRepo, 'updateCompetitionStatus').mockResolvedValue({
         ...mockComp,
         status: 'active',
@@ -98,6 +115,24 @@ describe('CompetitionService', () => {
 
       const comp = await getCurrentCompetition(mockDb, 'v-1');
       expect(updateSpy).toHaveBeenCalledWith(mockDb, 'comp-1', 'active');
+      expect(comp?.status).toBe('active');
+    });
+
+    it('prioriza competencia open activa por sobre scheduled sin evaluar fecha u horarios', async () => {
+      const mockDb = createMockDb([]);
+      const mockOpenComp = {
+        id: 'open-comp-1',
+        timingMode: 'open',
+        status: 'active',
+        startsAt: null,
+        endsAt: null,
+      } as unknown as Competition;
+
+      vi.spyOn(compRepo, 'getActiveOpenCompetitionByVenue').mockResolvedValue(mockOpenComp);
+
+      const comp = await getCurrentCompetition(mockDb, 'v-1');
+      expect(comp?.id).toBe('open-comp-1');
+      expect(comp?.timingMode).toBe('open');
       expect(comp?.status).toBe('active');
     });
   });

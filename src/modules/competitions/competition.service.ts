@@ -33,10 +33,10 @@ import { generateCompetitionBlueprint } from './blueprint-generator';
 import {
   getCompetitionById,
   getCompetitionByVenueAndDate,
+  getActiveOpenCompetitionByVenue,
   createCompetitionRecord,
   createCompetitionBlueprintSlots,
   getCompetitionBlueprintSlots,
-  getCompetitionEntry,
   getCompetitionEntryByTableSessionId,
   createCompetitionEntry,
   updateCompetitionEntryStatus,
@@ -72,9 +72,10 @@ export interface RequestCookiesReader {
 
 export interface CreateCompetitionOptions {
   venueId: string;
-  localDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  timingMode?: 'scheduled' | 'open';
+  localDate?: string; // YYYY-MM-DD
+  startTime?: string; // HH:mm
+  endTime?: string; // HH:mm
   name?: string;
   registrationMinutesBefore?: number;
   joinCutoffMinutesBeforeEnd?: number;
@@ -98,6 +99,7 @@ export async function createCompetition(
 
   const {
     venueId,
+    timingMode = 'scheduled',
     localDate,
     startTime,
     endTime,
@@ -109,23 +111,53 @@ export async function createCompetition(
     rng = defaultRng,
   } = options;
 
-  const startsAt = new Date(`${localDate}T${startTime}:00.000-03:00`);
-  const endsAt = new Date(`${localDate}T${endTime}:00.000-03:00`);
-  const registrationOpensAt = new Date(startsAt.getTime() - registrationMinutesBefore * 60_000);
-  const joinCutoffAt = new Date(endsAt.getTime() - joinCutoffMinutesBeforeEnd * 60_000);
-  const finalizationGraceUntil = new Date(endsAt.getTime() + graceMinutes * 60_000);
+  let startsAt: Date | null = null;
+  let endsAt: Date | null = null;
+  let registrationOpensAt: Date | null = null;
+  let joinCutoffAt: Date | null = null;
+  let finalizationGraceUntil: Date | null = null;
+  let competitionStatus: 'scheduled' | 'active' = 'scheduled';
 
-  if (startsAt >= endsAt) {
-    throw new Error('La hora de inicio de la competencia debe ser anterior a la hora de fin.');
-  }
+  if (timingMode === 'open') {
+    // Si existe open + active para este venue, no permitir crear otra oficial
+    if (!isTest) {
+      const activeOpen = await getActiveOpenCompetitionByVenue(db, venueId, false);
+      if (activeOpen) {
+        throw new Error(
+          'Ya existe una competencia abierta activa en este local. Debe finalizarse antes de crear una nueva.'
+        );
+      }
+    }
+    competitionStatus = 'active';
+  } else {
+    // Modo scheduled
+    if (!localDate || !startTime || !endTime) {
+      throw new Error('Las competencias programadas requieren localDate, startTime y endTime.');
+    }
 
-  // Comprobar que no exista otra competencia oficial activa/programada para esta fecha
-  if (!isTest) {
-    const existing = await getCompetitionByVenueAndDate(db, venueId, localDate);
-    if (existing && existing.status !== 'cancelled' && !existing.isTest) {
-      throw new Error(
-        `Ya existe una competencia oficial (${existing.status}) para la fecha ${localDate}.`
-      );
+    startsAt = new Date(`${localDate}T${startTime}:00.000-03:00`);
+    endsAt = new Date(`${localDate}T${endTime}:00.000-03:00`);
+    registrationOpensAt = new Date(startsAt.getTime() - registrationMinutesBefore * 60_000);
+    joinCutoffAt = new Date(endsAt.getTime() - joinCutoffMinutesBeforeEnd * 60_000);
+    finalizationGraceUntil = new Date(endsAt.getTime() + graceMinutes * 60_000);
+
+    if (startsAt >= endsAt) {
+      throw new Error('La hora de inicio de la competencia debe ser anterior a la hora de fin.');
+    }
+
+    // Comprobar que no exista otra competencia oficial scheduled para esta fecha
+    if (!isTest) {
+      const existing = await getCompetitionByVenueAndDate(db, venueId, localDate);
+      if (
+        existing &&
+        existing.status !== 'cancelled' &&
+        !existing.isTest &&
+        existing.timingMode === 'scheduled'
+      ) {
+        throw new Error(
+          `Ya existe una competencia oficial (${existing.status}) para la fecha ${localDate}.`
+        );
+      }
     }
   }
 
@@ -148,14 +180,15 @@ export async function createCompetition(
   return db.transaction(async (tx) => {
     const comp = await createCompetitionRecord(tx, {
       venueId,
-      localDate,
-      name: name ?? `Competencia ${localDate}`,
+      timingMode,
+      localDate: localDate ?? null,
+      name: name ?? (timingMode === 'open' ? 'Competencia Abierta' : `Competencia ${localDate}`),
       startsAt,
       endsAt,
       registrationOpensAt,
       joinCutoffAt,
       finalizationGraceUntil,
-      status: 'scheduled',
+      status: competitionStatus,
       isTest,
     });
 
@@ -182,11 +215,21 @@ export async function getCurrentCompetition(
   venueId: string,
   options?: { allowTest?: boolean }
 ): Promise<Competition | null> {
+  // 1. Prioridad: si existe una competencia timingMode = 'open' and status = 'active'
+  const activeOpen = await getActiveOpenCompetitionByVenue(db, venueId, options?.allowTest);
+  if (activeOpen) {
+    return activeOpen;
+  }
+
   const today = getTodayLocalDate();
   const now = new Date();
 
-  // Buscar competencia de hoy o que esté en su ventana de ejecución
-  const conditions = [eq(competitions.venueId, venueId), sql`status != 'cancelled'`];
+  // Buscar competencia scheduled de hoy o que esté en su ventana de ejecución
+  const conditions = [
+    eq(competitions.venueId, venueId),
+    eq(competitions.timingMode, 'scheduled'),
+    sql`status != 'cancelled'`,
+  ];
 
   if (!options?.allowTest) {
     conditions.push(eq(competitions.isTest, false));
@@ -205,7 +248,10 @@ export async function getCurrentCompetition(
     // Si la fecha coincide o la ventana temporal está vigente
     if (
       c.localDate === today ||
-      (now >= c.registrationOpensAt && now <= c.finalizationGraceUntil)
+      (c.registrationOpensAt &&
+        c.finalizationGraceUntil &&
+        now >= c.registrationOpensAt &&
+        now <= c.finalizationGraceUntil)
     ) {
       current = c;
       break;
@@ -214,15 +260,21 @@ export async function getCurrentCompetition(
 
   if (!current) return null;
 
-  // Normalización perezosa de estados
+  // Normalización perezosa de estados (solo scheduled)
   if (
     current.status === 'scheduled' &&
+    current.startsAt &&
+    current.finalizationGraceUntil &&
     now >= current.startsAt &&
     now < current.finalizationGraceUntil
   ) {
     const updated = await updateCompetitionStatus(db, current.id, 'active');
     if (updated) current = updated;
-  } else if (current.status === 'active' && now >= current.finalizationGraceUntil) {
+  } else if (
+    current.status === 'active' &&
+    current.finalizationGraceUntil &&
+    now >= current.finalizationGraceUntil
+  ) {
     const updated = await updateCompetitionStatus(db, current.id, 'finalized');
     if (updated) current = updated;
   }
@@ -262,20 +314,28 @@ export async function joinCompetition(
   const now = new Date();
 
   // 3. Validar ventana de registro
-  if (now < comp.registrationOpensAt) {
-    throw new CompetitionRegistrationClosedError(
-      `La inscripción para la competencia abrirá a las ${comp.registrationOpensAt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}.`
-    );
+  if (comp.timingMode === 'open') {
+    if (comp.status !== 'active') {
+      throw new CompetitionRegistrationClosedError(
+        'La competencia abierta no se encuentra activa.'
+      );
+    }
+  } else {
+    if (comp.registrationOpensAt && now < comp.registrationOpensAt) {
+      throw new CompetitionRegistrationClosedError(
+        `La inscripción para la competencia abrirá a las ${comp.registrationOpensAt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}.`
+      );
+    }
+
+    if (comp.joinCutoffAt && now > comp.joinCutoffAt) {
+      throw new CompetitionRegistrationClosedError(
+        'El horario límite de inscripción para la competencia de hoy ha finalizado.'
+      );
+    }
   }
 
-  if (now > comp.joinCutoffAt) {
-    throw new CompetitionRegistrationClosedError(
-      'El horario límite de inscripción para la competencia de hoy ha finalizado.'
-    );
-  }
-
-  // 4. Comprobar si la mesa ya está inscripta
-  const existingEntry = await getCompetitionEntry(db, comp.id, table.id);
+  // 4. Comprobar si la sesión ya está inscripta
+  const existingEntry = await getCompetitionEntryByTableSessionId(db, session.id);
   if (existingEntry) {
     return {
       ok: true,
@@ -293,12 +353,23 @@ export async function joinCompetition(
 
   return db.transaction(async (tx) => {
     // 5. Extender la sesión de mesa para que cubra la competencia
-    const targetExpiry = new Date(comp.finalizationGraceUntil.getTime() + 5 * 60_000);
-    if (session.expiresAt < targetExpiry) {
-      await tx
-        .update(tableSessions)
-        .set({ expiresAt: targetExpiry, updatedAt: new Date() })
-        .where(eq(tableSessions.id, session.id));
+    if (comp.timingMode === 'open') {
+      // En modo abierto: asegurar al menos 120 minutos desde este momento
+      const minExpiry = new Date(now.getTime() + 120 * 60_000);
+      if (session.expiresAt < minExpiry) {
+        await tx
+          .update(tableSessions)
+          .set({ expiresAt: minExpiry, updatedAt: new Date() })
+          .where(eq(tableSessions.id, session.id));
+      }
+    } else if (comp.finalizationGraceUntil) {
+      const targetExpiry = new Date(comp.finalizationGraceUntil.getTime() + 5 * 60_000);
+      if (session.expiresAt < targetExpiry) {
+        await tx
+          .update(tableSessions)
+          .set({ expiresAt: targetExpiry, updatedAt: new Date() })
+          .where(eq(tableSessions.id, session.id));
+      }
     }
 
     // 6. Crear entrada
@@ -349,17 +420,43 @@ export async function prepareCompetitionRound(
     const now = new Date();
 
     // 2. Validar tiempos según ciclo
-    if (roundNumber === 1) {
-      if (now < comp.startsAt) {
-        throw new CompetitionCutoffReachedError('La competencia todavía no ha comenzado.');
+    if (comp.timingMode === 'open') {
+      if (comp.status !== 'active') {
+        throw new CompetitionCutoffReachedError('La competencia abierta no se encuentra activa.');
+      }
+    } else {
+      if (roundNumber === 1) {
+        if (comp.startsAt && now < comp.startsAt) {
+          throw new CompetitionCutoffReachedError('La competencia todavía no ha comenzado.');
+        }
+      }
+
+      // Para cualquier ciclo, no se puede iniciar un nuevo ciclo si ya pasó endsAt
+      if (comp.endsAt && now >= comp.endsAt) {
+        throw new CompetitionCutoffReachedError(
+          'El horario de juego de la competencia ha finalizado.'
+        );
       }
     }
 
-    // Para cualquier ciclo, no se puede iniciar un nuevo ciclo si ya pasó endsAt
-    if (now >= comp.endsAt) {
-      throw new CompetitionCutoffReachedError(
-        'El horario de juego de la competencia ha finalizado.'
-      );
+    // Extensión de sesión para open mode:
+    // Al iniciar Ciclo 2 o Ciclo 3: si quedan menos de 30 minutos de sesión, extender nuevamente hasta: now + 60 minutos
+    if (comp.timingMode === 'open' && (roundNumber === 2 || roundNumber === 3)) {
+      const [currentTableSession] = await tx
+        .select()
+        .from(tableSessions)
+        .where(eq(tableSessions.id, entry.tableSessionId));
+
+      if (
+        currentTableSession &&
+        currentTableSession.expiresAt.getTime() - now.getTime() < 30 * 60_000
+      ) {
+        const extendedExpiry = new Date(now.getTime() + 60 * 60_000);
+        await tx
+          .update(tableSessions)
+          .set({ expiresAt: extendedExpiry, updatedAt: new Date() })
+          .where(eq(tableSessions.id, entry.tableSessionId));
+      }
     }
 
     // 3. Comprobar rondas previas y unicidad
@@ -655,12 +752,17 @@ export async function getCompetitionState(
           id: comp.id,
           name: comp.name,
           status: comp.status,
+          timingMode: comp.timingMode,
           localDate: comp.localDate,
-          startsAt: comp.startsAt.toISOString(),
-          endsAt: comp.endsAt.toISOString(),
-          registrationOpensAt: comp.registrationOpensAt.toISOString(),
-          joinCutoffAt: comp.joinCutoffAt.toISOString(),
-          finalizationGraceUntil: comp.finalizationGraceUntil.toISOString(),
+          startsAt: comp.startsAt ? comp.startsAt.toISOString() : null,
+          endsAt: comp.endsAt ? comp.endsAt.toISOString() : null,
+          registrationOpensAt: comp.registrationOpensAt
+            ? comp.registrationOpensAt.toISOString()
+            : null,
+          joinCutoffAt: comp.joinCutoffAt ? comp.joinCutoffAt.toISOString() : null,
+          finalizationGraceUntil: comp.finalizationGraceUntil
+            ? comp.finalizationGraceUntil.toISOString()
+            : null,
           isTest: comp.isTest,
         }
       : null,

@@ -82,7 +82,7 @@ async function main() {
     console.table(
       finalRanking.slice(0, 10).map((r) => ({
         Puesto: `#${r.position}`,
-        Mesa: r.table,
+        Competidor: r.displayName ?? r.table,
         Puntaje: `${r.totalScore} pts`,
         Ciclos: `${r.roundsCompleted}/3`,
         Correctas: r.correctCount,

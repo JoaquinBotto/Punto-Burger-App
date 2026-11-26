@@ -36,6 +36,7 @@ describe('GET /api/v1/competitions/current', () => {
     vi.spyOn(compModule, 'getCurrentCompetition').mockResolvedValue({
       id: 'comp-uuid',
       venueId: 'v-01',
+      timingMode: 'scheduled',
       localDate: '2026-11-26',
       name: 'Competencia Nocturna',
       status: 'active',

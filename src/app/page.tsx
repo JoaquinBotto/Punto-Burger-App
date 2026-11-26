@@ -57,19 +57,25 @@ export default async function HomePage() {
               </span>
             </div>
             <p className="mt-1 text-xs font-black text-pb-charcoal">{competition.name}</p>
-            <p className="text-[11px] font-semibold text-pb-charcoal-muted">
-              Horario:{' '}
-              {new Date(competition.startsAt).toLocaleTimeString('es-AR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}{' '}
-              a{' '}
-              {new Date(competition.endsAt).toLocaleTimeString('es-AR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}{' '}
-              hs
-            </p>
+            {competition.timingMode === 'open' ? (
+              <p className="text-[11px] font-semibold text-pb-charcoal-muted">
+                ¡Participá con tu mesa y sumá puntos en los 3 ciclos!
+              </p>
+            ) : competition.startsAt && competition.endsAt ? (
+              <p className="text-[11px] font-semibold text-pb-charcoal-muted">
+                Horario:{' '}
+                {new Date(competition.startsAt).toLocaleTimeString('es-AR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                a{' '}
+                {new Date(competition.endsAt).toLocaleTimeString('es-AR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                hs
+              </p>
+            ) : null}
           </div>
         )}
 

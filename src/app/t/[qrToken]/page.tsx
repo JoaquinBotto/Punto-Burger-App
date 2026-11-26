@@ -29,8 +29,9 @@ export default async function TableQrPage({ params }: TableQrPageProps) {
   let competitionData: {
     name?: string | null;
     status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
-    startsAt: string;
-    endsAt: string;
+    timingMode?: 'scheduled' | 'open';
+    startsAt?: string | null;
+    endsAt?: string | null;
   } | null = null;
 
   try {
@@ -48,8 +49,9 @@ export default async function TableQrPage({ params }: TableQrPageProps) {
         competitionData = {
           name: comp.name,
           status: comp.status,
-          startsAt: comp.startsAt.toISOString(),
-          endsAt: comp.endsAt.toISOString(),
+          timingMode: comp.timingMode,
+          startsAt: comp.startsAt ? comp.startsAt.toISOString() : null,
+          endsAt: comp.endsAt ? comp.endsAt.toISOString() : null,
         };
       }
     } catch {

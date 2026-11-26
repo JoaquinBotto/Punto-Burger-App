@@ -10,9 +10,10 @@ interface CompetitionRankingInfo {
   id: string;
   name: string | null;
   status: 'scheduled' | 'active' | 'finalized' | 'cancelled';
-  startsAt: string;
-  endsAt: string;
-  localDate: string;
+  timingMode?: 'scheduled' | 'open';
+  startsAt: string | null;
+  endsAt: string | null;
+  localDate: string | null;
 }
 
 interface RankingClientProps {
@@ -60,6 +61,7 @@ export function RankingClient({
                   id: data.competition.id,
                   name: data.competition.name,
                   status: data.competition.status,
+                  timingMode: data.competition.timingMode,
                   startsAt: data.competition.startsAt,
                   endsAt: data.competition.endsAt,
                   localDate: data.competition.localDate,
@@ -149,15 +151,21 @@ export function RankingClient({
           />
           {isCompetitionMode ? (
             <span>
-              {competition?.status === 'scheduled'
-                ? 'Programada · Inicia ' +
-                  new Date(competition.startsAt).toLocaleTimeString('es-AR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : competition?.status === 'active'
-                  ? '🏆 Competencia de hoy · EN VIVO'
-                  : '🏆 Resultado final de hoy'}
+              {competition?.timingMode === 'open'
+                ? competition?.status === 'active'
+                  ? '🏆 Competencia abierta · EN VIVO'
+                  : '🏆 Resultado final de competencia'
+                : competition?.status === 'scheduled'
+                  ? 'Programada · Inicia ' +
+                    (competition.startsAt
+                      ? new Date(competition.startsAt).toLocaleTimeString('es-AR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '')
+                  : competition?.status === 'active'
+                    ? '🏆 Competencia de hoy · EN VIVO'
+                    : '🏆 Resultado final de hoy'}
             </span>
           ) : (
             <span>{dateString}</span>
@@ -171,7 +179,9 @@ export function RankingClient({
             <span className="text-[11px] font-black uppercase tracking-wider text-pb-yellow-hover block">
               {competition?.status === 'finalized' ? '👑 Mesa ganadora de hoy' : '🥇 Líder actual'}
             </span>
-            <span className="text-xl font-black text-pb-charcoal block mt-0.5">{leader.table}</span>
+            <span className="text-xl font-black text-pb-charcoal block mt-0.5">
+              {leader.displayName ?? leader.table}
+            </span>
             <div className="mt-1 inline-flex items-center gap-2 text-xs font-bold text-pb-charcoal-muted">
               <span>{leader.totalScore} pts</span>
               <span>·</span>
@@ -254,7 +264,7 @@ export function RankingClient({
                 </h2>
                 <p className="mt-1 text-xs text-pb-charcoal-muted">
                   {competition?.status === 'scheduled'
-                    ? `Inicia a las ${new Date(competition.startsAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}. Las mesas inscriptas aparecerán aquí.`
+                    ? `Inicia a las ${competition?.startsAt ? new Date(competition.startsAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''}. Las mesas inscriptas aparecerán aquí.`
                     : '¡Completá el Ciclo 1 en tu mesa para liderar la tabla!'}
                 </p>
                 <div className="mt-4">
@@ -291,7 +301,7 @@ export function RankingClient({
 
                   return (
                     <div
-                      key={entry.tableCode}
+                      key={entry.entryId || entry.tableCode}
                       className={`flex items-center justify-between rounded-2xl p-3.5 shadow-xs transition-transform ${borderClass}`}
                     >
                       <div className="flex items-center gap-3">
@@ -300,7 +310,7 @@ export function RankingClient({
                         </span>
                         <div className="text-left">
                           <span className="font-black text-sm text-pb-charcoal block">
-                            {entry.table}
+                            {entry.displayName ?? entry.table}
                           </span>
                           <span className="text-[11px] font-semibold text-pb-charcoal-muted">
                             Ciclos: {entry.roundsCompleted}/3 · {entry.correctCount} correctas ·{' '}
@@ -335,7 +345,7 @@ export function RankingClient({
 
                       return (
                         <div
-                          key={entry.tableCode}
+                          key={entry.entryId || entry.tableCode}
                           className="flex items-center justify-between rounded-xl border border-pb-cream-border bg-white px-3.5 py-2.5 shadow-2xs"
                         >
                           <div className="flex items-center gap-2.5">
@@ -344,7 +354,7 @@ export function RankingClient({
                             </span>
                             <div>
                               <span className="font-bold text-xs text-pb-charcoal block">
-                                {entry.table}
+                                {entry.displayName ?? entry.table}
                               </span>
                               <span className="text-[10px] text-pb-charcoal-muted">
                                 {entry.roundsCompleted}/3 ciclos · {entry.correctCount} correctas ·{' '}
