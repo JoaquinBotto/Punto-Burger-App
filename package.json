@@ -20,7 +20,9 @@
     "dev:access-code": "tsx scripts/dev-access-code.ts",
     "tables:provision": "tsx scripts/provision-tables.ts",
     "qr:export": "tsx scripts/export-table-qr-manifest.ts",
-    "qr:rotate": "tsx scripts/rotate-table-qr.ts"
+    "qr:rotate": "tsx scripts/rotate-table-qr.ts",
+    "questions:validate": "tsx scripts/validate-question-bank.ts",
+    "questions:verify:production": "tsx scripts/verify-question-bank-production.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

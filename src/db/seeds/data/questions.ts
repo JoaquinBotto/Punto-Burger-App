@@ -1,3 +1,5 @@
+import { expandedSeedQuestions } from './expanded';
+
 export interface SeedQuestion {
   categorySlug: string;
   prompt: string;
@@ -13,7 +15,7 @@ export interface SeedQuestion {
   status: 'approved';
 }
 
-export const seedQuestions: SeedQuestion[] = [
+export const originalSeedQuestions: SeedQuestion[] = [
   // =========================================================================
   // 1. CULTURA GENERAL (12 preguntas: 4 initial, 4 medium, 4 advanced)
   // =========================================================================
@@ -1146,3 +1148,5 @@ export const seedQuestions: SeedQuestion[] = [
     status: 'approved',
   },
 ];
+
+export const seedQuestions: SeedQuestion[] = [...originalSeedQuestions, ...expandedSeedQuestions];
