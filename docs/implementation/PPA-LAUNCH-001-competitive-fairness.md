@@ -14,15 +14,19 @@
 ## 2. Diagnóstico y Problema Resuelto
 
 ### 2.1 El Conflicto de Equidad
+
 Antes de este hotfix, el motor de selección de preguntas (`src/modules/trivia/question-selection.ts`) y el planificador de turnos (`src/modules/trivia/assignment-plan.ts`) utilizaban `ageRange` y `educationLevel` declarados por los usuarios al registrar los participantes de la mesa para modular la partida:
+
 1. `scoreCompatibility(...)` asignaba mayor ponderación a preguntas con etiquetas etarias afines y descartaba preguntas de otros rangos etarios.
 2. `buildAssignmentPlan(...)` bifurcaba la distribución de turnos entre grupos "homogéneos" y grupos "mixtos" según las edades declaradas.
 
 En el marco de la competencia diaria oficial entre mesas físicas (**PPA-RANK-001**), esta lógica representaba una vulnerabilidad competitiva crítica:
+
 - Una mesa compuesta por adultos podía declarar perfiles infantiles para recibir preguntas etiquetadas como `child`, obteniendo una ventaja desleal sobre las demás mesas.
 - La experiencia no era equitativa: mesas en una misma categoría competían con universos de preguntas dispares y subconjuntos restringidos del banco.
 
 ### 2.2 Principio de Diseño
+
 > **Regla de Equidad Competitiva:**
 > La edad y el nivel educativo declarados por el usuario **no intervienen ni influyen bajo ningún concepto** en la selección de preguntas ni en el reparto de turnos. Todas las mesas compiten exactamente con el mismo universo de preguntas bajo las mismas reglas de dificultad inmutable (3 initial / 4 medium / 3 advanced).
 
@@ -31,6 +35,7 @@ En el marco de la competencia diaria oficial entre mesas físicas (**PPA-RANK-00
 ## 3. Arquitectura e Implementación Técnica
 
 ### 3.1 Desactivación en Selección de Preguntas (`src/modules/trivia/question-selection.ts`)
+
 - **Eliminación Total:** Se removió la función interna `scoreCompatibility(...)`, el cálculo de puntuaciones `maxScore` y el filtrado por percentil `topTier`.
 - **Pool Unificado por Dificultad:** La selección de preguntas extrae candidatas exclusivamente evaluando:
   - `status === 'approved'`
@@ -41,6 +46,7 @@ En el marco de la competencia diaria oficial entre mesas físicas (**PPA-RANK-00
 - **RNG Inyectable:** Se preservó el soporte para generadores pseudoaleatorios determinísticos (`rng`) en pruebas automatizadas y criptográficos en producción (`crypto.randomInt`).
 
 ### 3.2 Desactivación en Asignación de Turnos (`src/modules/trivia/assignment-plan.ts`)
+
 - **Eliminación de Ramas por Edad:** Se eliminaron las funciones de detección de homogeneidad/heterogeneidad etaria y la alternancia según rangos de edad.
 - **Round-Robin Determinístico:** La asignación de turnos para partidas de 2 o más jugadores se basa exclusivamente en la posición registrada del jugador (`sorted[directedIndex % n]`), garantizando que la estructura de la partida sea idéntica independientemente de la edad declarada.
 - **Patrón de Slots Estandarizado:**
@@ -52,11 +58,13 @@ En el marco de la competencia diaria oficial entre mesas físicas (**PPA-RANK-00
 - **Inmutabilidad de la Dificultad:** La dificultad de cada turno está determinada unívocamente por la posición del slot (1-3: initial, 4-7: medium, 8-10: advanced), jamás por el participante asignado.
 
 ### 3.3 Corrección en Interfaz de Usuario (`src/app/play/setup/play-setup-wizard.tsx`)
+
 - Se corrigió el texto explicativo en el paso de registro de jugadores:
-  - *Antes:* "Registrá a los participantes para calibrar las preguntas de la partida" (inducía erróneamente a creer que la edad modificaba la dificultad).
-  - *Ahora:* "Registrá a los jugadores para repartir los turnos de la partida" (refleja fidedignamente la función del paso).
+  - _Antes:_ "Registrá a los participantes para calibrar las preguntas de la partida" (inducía erróneamente a creer que la edad modificaba la dificultad).
+  - _Ahora:_ "Registrá a los jugadores para repartir los turnos de la partida" (refleja fidedignamente la función del paso).
 
 ### 3.4 Sin Migraciones de Base de Datos
+
 - Las columnas existentes en el esquema de PostgreSQL (`questions.age_range`, `questions.education_level`, `participants.age_range`, `participants.education_level`) se mantuvieron intactas para preservar la compatibilidad hacia atrás y el histórico de auditoría.
 - No se requirió ninguna migración SQL en Drizzle.
 
@@ -65,13 +73,16 @@ En el marco de la competencia diaria oficial entre mesas físicas (**PPA-RANK-00
 ## 4. Auditoría y Simulación Estadística en Producción
 
 ### 4.1 Simulación Masiva (`scripts/verify-question-bank-production.ts`)
+
 Se ejecutó una auditoría estadística contra la base de datos real de producción simulando **1,200 partidas** (200 partidas por categoría para las 6 categorías oficiales) bajo 4 perfiles etarios extremos:
+
 - Perfil 1: **Niños** (`child` / `primary`)
 - Perfil 2: **Adolescentes** (`teen` / `secondary`)
 - Perfil 3: **Adultos** (`adult` / `higher`)
 - Perfil 4: **Mixto** (familia con niños y adultos)
 
 ### 4.2 Resultados Obtenidos
+
 ```text
 ================================================================
 === PPA-LAUNCH-001: VERIFICACIÓN DE EQUIDAD COMPETITIVA      ===
@@ -119,7 +130,9 @@ Se ejecutó una auditoría estadística contra la base de datos real de producci
 ## 5. Smoke Test Real en Producción
 
 ### 5.1 Protocolo de Prueba (`scripts/smoke-launch-fairness.mjs`)
+
 Se ejecutó una prueba funcional real contra `https://app.puntoburger.com.ar` utilizando el QR permanente de **Mesa 01** sin afectar a clientes reales:
+
 1. **Verificación de Disponibilidad:** Mesa 01 se encontraba libre sin sesiones activas.
 2. **Partida A (Perfil Infantil):** Se configuró una partida con participante declarado niño (`ageRange: child`, `educationLevel: primary`) en `cultura-general`. Se congelaron las preguntas mediante `POST /api/v1/games/prepare` y se inspeccionó la tabla `game_questions` en PostgreSQL.
    - Resultado: Distribución de tags en banco `{ child: 1, teen: 2, adult: 2, general: 5 }`.
@@ -139,6 +152,7 @@ Se ejecutó una prueba funcional real contra `https://app.puntoburger.com.ar` ut
 ## 6. Cobertura de Pruebas Automatizadas
 
 Se crearon pruebas unitarias especializadas en:
+
 - `src/modules/trivia/question-selection.test.ts`:
   - **Prueba Anti-Exploit:** Dos partidas generadas con idéntico seed RNG (una con participante niño y otra con participante adulto) producen una secuencia 100% idéntica de IDs de preguntas.
   - **Prueba de Nivel Educativo:** Variaciones de `educationLevel` no alteran la selección de preguntas.

@@ -99,7 +99,9 @@ async function run() {
   const ageDistributionA = {};
   for (const q of questionsA) {
     ageDistributionA[q.age_range] = (ageDistributionA[q.age_range] || 0) + 1;
-    console.log(`  Pos ${q.position} [${q.difficulty}] (Q Bank tag: ${q.age_range}) => ${q.prompt.slice(0, 45)}...`);
+    console.log(
+      `  Pos ${q.position} [${q.difficulty}] (Q Bank tag: ${q.age_range}) => ${q.prompt.slice(0, 45)}...`
+    );
   }
   console.log('Distribución de etiquetas de edad en Partida A:', ageDistributionA);
 
@@ -163,7 +165,9 @@ async function run() {
   const ageDistributionB = {};
   for (const q of questionsB) {
     ageDistributionB[q.age_range] = (ageDistributionB[q.age_range] || 0) + 1;
-    console.log(`  Pos ${q.position} [${q.difficulty}] (Q Bank tag: ${q.age_range}) => ${q.prompt.slice(0, 45)}...`);
+    console.log(
+      `  Pos ${q.position} [${q.difficulty}] (Q Bank tag: ${q.age_range}) => ${q.prompt.slice(0, 45)}...`
+    );
   }
   console.log('Distribución de etiquetas de edad en Partida B:', ageDistributionB);
 
