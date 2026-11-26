@@ -26,7 +26,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 ├── docs/
 │   ├── adr/                    # Architecture Decision Records (ADR 001)
 │   ├── deployment/             # Guías de infraestructura de producción (DonWeb)
-│   └── implementation/         # Informes de implementación (PPA-008 a PPA-ACCESS-002)
+│   └── implementation/         # Informes de implementación (PPA-008 a PPA-CONTENT-001)
 ├── specs/                      # Especificaciones funcionales y técnicas (SDD)
 ├── src/
 │   ├── app/                    # Next.js App Router (layout, landing, APIs, /t/[qrToken], /play, /ranking)
@@ -41,7 +41,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 │   │   ├── migrations/         # Migraciones SQL versionadas
 │   │   ├── repositories/       # Repositorios de datos por entidad
 │   │   ├── schema/             # 13 entidades del Vertical Slice
-│   │   └── seeds/              # Semillas idempotentes y banco de 72 preguntas
+│   │   └── seeds/              # Semillas idempotentes y banco de 360 preguntas
 │   ├── lib/                    # Utilidades y configuración transversal
 │   │   ├── env/                # Validación estricta de variables de entorno (Zod)
 │   │   ├── security/           # Criptografía, hashing y códigos temporales HMAC
