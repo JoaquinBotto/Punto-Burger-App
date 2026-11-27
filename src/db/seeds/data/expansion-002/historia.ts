@@ -1,0 +1,1087 @@
+import type { SeedQuestion } from '../questions';
+
+export const historiaExpansion002: SeedQuestion[] = [
+  // =========================================================================
+  // HISTORIA — INICIAL (22 preguntas: 5 A, 6 B, 5 C, 6 D)
+  // =========================================================================
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se firmó el Tratado de Versalles que puso fin formal al estado de guerra de la Primera Guerra Mundial?',
+    optionA: '1919',
+    optionB: '1914',
+    optionC: '1925',
+    optionD: '1939',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Tratado de Versalles se firmó el 28 de junio de 1919 en el Salón de los Espejos del palacio de Versalles en Francia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el líder militar y político que comandó el legendario Cruce de los Andes en 1817 para liberar Chile y Perú?',
+    optionA: 'José de San Martín',
+    optionB: 'Manuel Belgrano',
+    optionC: 'Juan José Paso',
+    optionD: 'Mariano Moreno',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El general José de San Martín organizó el Ejército de los Andes en Mendoza y cruzó la imponente cordillera en 1817.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre presidente de Argentina impulsó con fuerza la educación pública laica y gratuita en el siglo XIX y es recordado en el Día del Maestro?',
+    optionA: 'Domingo Faustino Sarmiento',
+    optionB: 'Bartolomé Mitre',
+    optionC: 'Nicolás Avellaneda',
+    optionD: 'Julio Argentino Roca',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Sarmiento fue presidente entre 1868 y 1874 y promovió la fundación de cientos de escuelas primarias y normales en todo el territorio argentino.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué país europeo estalló en 1789 la trascendental Revolución que proclamó los derechos del hombre con la toma de la Bastilla?',
+    optionA: 'Francia',
+    optionB: 'Inglaterra',
+    optionC: 'España',
+    optionD: 'Alemania',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Revolución Francesa abolió la monarquía absoluta e inauguró la era contemporánea bajo el lema Libertad, Igualdad y Fraternidad.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Cómo se llamaba el barco trasatlántico británico que naufragó en su viaje inaugural en abril de 1912 tras colisionar con un iceberg?',
+    optionA: 'RMS Titanic',
+    optionB: 'HMS Beagle',
+    optionC: 'Britannic',
+    optionD: 'Lusitania',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Titanic se hundió en las gélidas aguas del Atlántico norte en la madrugada del 15 de abril de 1912 provocando más de 1.500 víctimas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se fundó la ciudad de Córdoba en Argentina por el adelantado Jerónimo Luis de Cabrera?',
+    optionA: '1580',
+    optionB: '1573',
+    optionC: '1536',
+    optionD: '1591',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Jerónimo Luis de Cabrera fundó Córdoba de la Nueva Andalucía el 6 de julio de 1573 a orillas del río Suquía.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el emperador de los franceses y genial estratega militar que conquistó gran parte de Europa a inicios del siglo XIX?',
+    optionA: 'Luis XIV',
+    optionB: 'Napoleón Bonaparte',
+    optionC: 'Carlomagno',
+    optionD: 'Felipe II',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Napoleón Bonaparte transformó las instituciones de Francia, promulgó el Código Civil y combatió contra múltiples coaliciones europeas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué civilización precolombina construyó la imponente ciudadela de piedra de Machu Picchu en la cordillera de los Andes peruanos?',
+    optionA: 'Los Aztecas',
+    optionB: 'Los Incas',
+    optionC: 'Los Mayas',
+    optionD: 'Los Guaraníes',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Machu Picchu fue edificada hacia el siglo XV durante el reinado del emperador inca Pachacútec como residencia ceremonial y administrativa.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué presidente argentino asumió el 10 de diciembre de 1983 marcando el retorno definitivo de la democracia en Argentina?',
+    optionA: 'Arturo Illia',
+    optionB: 'Raúl Alfonsín',
+    optionC: 'Carlos Menem',
+    optionD: 'Juan Domingo Perón',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El radical Raúl Alfonsín triunfó en las elecciones presidenciales de octubre de 1983 restaurando el orden constitucional en Argentina.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué antigua civilización africana floreció a orillas del río Nilo y construyó las grandes pirámides y templos de piedra?',
+    optionA: 'Imperio Romano',
+    optionB: 'Antiguo Egipto',
+    optionC: 'Antigua Grecia',
+    optionD: 'Imperio Persa',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Antiguo Egipto desarrolló una rica cultura milenaria caracterizada por la escritura jeroglífica, el embalsamamiento y el culto a los faraones.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue la primera presidenta mujer de Argentina y del mundo en asumir el cargo de jefa de Estado en 1974?',
+    optionA: 'Eva Perón',
+    optionB: 'María Estela Martínez de Perón (Isabelita)',
+    optionC: 'Cristina Fernández de Kirchner',
+    optionD: 'Alicia Moreau de Justo',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Isabel Perón asumió la presidencia de la Nación en julio de 1974 tras el fallecimiento del presidente Juan Domingo Perón.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año cayó el Muro de Berlín, símbolo divisorio de la Guerra Fría, abriendo camino a la reunificación alemana?',
+    optionA: '1975',
+    optionB: '1982',
+    optionC: '1989',
+    optionD: '1995',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El 9 de noviembre de 1989 los ciudadanos berlineses derribaron el muro que dividió la ciudad durante 28 años.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué prócer argentino fue el creador del Regimiento de Granaderos a Caballo y combatió en el único combate en suelo argentino en San Lorenzo?',
+    optionA: 'Martín Miguel de Güemes',
+    optionB: 'Cornelio Saavedra',
+    optionC: 'José de San Martín',
+    optionD: 'Juan Bautista Cabral',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'San Martín derrotó a las fuerzas realistas en el Combate de San Lorenzo, Santa Fe, el 3 de febrero de 1813 con sus Granaderos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se libró la Guerra de las Malvinas entre Argentina y el Reino Unido en el Atlántico Sur?',
+    optionA: '1976',
+    optionB: '1978',
+    optionC: '1982',
+    optionD: '1985',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El conflicto armado por las Islas Malvinas se extendió entre el 2 de abril y el 14 de junio de 1982.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el célebre dictador romano y general asesinado en los Idus de marzo del año 44 a.C. en el Senado de Roma?',
+    optionA: 'César Augusto',
+    optionB: 'Marco Antonio',
+    optionC: 'Julio César',
+    optionD: 'Nerón',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Julio César conquistó las Galias y fue apuñalado por un grupo de senadores liderados por Bruto y Casio en el año 44 a.C.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué gran figura femenina de la historia argentina impulsó la Ley de Sufragio Femenino aprobada en 1947?',
+    optionA: 'Julieta Lanteri',
+    optionB: 'Victoria Ocampo',
+    optionC: 'Eva Duarte de Perón (Evita)',
+    optionD: 'Juana Azurduy',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Evita encabezó la lucha cívica para que las mujeres argentinas obtuvieran el derecho a elegir y ser elegidas mediante la Ley 13.010.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año concluyó la Guerra Civil Estadounidense (Guerra de Secesión) con la rendición confederada en Appomattox?',
+    optionA: '1850',
+    optionB: '1870',
+    optionC: '1861',
+    optionD: '1865',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'En abril de 1865 el general confederado Robert E. Lee se rindió ante Ulysses S. Grant en Virginia poniendo fin a la sangrienta contienda.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el caudillo entrerriano que venció a Juan Manuel de Rosas en la Batalla de Caseros en 1852?',
+    optionA: 'Estanislao López',
+    optionB: 'Facundo Quiroga',
+    optionC: 'Ángel Vicente Peñaloza',
+    optionD: 'Justo José de Urquiza',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Urquiza lideró el Ejército Grande que derrotó a Rosas en Caseros abriendo el camino para la Constitución de 1853.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué monumento histórico de la ciudad de Roma era un gigantesco anfiteatro donde se celebraban luchas de gladiadores en la Antigüedad?',
+    optionA: 'Panteón de Agripa',
+    optionB: 'Foro Romano',
+    optionC: 'Circo Máximo',
+    optionD: 'Coliseo Romano (Anfiteatro Flavio)',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Coliseo fue inaugurado en el año 80 d.C. bajo el mandato del emperador Tito y albergaba a más de 50.000 espectadores.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Cómo se llamaba el emblemático caudillo federal y gobernador de Santa Fe apodado "el Patriarca de la Federación"?',
+    optionA: 'Juan Bautista Bustos',
+    optionB: 'Pascual Echagüe',
+    optionC: 'Francisco Ramírez',
+    optionD: 'Estanislao López',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Estanislao López gobernó la provincia de Santa Fe entre 1818 y 1838 defendiendo con firmeza la autonomía y el federalismo argentino.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué líder independentista venezolano es conocido en América del Sur con el título de "El Libertador" de cinco naciones?',
+    optionA: 'Francisco de Miranda',
+    optionB: 'Antonio José de Sucre',
+    optionC: 'Andrés Bello',
+    optionD: 'Simón Bolívar',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Simón Bolívar lideró las campañas emancipadoras que sellaron la independencia de Venezuela, Colombia, Ecuador, Perú y Bolivia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se produjo el bombardeo atómico sobre las ciudades japonesas de Hiroshima y Nagasaki?',
+    optionA: '1939',
+    optionB: '1941',
+    optionC: '1943',
+    optionD: '1945',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'En agosto de 1945 Estados Unidos arrojó bombas nucleares sobre Hiroshima y Nagasaki forzando la capitulación definitiva japonesa.',
+    status: 'approved',
+  },
+
+  // =========================================================================
+  // HISTORIA — INTERMEDIA (23 preguntas: 6 A, 5 B, 6 C, 6 D)
+  // =========================================================================
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué ley argentina sancionada en 1912 estableció el voto universal masculino, secreto y obligatorio en todo el país?',
+    optionA: 'Ley Sáenz Peña',
+    optionB: 'Ley Avellaneda',
+    optionC: 'Ley de Residencia',
+    optionD: 'Ley 1420',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Ley 8.871 (Ley Sáenz Peña) terminó con el fraude electoral oligárquico y permitió la elección democrática de Hipólito Yrigoyen en 1916.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué acontecimiento militar decisivo del 6 de junio de 1944 marcó el desembarco de las tropas aliadas en las costas de Normandía?',
+    optionA: 'El Día D (Operación Overlord)',
+    optionB: 'La Batalla de Stalingrado',
+    optionC: 'La Batalla de las Ardenas',
+    optionD: 'La Batalla de Midway',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Día D abrió el frente occidental en Europa contra la Alemania nazi y fue la mayor operación anfibia de la historia militar.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué caudillo salteño defendió la frontera norte argentina contra las invasiones realistas al mando de sus gauchos guerrilleros?',
+    optionA: 'Martín Miguel de Güemes',
+    optionB: 'Facundo Quiroga',
+    optionC: 'Ángel Vicente Peñaloza',
+    optionD: 'Manuel Dorrego',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Güemes organizó la Guerra Gaucha en Salta y Jujuy, conteniendo los avances del ejército realista español entre 1814 y 1821.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué acuerdo firmado en 1852 por catorce provincias argentinas sentó las bases para convocar al Congreso Constituyente en Santa Fe?',
+    optionA: 'Acuerdo de San Nicolás',
+    optionB: 'Pacto Federal',
+    optionC: 'Pacto de San José de Flores',
+    optionD: 'Tratado del Pilar',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Acuerdo de San Nicolás de los Arroyos designó a Justo José de Urquiza como Director Provisorio y convocó al congreso que sancionó la Carta Magna.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se fundó la ciudad de La Plata como nueva capital planificada de la provincia de Buenos Aires por Dardo Rocha?',
+    optionA: '1882',
+    optionB: '1870',
+    optionC: '1890',
+    optionD: '1898',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El 19 de noviembre de 1882 el gobernador bonaerense Dardo Rocha colocó la piedra fundamental de la ciudad planificada de La Plata.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el conquistador español que lideró la expedición que provocó la caída del Imperio Azteca en Tenochtitlán en 1521?',
+    optionA: 'Hernán Cortés',
+    optionB: 'Francisco Pizarro',
+    optionC: 'Diego de Almagro',
+    optionD: 'Pedro de Valdivia',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Hernán Cortés forjó alianzas con pueblos indígenas sometidos por los aztecas como los tlaxcaltecas para sitiar y conquistar Tenochtitlán.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué civilización mesoamericana de la península de Yucatán desarrolló una avanzada escritura jeroglífica y el complejo calendario de la Cuenta Larga?',
+    optionA: 'Olmecas',
+    optionB: 'Mayas',
+    optionC: 'Zapotecas',
+    optionD: 'Toltecas',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Los mayas levantaron grandes ciudades-estado ceremoniales como Tikal, Palenque y Chichén Itzá destacándose en astronomía y matemáticas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué militar y patriota chileno fue Director Supremo de Chile y colaboró estrechamente con San Martín en la gesta emancipadora?',
+    optionA: 'José Miguel Carrera',
+    optionB: "Bernardo O'Higgins",
+    optionC: 'Manuel Rodríguez',
+    optionD: 'Diego Portales',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      "O'Higgins luchó en Chacabuco y Maipú y gobernó Chile consolidando su independencia junto al Ejército de los Andes.",
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué gran batalla librada en Bélgica en junio de 1815 representó la derrota definitiva de Napoleón Bonaparte frente a Wellington y Blücher?',
+    optionA: 'Batalla de Austerlitz',
+    optionB: 'Batalla de Waterloo',
+    optionC: 'Batalla de Leipzig',
+    optionD: 'Batalla de Borodino',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Tras el regreso de Napoleón durante los Cien Días, la coalición anglo-prusiana lo venció en Waterloo desterrándolo a la isla de Santa Elena.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se sancionó la histórica Ley 1420 de Educación Común en Argentina, consagrando la enseñanza primaria gratuita, laica y obligatoria?',
+    optionA: '1870',
+    optionB: '1884',
+    optionC: '1890',
+    optionD: '1901',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Sancionada durante la presidencia de Julio A. Roca, la Ley 1420 constituyó el pilar formativo y alfabetizador del Estado moderno argentino.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el gobernante de la provincia de Buenos Aires y líder supremo de la Confederación Argentina entre 1829 y 1852?',
+    optionA: 'Bernardino Rivadavia',
+    optionB: 'Juan Manuel de Rosas',
+    optionC: 'Manuel Dorrego',
+    optionD: 'Juan Lavalle',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Rosas gobernó con facultades extraordinarias y la suma del poder público respaldado por el sector terrateniente y federal porteño.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué emperador romano legalizó el cristianismo en el Imperio Romano mediante el Edicto de Milán en el año 313 d.C.?',
+    optionA: 'Teodosio I',
+    optionB: 'Marco Aurelio',
+    optionC: 'Constantino I el Grande',
+    optionD: 'Trajano',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Constantino puso fin a las persecuciones cristianas en el imperio y fundó la nueva capital oriental en Constantinopla.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre maniobra militar ordenada por Manuel Belgrano en 1812 consistió en la retirada colectiva del pueblo jujeño quemando cosechas?',
+    optionA: 'Cruce de los Andes',
+    optionB: 'Guerra Gaucha',
+    optionC: 'Éxodo Jujeño',
+    optionD: 'Campaña al Paraguay',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Éxodo Jujeño despojó a las tropas realistas de suministros y permitió a Belgrano reorganizarse para vencer en Tucumán y Salta.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué país europeo conquistó el vasto Imperio Inca en los Andes sudamericanos en la década de 1530 al mando de Francisco Pizarro?',
+    optionA: 'Portugal',
+    optionB: 'Francia',
+    optionC: 'España',
+    optionD: 'Inglaterra',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Pizarro capturó al inca Atahualpa en Cajamarca en 1532 y fundó la capital virreinal de Lima en 1535 en nombre de la corona española.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se aprobó la Declaración de la Independencia de los Estados Unidos de América en la ciudad de Filadelfia?',
+    optionA: '1789',
+    optionB: '1765',
+    optionC: '1776',
+    optionD: '1799',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El 4 de julio de 1776 el Segundo Congreso Continental proclamó que las trece colonias británicas se declaraban estados soberanos e independientes.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el líder revolucionario ruso que encabezó la Revolución de Octubre de 1917 y fue el primer mandatario de la Unión Soviética?',
+    optionA: 'Iósif Stalin',
+    optionB: 'León Trotski',
+    optionC: 'Vladimir Lenin',
+    optionD: 'Mijaíl Gorbachov',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Lenin lideró al Partido Bolchevique que derrocó al gobierno provisional ruso e instauró un estado socialista.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre aviadora estadounidense fue la primera mujer en cruzar en vuelo solitario el océano Atlántico en 1932?',
+    optionA: 'Bessie Coleman',
+    optionB: 'Valentina Tereshkova',
+    optionC: 'Amelia Earhart',
+    optionD: 'Jacqueline Cochran',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Amelia Earhart despegó de Terranova y aterrizó en Irlanda del Norte a bordo de su monomotor Lockheed Vega 5B.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se fundó formalmente la Organización de las Naciones Unidas (ONU) en San Francisco tras concluir la Segunda Guerra Mundial?',
+    optionA: '1919',
+    optionB: '1939',
+    optionC: '1950',
+    optionD: '1945',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Carta de las Naciones Unidas fue firmada el 26 de junio de 1945 por 50 países para promover la paz y la seguridad internacional.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué médico y militar patriota argentino asistió a los heridos en el Combate de San Lorenzo y redactó el primer Código Militar patrio?',
+    optionA: 'Ignacio Pirovano',
+    optionB: 'Guillermo Rawson',
+    optionC: 'Bernardo Houssay',
+    optionD: 'Cosme Argerich',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Cosme Argerich fue cirujano mayor del Ejército del Norte y organizó el servicio de sanidad militar de las Provincias Unidas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué país europeo fue gobernado por el canciller Otto von Bismarck, quien logró su unificación nacional en 1871 en Versalles?',
+    optionA: 'Austria',
+    optionB: 'Rusia',
+    optionC: 'Italia',
+    optionD: 'Alemania',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El "Canciller de Hierro" Otto von Bismarck unificó a los estados alemanes en torno al reino de Prusia tras la guerra franco-prusiana.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el sacerdote y militar mexicano considerado "Padre de la Patria" que lanzó el Grito de Dolores en 1810 iniciando la independencia de México?',
+    optionA: 'José María Morelos',
+    optionB: 'Agustín de Iturbide',
+    optionC: 'Vicente Guerrero',
+    optionD: 'Miguel Hidalgo y Costilla',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El cura Miguel Hidalgo convocó al pueblo en la parroquia de Dolores el 16 de septiembre de 1810 en contra del dominio español.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año fundó Juan de Garay por segunda vez a la ciudad de Buenos Aires con el nombre de Ciudad de la Trinidad?',
+    optionA: '1516',
+    optionB: '1536',
+    optionC: '1573',
+    optionD: '1580',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Tras el despoblamiento del asentamiento fundado por Pedro de Mendoza en 1536, Juan de Garay refundó Buenos Aires el 11 de junio de 1580 partiendo desde Santa Fe.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué faraón egipcio de la XVIII dinastía es célebre porque su tumba intacta repleta de tesoros de oro fue descubierta por Howard Carter en 1922?',
+    optionA: 'Ramsés II',
+    optionB: 'Akenatón',
+    optionC: 'Keops',
+    optionD: 'Tutankamón',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La tumba KV62 de Tutankamón en el Valle de los Reyes permaneció prácticamente inviolada durante más de 3.000 años.',
+    status: 'approved',
+  },
+
+  // =========================================================================
+  // HISTORIA — AVANZADA (22 preguntas: 5 A, 6 B, 6 C, 5 D)
+  // =========================================================================
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué tratado internacional firmado en 1494 entre Castilla y Portugal trazó una línea divisoria a 370 leguas al oeste de Cabo Verde para repartirse las tierras descubiertas?',
+    optionA: 'Tratado de Tordesillas',
+    optionB: 'Tratado de Alcáçovas',
+    optionC: 'Tratado de Zaragoza',
+    optionD: 'Bula Inter Caetera',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Tratado de Tordesillas permitió a la corona portuguesa reclamar la costa oriental de Brasil al quedar al este de la línea divisoria pactada.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué batalla naval de 1571 en el golfo de Patras enfrentó a la Liga Santa contra la armada del Imperio Otomano frenando su avance en el Mediterráneo?',
+    optionA: 'Batalla de Lepanto',
+    optionB: 'Batalla de Trafalgar',
+    optionC: 'Batalla de Actium',
+    optionD: 'Batalla de Salamina',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'En la batalla de Lepanto (1571), la armada combinada cristiana comandada por Don Juan de Austria derrotó a la flota del Imperio Otomano.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué intelectual y diplomático argentino escribió "Bases y puntos de partida", obra fundacional que inspiró la Constitución Nacional de 1853?',
+    optionA: 'Juan Bautista Alberdi',
+    optionB: 'Esteban Echeverría',
+    optionC: 'Dalmacio Vélez Sarsfield',
+    optionD: 'José Benjamín Gorostiaga',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Alberdi concibió el modelo republicano, federal y de fomento a la inmigración y el comercio que inspiró a los constituyentes reunidos en Santa Fe.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año cayó la ciudad de Constantinopla ante el asedio del sultán otomano Mehmed II, acontecimiento que marca convencionalmente el fin de la Edad Media?',
+    optionA: '1453',
+    optionB: '1492',
+    optionC: '1348',
+    optionD: '1517',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La caída del Imperio Bizantino en mayo de 1453 cortó las rutas comerciales europeas terrestres con Asia impulsando la era de los descubrimientos oceánicos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué acuerdo tripartito firmado en 1831 entre Buenos Aires, Santa Fe y Entre Ríos conformó la alianza fundamental del federalismo argentino previo a la Constitución?',
+    optionA: 'Pacto Federal de 1831',
+    optionB: 'Tratado del Cuadrilátero',
+    optionC: 'Pacto de San José de Flores',
+    optionD: 'Tratado de Benegas',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Pacto Federal sentó la base jurídica confederada que rigió las relaciones provinciales argentinas hasta la caída de Rosas en 1852.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué emperador de origen bizantino ordenó en el siglo VI la monumental recopilación del derecho romano conocida como Corpus Iuris Civilis?',
+    optionA: 'Constantino el Grande',
+    optionB: 'Justiniano I el Grande',
+    optionC: 'Heraclio',
+    optionD: 'Basilio II',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Justiniano I y su jurista Triboniano sistematizaron el derecho romano clásico en el Código, el Digesto y las Institutas, base del derecho civil moderno.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué líder independentista de la República de Haití lideró la insurrección de esclavos en 1791 que culminó en la primera república negra independiente del mundo?',
+    optionA: 'Jean-Jacques Dessalines',
+    optionB: 'Toussaint Louverture',
+    optionC: 'Henri Christophe',
+    optionD: 'Alexandre Pétion',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Toussaint Louverture fue un brillante estratega militar que desafió al dominio colonial francés allanando el camino para la independencia haitiana de 1804.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre conferencia celebrada en 1945 en Crimea reunió a Churchill, Roosevelt y Stalin para acordar el reparto y futuro de Europa tras la guerra?',
+    optionA: 'Conferencia de Potsdam',
+    optionB: 'Conferencia de Yalta',
+    optionC: 'Conferencia de Teherán',
+    optionD: 'Conferencia de Casablanca',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'En Yalta en febrero de 1945 los "Tres Grandes" trazaron las zonas de ocupación de Alemania y las bases de la creación de las Naciones Unidas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el jurista argentino que presidió la comisión redactora de la Constitución de 1853 y defendió el proyecto en el recinto de Santa Fe?',
+    optionA: 'Facundo Zuviría',
+    optionB: 'José Benjamín Gorostiaga',
+    optionC: 'Juan María Gutiérrez',
+    optionD: 'Manuel Leiva',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Gorostiaga fue el principal redactor e informante del texto constitucional de 1853 y más tarde miembro fundador de la Corte Suprema.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué faraona ptolemaica fue la última gobernante de la dinastía helenística de Egipto antes de que su reino fuera anexado por Roma tras la batalla de Accio?',
+    optionA: 'Nefertiti',
+    optionB: 'Cleopatra VII Filopátor',
+    optionC: 'Hatshepsut',
+    optionD: 'Arsinoe II',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Cleopatra VII forjó alianzas con Julio César y Marco Antonio antes de su suicidio en Alejandría en el año 30 a.C.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué batalla librada en 1824 en el altiplano peruano bajo el mando de Antonio José de Sucre selló definitivamente la emancipación de Sudamérica del imperio español?',
+    optionA: 'Batalla de Junín',
+    optionB: 'Batalla de Ayacucho',
+    optionC: 'Batalla de Pichincha',
+    optionD: 'Batalla de Boyacá',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'En Ayacucho el ejército libertador derrotó y capturó al virrey La Serna rubricando la capitulación de las últimas fuerzas coloniales españolas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año promulgó el monarca Juan Sin Tierra en Runnymede la Carta Magna inglesa, considerada uno de los antecedentes remotos del constitucionalismo?',
+    optionA: '1066',
+    optionB: '1284',
+    optionC: '1215',
+    optionD: '1340',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Carta Magna de 1215 limitó los poderes feudales arbitrarios del rey y estableció principios de debido proceso y protección legal.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué heroica patriota altoperuana de las guerras de independencia combatió junto a su esposo Manuel Asencio Padilla y recibió el rango de teniente coronel de Belgrano?',
+    optionA: 'Macacha Güemes',
+    optionB: 'Mariquita Sánchez de Thompson',
+    optionC: 'Juana Azurduy de Padilla',
+    optionD: 'María Remedios del Valle',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Juana Azurduy lideró audaces guerrillas independentistas en el Alto Perú y es reconocida como heroína de Argentina y Bolivia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué sangriento conflicto armado entre 1936 y 1939 precedió a la Segunda Guerra Mundial y culminó con la instauración de la dictadura de Francisco Franco en España?',
+    optionA: 'Guerra de los Balcanes',
+    optionB: 'Guerra Ruso-Japonesa',
+    optionC: 'Guerra Civil Española',
+    optionD: 'Guerra de las Comunidades',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Guerra Civil Española enfrentó al bando republicano constitucional contra los militares sublevados apoyados por la Alemania nazi y la Italia fascista.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué marino vasco completó al mando de la nao Victoria la primera circunnavegación del planeta en 1522 tras la muerte de Fernando de Magallanes en Filipinas?',
+    optionA: 'Vasco da Gama',
+    optionB: 'Bartolomé Díaz',
+    optionC: 'Juan Sebastián Elcano',
+    optionD: 'Alonso de Ojeda',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Elcano arribó al puerto de Sanlúcar de Barrameda con solo 18 supervivientes completando la primera vuelta al mundo en barco.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué político ateniense de la época clásica del siglo V a.C. lideró la edad dorada de Atenas e impulsó la construcción del Partenón en la Acrópolis?',
+    optionA: 'Solón',
+    optionB: 'Clístenes',
+    optionC: 'Pericles',
+    optionD: 'Alcibíades',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Siglo de Pericles coincidió con el apogeo artístico, democrático y filosófico de la polis ateniense.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿En qué año se produjo el trágico bombardeo aéreo de la Plaza de Mayo en Buenos Aires por parte de aviones de la Aviación Naval contra la población civil?',
+    optionA: '1945',
+    optionB: '1950',
+    optionC: '1955',
+    optionD: '1962',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El 16 de junio de 1955 aviones militares descargaron toneladas de bombas sobre la Casa Rosada y la Plaza de Mayo dejando más de 300 muertos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre tratado de paz firmado en 1648 puso fin a la destructiva Guerra de los Treinta Años en Europa sentando las bases de la soberanía nacional moderna?',
+    optionA: 'Tratado de Utrecht',
+    optionB: 'Tratado de Versalles',
+    optionC: 'Tratado de Viena',
+    optionD: 'Paz de Westfalia',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La Paz de Westfalia consagró el principio de integridad territorial y no injerencia en asuntos internos de los estados soberanos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Quién fue el caudillo riojano apodado "El Tigre de los Llanos", célebre líder federal asesinado en Barranca Yaco en 1835?',
+    optionA: 'Felipe Varela',
+    optionB: 'Ángel Vicente Peñaloza',
+    optionC: 'Juan Bautista Bustos',
+    optionD: 'Facundo Quiroga',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La trágica muerte de Facundo Quiroga en una emboscada en Córdoba conmocionó al país y motivó el libro "Facundo" de Sarmiento.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué influyente filósofo humanista neerlandés del Renacimiento escribió en 1511 la sátira moral "Elogio de la locura"?',
+    optionA: 'Tomás Moro',
+    optionB: 'Nicolás Maquiavelo',
+    optionC: 'Michel de Montaigne',
+    optionD: 'Erasmo de Róterdam',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Desiderio Erasmo de Róterdam fue una figura central del humanismo cristiano que cuestionó la corrupción eclesiástica sin romper con la Iglesia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué combativa y abnegada mujer afroargentina que actuó como enfermera y combatiente en el Ejército del Norte fue llamada "Madre de la Patria" por Manuel Belgrano?',
+    optionA: 'Mariquita Sánchez',
+    optionB: 'Macacha Güemes',
+    optionC: 'Juana Azurduy',
+    optionD: 'María Remedios del Valle',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'María Remedios del Valle fue nombrada capitana del ejército patriota por su valor en Tucumán y Salta, y el Congreso Nacional honra su memoria en el Día Nacional de los Afroargentinos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'historia',
+    prompt:
+      '¿Qué célebre faraón egipcio de la dinastía XIX gobernó durante 66 años y mandó construir los monumentales templos de Abu Simbel en Nubia?',
+    optionA: 'Tutmosis III',
+    optionB: 'Akenatón',
+    optionC: 'Tutankamón',
+    optionD: 'Ramsés II el Grande',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Ramsés II reinó entre 1279 y 1213 a.C., firmó el primer tratado de paz conservado de la historia con los hititas y erigió colosales monumentos en todo Egipto.',
+    status: 'approved',
+  },
+];

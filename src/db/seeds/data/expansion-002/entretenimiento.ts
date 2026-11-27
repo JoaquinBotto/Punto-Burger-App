@@ -1,0 +1,1087 @@
+import type { SeedQuestion } from '../questions';
+
+export const entretenimientoExpansion002: SeedQuestion[] = [
+  // =========================================================================
+  // ENTRETENIMIENTO — INICIAL (22 preguntas: 6 A, 5 B, 5 C, 6 D)
+  // =========================================================================
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el muñeco vaquero de juguete protagonista de la saga animada de Pixar "Toy Story"?',
+    optionA: 'Woody',
+    optionB: 'Buzz Lightyear',
+    optionC: 'Jessie',
+    optionD: 'Rex',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Woody, el leal comisario vaquero con la voz original de Tom Hanks, lidera el grupo de juguetes de Andy.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién fue el carismático cantante británico y líder de la banda de rock Queen, intérprete de "Bohemian Rhapsody"?',
+    optionA: 'Freddie Mercury',
+    optionB: 'Brian May',
+    optionC: 'Roger Taylor',
+    optionD: 'John Deacon',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Freddie Mercury cautivó a millones de personas con su portentosa voz y presencia escénica inolvidable al frente de Queen.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué icónica niña argentina rebelde y reflexiva que odia la sopa fue creada por el dibujante e historietista Quino en 1964?',
+    optionA: 'Mafalda',
+    optionB: 'Susanita',
+    optionC: 'Libertad',
+    optionD: 'Manolito',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Mafalda, creación cumbre del mendocino Joaquín Lavado (Quino), es un emblema internacional de la historieta y el humor inteligente.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el pequeño pez payaso naranja con una aleta más pequeña que se extravía en el océano en la película de Pixar?',
+    optionA: 'Nemo',
+    optionB: 'Marlon',
+    optionC: 'Dory',
+    optionD: 'Gill',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"Buscando a Nemo" (2003) narra la odisea de su padre Marlin cruzando el océano hasta Sídney para rescatar a su hijo Nemo.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cuarteto británico de Liverpool integrado por John, Paul, George y Ringo revolucionó la historia de la música pop en los años 60?',
+    optionA: 'The Beatles',
+    optionB: 'The Rolling Stones',
+    optionC: 'The Who',
+    optionD: 'The Kinks',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'The Beatles alcanzaron un éxito cultural y musical sin precedentes con álbumes como "Abbey Road" y "Sgt. Pepper".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cuál es el nombre del leoncito cachorro que protagoniza el clásico animado de Disney "El Rey León"?',
+    optionA: 'Simba',
+    optionB: 'Mufasa',
+    optionC: 'Scar',
+    optionD: 'Timón',
+    correctOption: 'A',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Simba emprende un camino de maduración junto a Timón y Pumba para reclamar su lugar legítimo en la Roca del Rey.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué emblemática banda argentina de rock liderada por Gustavo Cerati integraron además Zeta Bosio y Charly Alberti?',
+    optionA: 'Los Piojos',
+    optionB: 'Soda Stereo',
+    optionC: 'Patricio Rey y sus Redonditos de Ricota',
+    optionD: 'Sumo',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Soda Stereo fue la banda de rock en español más influyente y masiva de América Latina con himnos como "De música ligera".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién es el fontanero de bigote con gorra roja y mameluco azul protagonista del universo de videojuegos de Nintendo?',
+    optionA: 'Luigi',
+    optionB: 'Mario (Super Mario)',
+    optionC: 'Toad',
+    optionD: 'Bowser',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Creado por Shigeru Miyamoto, Mario es el personaje y mascota insignia más popular de la industria del videojuego.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué comedia cinematográfica argentina de culto de 1985 con Antonio Gasalla como Mamá Cora popularizó la frase "¡Tres empanadas!"?',
+    optionA: 'La nona',
+    optionB: 'Esperando la carroza',
+    optionC: 'Plata dulce',
+    optionD: 'El hijo de la novia',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Dirigida por Alejandro Doria, "Esperando la carroza" es la comedia grotesca argentina más citada y querida del cine nacional.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el niño mago con una cicatriz en forma de rayo en la frente creado por la escritora británica J.K. Rowling?',
+    optionA: 'Ron Weasley',
+    optionB: 'Harry Potter',
+    optionC: 'Neville Longbottom',
+    optionD: 'Draco Malfoy',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Harry Potter estudia magia en el colegio Hogwarts enfrentándose al temible mago tenebroso Lord Voldemort.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantante estadounidense fue coronado mundialmente como el "Rey del Pop" y popularizó el paso de baile del "Moonwalk"?',
+    optionA: 'Prince',
+    optionB: 'Michael Jackson',
+    optionC: 'Stevie Wonder',
+    optionD: 'George Michael',
+    correctOption: 'B',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Michael Jackson rompió todos los récords de la industria discográfica con su histórico álbum "Thriller" de 1982.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el leal perro gran danés miedoso y parlanchín que viaja en la Máquina del Misterio resolviendo enigmas?',
+    optionA: 'Pluto',
+    optionB: 'Snoopy',
+    optionC: 'Scooby-Doo',
+    optionD: 'Odie',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Scooby-Doo y su grupo de amigos desentrañan misterios de supuestos fantasmas y monstruos creados por Hanna-Barbera.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién es el joven héroe de Star Wars criado en Tatooine que aprende las artes Jedi con Obi-Wan Kenobi y Yoda?',
+    optionA: 'Han Solo',
+    optionB: 'Darth Vader',
+    optionC: 'Luke Skywalker',
+    optionD: 'Lando Calrissian',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Luke Skywalker porta el sable de luz y combate al Imperio Galáctico en la trilogía clásica original de George Lucas.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué serie de televisión argentina creada por Damián Szifron narra las misiones de un cuarteto de especialistas en operativos de simulación?',
+    optionA: 'Okupas',
+    optionB: 'Casados con hijos',
+    optionC: 'Los Simuladores',
+    optionD: 'El Marginal',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Santos, Lamponne, Ravenna y Medina resolvían problemas de gente común mediante sofisticados operativos de engaño simulado.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué banda británica de rock liderada por el cantante Mick Jagger y el guitarrista Keith Richards tiene como logo una lengua roja?',
+    optionA: 'Led Zeppelin',
+    optionB: 'AC/DC',
+    optionC: 'The Rolling Stones',
+    optionD: 'Aerosmith',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'The Rolling Stones llevan más de seis décadas sobre los escenarios como una de las agrupaciones de rock más longevas y célebres.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué muñeco de nieve ingenuo y amante de los abrazos cálidos cobra vida por magia en la película de Disney "Frozen"?',
+    optionA: 'Sven',
+    optionB: 'Kristoff',
+    optionC: 'Olaf',
+    optionD: 'Hans',
+    correctOption: 'C',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Olaf fue creado por los poderes de hielo de Elsa y acompaña a la princesa Anna en su travesía por el reino de Arendelle.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantautora y folclorista tucumana fue una de las máximas voces de América Latina y voz insignia del Movimiento del Nuevo Cancionero?',
+    optionA: 'Soledad Pastorutti',
+    optionB: 'Teresa Parodi',
+    optionC: 'Liliana Herrero',
+    optionD: 'Mercedes Sosa',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Apodada "La Negra", Mercedes Sosa conmovió al mundo interpretando obras maestras del folclore y la música popular sudamericana.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama la pequeña niña mexicana que visita la Tierra de los Recuerdos junto a su bisabuela en la película animada "Coco" de Pixar?',
+    optionA: 'Dante',
+    optionB: 'Héctor',
+    optionC: 'Ernesto',
+    optionD: 'Miguel',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Miguel Rivera sueña con ser músico y cruza accidentalmente al mundo de los muertos durante la fiesta del Día de Muertos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién es el entrañable personaje humorístico de Roberto Gómez Bolaños que vivía en una vecindad dentro de un barril de madera?',
+    optionA: 'Don Ramón',
+    optionB: 'Quico',
+    optionC: 'El Chapulín Colorado',
+    optionD: 'El Chavo del Ocho',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Chavo del 8 es una de las series cómicas más vistas y queridas en toda la historia de la televisión hispanoamericana.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué famoso ogro verde del cine de animación vive pacíficamente en su pantano junto a un burro parlante?',
+    optionA: 'Gru',
+    optionB: 'Megamente',
+    optionC: 'Sulley',
+    optionD: 'Shrek',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Shrek (2001) parodió los cuentos de hadas tradicionales y ganó el primer Óscar oficial a Mejor Película de Animación.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el icónico androide dorado diplomático y miedoso de la saga Star Wars que acompaña siempre al pequeño R2-D2?',
+    optionA: 'BB-8',
+    optionB: 'Chewbacca',
+    optionC: 'Boba Fett',
+    optionD: 'C-3PO',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'C-3PO domina más de seis millones de formas de comunicación y es una presencia constante en las nueve películas principales de Star Wars.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantautor y pianista rosarino compuso y grabó el álbum "El amor después del amor", disco bisagra del rock argentino?',
+    optionA: 'Charly García',
+    optionB: 'León Gieco',
+    optionC: 'Juan Carlos Baglietto',
+    optionD: 'Fito Páez',
+    correctOption: 'D',
+    difficulty: 'initial',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Fito Páez lanzó "El amor después del amor" en 1992, convirtiéndose en el disco más vendido de la discografía nacional.',
+    status: 'approved',
+  },
+
+  // =========================================================================
+  // ENTRETENIMIENTO — INTERMEDIA (22 preguntas: 5 A, 6 B, 5 C, 6 D)
+  // =========================================================================
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué película argentina de relatos antológicos dirigida por Damián Szifron fue nominada al Premio Óscar a Mejor Película Extranjera en 2015?',
+    optionA: 'Relatos salvajes',
+    optionB: 'El clan',
+    optionC: 'La odisea de los giles',
+    optionD: 'Carancho',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"Relatos salvajes" cuenta seis historias autoconclusivas cargadas de humor negro, violencia cotidiana y catarsis social.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama el actor y humorista argentino que protagonizó junto a Guillermo Francella la serie cómica "Poné a Francella" y películas como "El secreto de sus ojos"?',
+    optionA: 'Guillermo Francella',
+    optionB: 'Diego Peretti',
+    optionC: 'Luis Brandoni',
+    optionD: 'Puma Goity',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Guillermo Francella demostró su enorme versatilidad tanto en la comedia popular televisiva como en el drama cinematográfico de autor.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué legendario dúo británico de rock psicodélico y sinfónico compuso la monumental ópera rock conceptual "The Wall" en 1979?',
+    optionA: 'Pink Floyd',
+    optionB: 'Genesis',
+    optionC: 'Yes',
+    optionD: 'Deep Purple',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Roger Waters y David Gilmour lideraron a Pink Floyd en la creación de "The Wall", alegoría sobre el aislamiento y los traumas bélicos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director estadounidense dirigió la saga de dinosaurios "Jurassic Park" (1993) y clásicos como "Tiburón" e "E.T., el extraterrestre"?',
+    optionA: 'Steven Spielberg',
+    optionB: 'George Lucas',
+    optionC: 'Martin Scorsese',
+    optionD: 'Francis Ford Coppola',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Steven Spielberg es el cineasta más exitoso comercialmente de la historia y pionero de los grandes taquillazos cinematográficos modernos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantante colombiana de Barranquilla saltó al estrellato hispano con el álbum "Pies descalzos" y triunfó en todo el planeta con "Hips Don\'t Lie"?',
+    optionA: 'Shakira',
+    optionB: 'Karol G',
+    optionC: 'Rosalía',
+    optionD: 'Gloria Estefan',
+    correctOption: 'A',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Shakira Mebarak es la artista femenina latina más vendida y reconocida internacionalmente de todos los tiempos.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué aclamada película argentina dirigida por Santiago Mitre y protagonizada por Ricardo Darín como Julio Strassera narra el Juicio a las Juntas Militares?',
+    optionA: 'La historia oficial',
+    optionB: 'Argentina, 1985',
+    optionC: 'La noche de los lápices',
+    optionD: 'El secreto de sus ojos',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"Argentina, 1985" retrató la histórica labor de la fiscalía en el juicio civil que condenó a los dictadores de la última dictadura.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué carismático personaje amarillo de los videojuegos arcade creado por Toru Iwatani en 1980 come puntos y escapa de fantasmas?',
+    optionA: 'Donkey Kong',
+    optionB: 'Pac-Man',
+    optionC: 'Sonic',
+    optionD: 'Q*bert',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Pac-Man es un fenómeno cultural de la era dorada de las salas de arcade y uno de los videojuegos más influyentes de la historia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién es el director estadounidense célebre por su estilo no lineal y diálogos filosos que dirigió "Pulp Fiction" y "Kill Bill"?',
+    optionA: 'David Fincher',
+    optionB: 'Quentin Tarantino',
+    optionC: 'Christopher Nolan',
+    optionD: 'Paul Thomas Anderson',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Quentin Tarantino revolucionó el cine independiente de los 90 con "Pulp Fiction", ganadora de la Palma de Oro en Cannes.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué grupo musical argentino de rock y ska liderado por Vicentico y Flavio Cianciarulo compuso el hit "Matador" en 1993?',
+    optionA: 'Los Auténticos Decadentes',
+    optionB: 'Los Fabulosos Cadillacs',
+    optionC: 'Kapanga',
+    optionD: 'La Mosca',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"Matador" fusionó murga, candombe y rock latino, convirtiéndose en el primer gran videoclip hispano emitido con fuerza global en MTV.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué trilogía de películas de ciencia ficción de las hermanas Wachowski plantea que la realidad cotidiana es una simulación por computadoras?',
+    optionA: 'Terminator',
+    optionB: 'The Matrix',
+    optionC: 'Blade Runner',
+    optionD: 'Alien',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Keanu Reeves encarnó a Neo, el hacker elegido para liberar a la humanidad del control de las máquinas inteligentes.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama la famosa familia animada amarilla creada por Matt Groening que vive en la ciudad ficticia de Springfield?',
+    optionA: 'Los Picapiedra',
+    optionB: 'Los Simpson',
+    optionC: 'Padre de Familia',
+    optionD: 'Futurama',
+    correctOption: 'B',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Homero, Marge, Bart, Lisa y Maggie Simpson protagonizan la serie animada en horario central de mayor duración en la televisión.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué serie dramática estadounidense narra la transformación del profesor de química Walter White en el fabricante clandestino "Heisenberg"?',
+    optionA: 'Better Call Saul',
+    optionB: 'The Sopranos',
+    optionC: 'Breaking Bad',
+    optionD: 'Ozark',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Creada por Vince Gilligan, "Breaking Bad" es ampliamente aclamada como una de las mejores producciones dramáticas de la televisión moderna.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué legendario cantante y líder de Patricio Rey y sus Redonditos de Ricota fundó luego Los Fundamentalistas del Aire Acondicionado?',
+    optionA: 'Skay Beilinson',
+    optionB: 'Semilla Bucciarelli',
+    optionC: 'Carlos "Indio" Solari',
+    optionD: 'Sergio Dawi',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El Indio Solari es una figura casi mitológica de la cultura rock argentina, convocando a cientos de miles de fieles en sus "misas ricoteras".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿En qué película de Disney un joven ladrón callejero encuentra una lámpara mágica de la que surge un carismático Genio azul?',
+    optionA: 'Hércules',
+    optionB: 'Tarzán',
+    optionC: 'Aladdín',
+    optionD: 'La Sirenita',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Aladdín (1992) deslumbró con la inolvidable interpretación vocal cómica de Robin Williams en el papel del Genio.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director mexicano ganó premios Óscar como director por obras como "Birdman" y "El renacido" (The Revenant)?',
+    optionA: 'Guillermo del Toro',
+    optionB: 'Alfonso Cuarón',
+    optionC: 'Alejandro González Iñárritu',
+    optionD: 'Robert Rodriguez',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'González Iñárritu ganó dos premios Óscar consecutivos a Mejor Director en 2015 y 2016.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantautora estadounidense rompió récords globales de taquilla e impacto económico mundial con su histórica gira "The Eras Tour"?',
+    optionA: 'Beyoncé',
+    optionB: 'Billie Eilish',
+    optionC: 'Taylor Swift',
+    optionD: 'Lady Gaga',
+    correctOption: 'C',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Taylor Swift repasó todas las etapas de su carrera musical en una de las giras de estadios más multitudinarias y lucrativas de la historia.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué comedia de enredos y romance estadounidense de los 90 tenía como protagonistas a seis amigos llamados Ross, Rachel, Monica, Chandler, Joey y Phoebe?',
+    optionA: 'Seinfeld',
+    optionB: 'How I Met Your Mother',
+    optionC: 'The Big Bang Theory',
+    optionD: 'Friends',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"Friends" se transmitió durante diez exitosas temporadas convirtiéndose en un fenómeno cultural generacional en torno al café Central Perk.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué célebre cantante de tango uruguayo-argentino apodado "El Zorzal Criollo" falleció en un trágico accidente aéreo en Medellín en 1935?',
+    optionA: 'Julio Sosa',
+    optionB: 'Enrique Santos Discépolo',
+    optionC: 'Aníbal Troilo',
+    optionD: 'Carlos Gardel',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Carlos Gardel internacionalizó el tango con temas inmortales como "Volver", "Por una cabeza" y "El día que me quieras".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director cinematográfico dirigió la obra maestra del cine de gánsteres "El Padrino" (1972) basada en la novela de Mario Puzo?',
+    optionA: 'Martin Scorsese',
+    optionB: 'Brian De Palma',
+    optionC: 'Stanley Kubrick',
+    optionD: 'Francis Ford Coppola',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Francis Ford Coppola retrató la intimidad de la familia mafiosa Corleone con actuaciones estelares de Marlon Brando y Al Pacino.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué serie de televisión argentina de 2000 dirigida por Bruno Stagnaro mostró con crudo realismo la juventud marginal en una casona tomada de San Telmo?',
+    optionA: 'Tumberos',
+    optionB: 'El puntero',
+    optionC: 'Sol negro',
+    optionD: 'Okupas',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Protagonizada por Rodrigo de la Serna en el papel de Ricardo, "Okupas" marcó un quiebre en la ficción televisiva argentina.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué artista marcial y actor chino-estadounidense revolucionó el cine de acción y artes marciales en películas como "Operación Dragón" en 1973?',
+    optionA: 'Jackie Chan',
+    optionB: 'Jet Li',
+    optionC: 'Donnie Yen',
+    optionD: 'Bruce Lee',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Bruce Lee fundó el Jeet Kune Do y abrió las puertas de Hollywood al cine asiático de artes marciales antes de su temprana muerte.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Cómo se llama la pequeña hada compañera de Peter Pan en el País de Nunca Jamás creada por J.M. Barrie?',
+    optionA: 'Wendy',
+    optionB: 'Tiger Lily',
+    optionC: 'Clara',
+    optionD: 'Campanita (Tinker Bell)',
+    correctOption: 'D',
+    difficulty: 'medium',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Campanita vierte su polvo de hadas para permitir que Peter Pan y los niños Darling vuelen con solo tener pensamientos felices.',
+    status: 'approved',
+  },
+
+  // =========================================================================
+  // ENTRETENIMIENTO — AVANZADA (23 preguntas: 6 A, 6 B, 6 C, 5 D)
+  // =========================================================================
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Quién dirigió la aclamada película argentina "La ciénaga" (2001), consagrada internacionalmente en el Festival de Cine de Berlín?',
+    optionA: 'Lucrecia Martel',
+    optionB: 'María Luisa Bemberg',
+    optionC: 'Paula Hernández',
+    optionD: 'Celina Murga',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'La salteña Lucrecia Martel es una de las directoras más reverenciadas del cine autoral contemporáneo por su atmósfera sensorial y sonora.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué célebre cantante y compositor jamaicano fue el máximo difusor internacional del reggae y la cultura rastafari al frente de The Wailers?',
+    optionA: 'Bob Marley',
+    optionB: 'Peter Tosh',
+    optionC: 'Jimmy Cliff',
+    optionD: 'Bunny Wailer',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Bob Marley difundió mensajes de justicia social y espiritualidad con himnos como "No Woman, No Cry", "One Love" y "Redemption Song".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué compositor y productor estadounidense compuso las icónicas bandas sonoras de Star Wars, Tiburón, Indiana Jones, E.T. y Harry Potter?',
+    optionA: 'John Williams',
+    optionB: 'Hans Zimmer',
+    optionC: 'Jerry Goldsmith',
+    optionD: 'Howard Shore',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'John Williams acumula más de 50 nominaciones a los premios Óscar y compuso los leitmotivs orquestales más reconocibles de la historia del cine.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué legendaria banda británica de rock progresivo e innovación técnica grabó el trascendental álbum "The Dark Side of the Moon" en 1973?',
+    optionA: 'Pink Floyd',
+    optionB: 'King Crimson',
+    optionC: 'Jethro Tull',
+    optionD: 'The Moody Blues',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      '"The Dark Side of the Moon" permaneció un récord de más de 900 semanas en la lista Billboard gracias a sus letras reflexivas y sonido cuadrafónico.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué actor estadounidense interpretó magistralmente a Jack Torrance en la inquietante adaptación de "El resplandor" dirigida por Stanley Kubrick en 1980?',
+    optionA: 'Jack Nicholson',
+    optionB: 'Robert De Niro',
+    optionC: 'Al Pacino',
+    optionD: 'Gene Hackman',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Jack Nicholson compuso una actuación desquiciada inolvidable en el solitario hotel Overlook de Colorado.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director mexicano ganó los premios Óscar a Mejor Película y Mejor Dirección por la cinta fantástica "La forma del agua" en 2018?',
+    optionA: 'Guillermo del Toro',
+    optionB: 'Alfonso Cuarón',
+    optionC: 'Alejandro González Iñárritu',
+    optionD: 'Carlos Carrera',
+    correctOption: 'A',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Guillermo del Toro es un maestro del cine fantástico y gótico, creador también de "El laberinto del fauno" y "Cronos".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué gran músico argentino integró el trío Serú Girán junto a Charly García, Pedro Aznar y Oscar Moro?',
+    optionA: 'Nito Mestre',
+    optionB: 'David Lebón',
+    optionC: 'Fito Páez',
+    optionD: 'Pappo',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El guitarrista y cantante David Lebón aportó su voz y calidez compositiva a Serú Girán, considerada "los Beatles argentinos".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿En qué año se estrenó en los cines de todo el mundo la primera película de la saga galáctica "Star Wars: Una nueva esperanza" de George Lucas?',
+    optionA: '1973',
+    optionB: '1977',
+    optionC: '1980',
+    optionD: '1983',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'El estreno de Star Wars en mayo de 1977 causó colas kilométricas y cambió para siempre la comercialización y producción de cine de ciencia ficción.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cineasta británico dirigió complejas películas de trama temporal e intelectual como "Memento", "Inception", "Interstellar" y "Oppenheimer"?',
+    optionA: 'Ridley Scott',
+    optionB: 'Christopher Nolan',
+    optionC: 'Danny Boyle',
+    optionD: 'Guy Ritchie',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Christopher Nolan es reconocido por filmar en celuloide IMAX de gran formato y explorar la subjetividad de la memoria y la física teórica.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantante británica de voz profunda de jazz y soul saltó al estrellato mundial con el álbum "Back to Black" (2006)?',
+    optionA: 'Duffy',
+    optionB: 'Amy Winehouse',
+    optionC: 'Adele',
+    optionD: 'Joss Stone',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Amy Winehouse ganó cinco premios Grammy en una sola noche gracias a canciones imborrables como "Rehab" y "You Know I\'m No Good".',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué filme clásico en blanco y negro de 1942 protagonizado por Humphrey Bogart e Ingrid Bergman inmortalizó el bar "Rick\'s Café"?',
+    optionA: 'El halcón maltés',
+    optionB: 'Casablanca',
+    optionC: 'Ciudadano Kane',
+    optionD: 'El tercer hombre',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Dirigida por Michael Curtiz, "Casablanca" es uno de los melodramas románticos bélicos más admirados de la época de oro de Hollywood.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué influyente productor y músico británico produjo álbumes revolucionarios de David Bowie ("Héroes"), Talking Heads y U2?',
+    optionA: 'George Martin',
+    optionB: 'Brian Eno',
+    optionC: 'Quincy Jones',
+    optionD: 'Rick Rubin',
+    correctOption: 'B',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Brian Eno es pionero de la música ambient y un innovador sonoro decisivo en la evolución del pop y el rock vanguardista.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director estadounidense dirigió en 1941 con solo 25 años la película "Ciudadano Kane", revolucionando el lenguaje cinematográfico?',
+    optionA: 'John Ford',
+    optionB: 'Billy Wilder',
+    optionC: 'Orson Welles',
+    optionD: 'Howard Hawks',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Orson Welles introdujo innovaciones decisivas de profundidad de campo, iluminación expresionista y narrativa fragmentada no lineal.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué legendario bandoneonista y compositor argentino renovó el tango creando obras de proyección universal como "Adiós Nonino" y "Libertango"?',
+    optionA: 'Osvaldo Pugliese',
+    optionB: 'Mariano Mores',
+    optionC: 'Astor Piazzolla',
+    optionD: 'Eduardo Rovira',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Piazzolla incorporó armonías modernas, disonancias y ritmos contemporáneos al tango tradicional argentino a través de su célebre Quinteto.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué actor estadounidense encarnó al implacable gánster Tony Montana en la película de culto "Scarface" (1983) dirigida por Brian De Palma?',
+    optionA: 'Robert De Niro',
+    optionB: 'Joe Pesci',
+    optionC: 'Al Pacino',
+    optionD: 'Ray Liotta',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Al Pacino protagonizó la violenta ascensión y caída del refugiado cubano en el mundo del narcotráfico de Miami.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cineasta sueco dirigió obras cumbre del cine reflexivo y existencial como "El séptimo sello" (1957) y "Fresas salvajes"?',
+    optionA: 'Lars von Trier',
+    optionB: 'Andrei Tarkovsky',
+    optionC: 'Ingmar Bergman',
+    optionD: 'Carl Theodor Dreyer',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Ingmar Bergman exploró la fe, la muerte, la soledad y la psicología humana con una intensidad dramática sin parangón.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué célebre cantante de jazz y trompetista estadounidense apodado "Satchmo" conmovió al mundo con su voz rasposa en "What a Wonderful World"?',
+    optionA: 'Miles Davis',
+    optionB: 'Duke Ellington',
+    optionC: 'Louis Armstrong',
+    optionD: 'Chet Baker',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Louis Armstrong fue la primera gran estrella solista del jazz originada en Nueva Orleans que definió el swing para la posteridad.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cantautor y trovador cubano fundó el movimiento de la Nueva Trova Cubana y compuso himnos poéticos como "Ojalá" y "Playa Girón"?',
+    optionA: 'Pablo Milanés',
+    optionB: 'Noel Nicola',
+    optionC: 'Silvio Rodríguez',
+    optionD: 'Carlos Varela',
+    correctOption: 'C',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Silvio Rodríguez es una de las cumbres líricas de la canción de autor hispanoamericana, con una poética rica y virtuosismo guitarrístico.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué película de ciencia ficción de 1982 dirigida por Ridley Scott y basada en Philip K. Dick sigue al cazarrecompensas de replicantes Rick Deckard?',
+    optionA: 'Total Recall',
+    optionB: 'Dune',
+    optionC: 'Tron',
+    optionD: 'Blade Runner',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Harrison Ford encarnó al detective Rick Deckard en una Los Ángeles futurista y distópica con estética ciberpunk y música de Vangelis.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué cineasta japonés de leyenda dirigió obras maestras fundamentales del cine como "Los siete samuráis" (1954) y "Rashomon"?',
+    optionA: 'Yasujirō Ozu',
+    optionB: 'Kenji Mizoguchi',
+    optionC: 'Hayao Miyazaki',
+    optionD: 'Akira Kurosawa',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Akira Kurosawa ejerció una influencia colosal en el cine occidental, inspirando desde los westerns de Sergio Leone hasta Star Wars.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué músico y compositor inglés compuso la banda sonora de la película "El Rey León" (1994) con baladas como "Can You Feel the Love Tonight"?',
+    optionA: 'Phil Collins',
+    optionB: 'George Michael',
+    optionC: 'Paul McCartney',
+    optionD: 'Elton John',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Elton John compuso las melodías con letras de Tim Rice, ganando el premio Óscar a Mejor Canción Original en 1995.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué compositor y músico argentino apodado "El Carpo" fue pionero del blues y del hard rock nacional con agrupaciones como Pappo\'s Blues y Riff?',
+    optionA: 'Claudio Gabis',
+    optionB: 'Javier Martínez',
+    optionC: 'Willy Quiroga',
+    optionD: 'Norberto "Pappo" Napolitano',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Pappo fue el guitarrista de blues más visceral y virtuoso del país, elogiado e invitado a tocar en el Madison Square Garden por B.B. King.',
+    status: 'approved',
+  },
+  {
+    categorySlug: 'entretenimiento',
+    prompt:
+      '¿Qué director italiano dirigió la memorable película "Cinema Paradiso" (1988), homenaje nostálgico al amor por las salas de cine de pueblo?',
+    optionA: 'Federico Fellini',
+    optionB: 'Roberto Benigni',
+    optionC: 'Bernardo Bertolucci',
+    optionD: 'Giuseppe Tornatore',
+    correctOption: 'D',
+    difficulty: 'advanced',
+    ageRange: 'general',
+    educationLevel: null,
+    explanation:
+      'Giuseppe Tornatore ganó el Óscar a Mejor Película Extranjera con la conmovedora historia de amistad entre el proyeccionista Alfredo y el niño Totò.',
+    status: 'approved',
+  },
+];

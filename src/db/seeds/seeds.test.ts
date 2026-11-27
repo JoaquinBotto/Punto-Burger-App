@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { seedCategories } from './data/categories';
-import { seedQuestions, originalSeedQuestions } from './data/questions';
+import { seedQuestions, originalSeedQuestions, expandedSeedQuestions } from './data/questions';
+import { expansion002Questions } from './data/expansion-002';
 
-describe('Seed Data Integrity and Quality (PPA-009 & PPA-CONTENT-001)', () => {
+describe('Seed Data Integrity and Quality (PPA-009, PPA-CONTENT-001 & PPA-CONTENT-002)', () => {
   it('defines 6 active trivia categories', () => {
     expect(seedCategories.length).toBe(6);
     const slugs = seedCategories.map((c) => c.slug);
@@ -36,57 +37,66 @@ describe('Seed Data Integrity and Quality (PPA-009 & PPA-CONTENT-001)', () => {
     }
   });
 
-  it('contains exactly 360 approved seed questions in the expanded bank (60 per category)', () => {
-    expect(seedQuestions.length).toBe(360);
+  it('preserves the base 360 approved seed questions from PPA-CONTENT-001', () => {
+    const base360 = [...originalSeedQuestions, ...expandedSeedQuestions];
+    expect(base360.length).toBe(360);
   });
 
-  it('ensures balanced difficulty distribution across the entire database (120 initial, 120 medium, 120 advanced)', () => {
+  it('contains exactly 402 new approved questions in expansion-002 (67 per category)', () => {
+    expect(expansion002Questions.length).toBe(402);
+  });
+
+  it('contains exactly 762 approved seed questions in the expanded bank (127 per category)', () => {
+    expect(seedQuestions.length).toBe(762);
+  });
+
+  it('ensures balanced difficulty distribution across the entire database (254 initial, 254 medium, 254 advanced)', () => {
     const initial = seedQuestions.filter((q) => q.difficulty === 'initial');
     const medium = seedQuestions.filter((q) => q.difficulty === 'medium');
     const advanced = seedQuestions.filter((q) => q.difficulty === 'advanced');
 
-    expect(initial.length).toBe(120);
-    expect(medium.length).toBe(120);
-    expect(advanced.length).toBe(120);
+    expect(initial.length).toBe(254);
+    expect(medium.length).toBe(254);
+    expect(advanced.length).toBe(254);
   });
 
-  it('ensures every single category has exactly 60 approved questions (20 initial, 20 medium, 20 advanced)', () => {
+  it('ensures every single category has exactly 127 approved questions with the expected difficulty breakdown', () => {
+    const expectedByCategory: Record<
+      string,
+      { initial: number; medium: number; advanced: number }
+    > = {
+      'cultura-general': { initial: 43, medium: 42, advanced: 42 },
+      deportes: { initial: 42, medium: 43, advanced: 42 },
+      'ciencia-naturaleza': { initial: 42, medium: 42, advanced: 43 },
+      geografia: { initial: 43, medium: 42, advanced: 42 },
+      historia: { initial: 42, medium: 43, advanced: 42 },
+      entretenimiento: { initial: 42, medium: 42, advanced: 43 },
+    };
+
     for (const cat of seedCategories) {
       const catQuestions = seedQuestions.filter((q) => q.categorySlug === cat.slug);
-      expect(catQuestions.length).toBe(60);
+      expect(catQuestions.length).toBe(127);
 
       const catInitial = catQuestions.filter((q) => q.difficulty === 'initial');
       const catMedium = catQuestions.filter((q) => q.difficulty === 'medium');
       const catAdvanced = catQuestions.filter((q) => q.difficulty === 'advanced');
 
-      expect(catInitial.length).toBe(20);
-      expect(catMedium.length).toBe(20);
-      expect(catAdvanced.length).toBe(20);
-
-      // Verify age distributions in each difficulty bucket (8 general, 4 child, 4 teen, 4 adult)
-      for (const bucket of [catInitial, catMedium, catAdvanced]) {
-        const general = bucket.filter((q) => q.ageRange === 'general');
-        const child = bucket.filter((q) => q.ageRange === 'child');
-        const teen = bucket.filter((q) => q.ageRange === 'teen');
-        const adult = bucket.filter((q) => q.ageRange === 'adult');
-
-        expect(general.length).toBe(8);
-        expect(child.length).toBe(4);
-        expect(teen.length).toBe(4);
-        expect(adult.length).toBe(4);
-      }
+      const expected = expectedByCategory[cat.slug]!;
+      expect(catInitial.length).toBe(expected.initial);
+      expect(catMedium.length).toBe(expected.medium);
+      expect(catAdvanced.length).toBe(expected.advanced);
     }
   });
 
-  it('ensures perfectly balanced distribution of correct options (exactly 90 of each A, B, C, D)', () => {
+  it('ensures perfectly balanced distribution of correct options (191 A, 191 B, 190 C, 190 D)', () => {
     const counts = { A: 0, B: 0, C: 0, D: 0 };
     for (const q of seedQuestions) {
       counts[q.correctOption]++;
     }
-    expect(counts.A).toBe(90);
-    expect(counts.B).toBe(90);
-    expect(counts.C).toBe(90);
-    expect(counts.D).toBe(90);
+    expect(counts.A).toBe(191);
+    expect(counts.B).toBe(191);
+    expect(counts.C).toBe(190);
+    expect(counts.D).toBe(190);
   });
 
   it('validates every seed question adheres to quality and structure constraints', () => {

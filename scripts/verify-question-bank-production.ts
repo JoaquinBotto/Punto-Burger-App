@@ -180,7 +180,7 @@ async function loadQuestions(): Promise<QuestionWithSlug[]> {
   }
 
   // Fallback: usar seedQuestions en memoria
-  console.log('📦 Usando banco en memoria de seedQuestions (360 preguntas)...');
+  console.log(`📦 Usando banco en memoria de seedQuestions (${seedQuestions.length} preguntas)...`);
   return seedQuestions.map((q, idx) => ({
     id: `mem-q-${idx + 1}`,
     categoryId: `cat-${q.categorySlug}`,
@@ -322,7 +322,7 @@ async function runSimulations() {
     const totalPicks = Array.from(map.values()).reduce((a, b) => a + b, 0);
     const distinctQuestions = map.size;
     console.log(
-      `• Perfil [${ageCat.padEnd(5)}]: ${totalPicks} preguntas formuladas en 300 partidas | ${distinctQuestions}/360 preguntas distintas del banco utilizadas (${((distinctQuestions / 360) * 100).toFixed(0)}%)`
+      `• Perfil [${ageCat.padEnd(5)}]: ${totalPicks} preguntas formuladas en 300 partidas | ${distinctQuestions}/${allQuestions.length} preguntas distintas del banco utilizadas (${((distinctQuestions / allQuestions.length) * 100).toFixed(0)}%)`
     );
   }
 

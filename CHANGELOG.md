@@ -37,6 +37,14 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ### Added
 
+- `PPA-CONTENT-002`: Ampliación Mayor del Banco de Preguntas (402 Nuevas Preguntas / Total 762 Aprobadas):
+  - Incorporación de 402 preguntas originales, verificadas y equilibradas, distribuidas uniformemente en 67 preguntas nuevas por cada una de las 6 categorías oficiales (134 iniciales, 134 intermedias, 134 avanzadas).
+  - Consolidación del catálogo total de trivia en 762 preguntas aprobadas (127 preguntas por categoría; 254 iniciales, 254 intermedias, 254 avanzadas; 191 A, 191 B, 190 C, 190 D).
+  - Pleno alineamiento con el estándar de equidad competitiva (PPA-LAUNCH-001): todas las preguntas nuevas utilizan `ageRange = 'general'` y `educationLevel = null`.
+  - Cero duplicados exactos y cero duplicados semánticos validados con análisis heurístico de similitud de Jaccard contra el banco base.
+  - Inserción idempotente y no-destructiva en base de datos mediante comprobación transaccional por enunciado en `src/db/seeds/index.ts`, sin reiniciar la base de datos ni alterar sesiones, partidas ni torneos en curso.
+  - Documentado en `docs/implementation/PPA-CONTENT-002-question-bank-expansion.md`.
+
 - `PPA-TESTMODE-001`: Competencia Abierta + Renovación Operativa de Mesas. Soporte de modalidad de competencia abierta y renovación operativa para pruebas reales en el local físico de Punto Burger Esperanza:
   - Concepto de `timingMode: 'scheduled' | 'open'` en `competitions`: el modo abierto se activa inmediatamente (`status = 'active'`), no depende de horarios ni fechas calendario y permanece activo hasta su finalización manual mediante `npm run competition:finalize`.
   - Nueva identidad de participación por sesión: constraint cambiada a `UNIQUE(competition_id, table_session_id)` mediante migración incremental `0005_glorious_mordo.sql`, permitiendo que una misma mesa física (`tables.id`) compita múltiples veces con diferentes grupos de comensales en la misma competencia abierta.
@@ -120,6 +128,14 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
   - Suite de 259 pruebas automatizadas (48 test suites) pasando al 100%; documentado en `docs/implementation/PPA-HOTFIX-002-idempotent-competition-setup.md`.
 
 ### Added
+
+- `PPA-CONTENT-002`: Ampliación Mayor del Banco de Preguntas (402 Nuevas Preguntas / Total 762 Aprobadas):
+  - Incorporación de 402 preguntas originales, verificadas y equilibradas, distribuidas uniformemente en 67 preguntas nuevas por cada una de las 6 categorías oficiales (134 iniciales, 134 intermedias, 134 avanzadas).
+  - Consolidación del catálogo total de trivia en 762 preguntas aprobadas (127 preguntas por categoría; 254 iniciales, 254 intermedias, 254 avanzadas; 191 A, 191 B, 190 C, 190 D).
+  - Pleno alineamiento con el estándar de equidad competitiva (PPA-LAUNCH-001): todas las preguntas nuevas utilizan `ageRange = 'general'` y `educationLevel = null`.
+  - Cero duplicados exactos y cero duplicados semánticos validados con análisis heurístico de similitud de Jaccard contra el banco base.
+  - Inserción idempotente y no-destructiva en base de datos mediante comprobación transaccional por enunciado en `src/db/seeds/index.ts`, sin reiniciar la base de datos ni alterar sesiones, partidas ni torneos en curso.
+  - Documentado en `docs/implementation/PPA-CONTENT-002-question-bank-expansion.md`.
 
 - Creación del **Bootstrap Kit** documental para inicializar el proyecto bajo la metodología SDD.
 - Archivo `README.md` con resumen del proyecto.

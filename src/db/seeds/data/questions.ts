@@ -1,4 +1,8 @@
 import { expandedSeedQuestions } from './expanded';
+import { expansion002Questions } from './expansion-002';
+
+export { expandedSeedQuestions };
+export { expansion002Questions };
 
 export interface SeedQuestion {
   categorySlug: string;
@@ -1149,4 +1153,8 @@ export const originalSeedQuestions: SeedQuestion[] = [
   },
 ];
 
-export const seedQuestions: SeedQuestion[] = [...originalSeedQuestions, ...expandedSeedQuestions];
+export const seedQuestions: SeedQuestion[] = [
+  ...originalSeedQuestions,
+  ...expandedSeedQuestions,
+  ...expansion002Questions,
+];

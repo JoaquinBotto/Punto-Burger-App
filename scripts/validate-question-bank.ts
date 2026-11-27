@@ -65,7 +65,7 @@ function jaccardSimilarity(setA: Set<string>, setB: Set<string>): number {
 
 export function validateQuestionBank(
   questions: SeedQuestion[] = seedQuestions,
-  expectedTotal = 360
+  expectedTotal = 762
 ): ValidationReport {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -266,6 +266,18 @@ export function validateQuestionBank(
   }
 
   // 4. Validar conteos por categoría y dificultad
+  const EXPECTED_DIFFICULTY_762: Record<
+    string,
+    { initial: number; medium: number; advanced: number }
+  > = {
+    'cultura-general': { initial: 43, medium: 42, advanced: 42 },
+    deportes: { initial: 42, medium: 43, advanced: 42 },
+    'ciencia-naturaleza': { initial: 42, medium: 42, advanced: 43 },
+    geografia: { initial: 43, medium: 42, advanced: 42 },
+    historia: { initial: 42, medium: 43, advanced: 42 },
+    entretenimiento: { initial: 42, medium: 42, advanced: 43 },
+  };
+
   for (const cat of VALID_CATEGORIES) {
     let catTotal = 0;
     for (const diff of VALID_DIFFICULTIES) {
@@ -303,11 +315,22 @@ export function validateQuestionBank(
             `[${cat} - ${diff}] Se esperaban 4 preguntas adult (encontradas: ${adultCount}).`
           );
         }
+      } else if (expectedTotal === 762) {
+        const expectedDiff = EXPECTED_DIFFICULTY_762[cat]?.[diff];
+        if (expectedDiff !== undefined && diffTotal !== expectedDiff) {
+          errors.push(
+            `[${cat} - ${diff}] Se esperaban exactamente ${expectedDiff} preguntas (encontradas: ${diffTotal}).`
+          );
+        }
       }
     }
 
     if (expectedTotal === 360 && catTotal !== 60) {
       errors.push(`[${cat}] Se esperaban 60 preguntas en la categoría (encontradas: ${catTotal}).`);
+    } else if (expectedTotal === 762 && catTotal !== 127) {
+      errors.push(
+        `[${cat}] Se esperaban 127 preguntas en la categoría (encontradas: ${catTotal}).`
+      );
     }
   }
 
@@ -321,6 +344,19 @@ export function validateQuestionBank(
           `Distribución de opción ${opt} (${count}/${questions.length} = ${pct.toFixed(1)}%) se desvía del target de 25%.`
         );
       }
+    }
+  } else if (expectedTotal === 762 && questions.length === 762) {
+    if (optionDistribution.A !== 191) {
+      errors.push(`Distribución de opción A esperada: 191, encontrada: ${optionDistribution.A}`);
+    }
+    if (optionDistribution.B !== 191) {
+      errors.push(`Distribución de opción B esperada: 191, encontrada: ${optionDistribution.B}`);
+    }
+    if (optionDistribution.C !== 190) {
+      errors.push(`Distribución de opción C esperada: 190, encontrada: ${optionDistribution.C}`);
+    }
+    if (optionDistribution.D !== 190) {
+      errors.push(`Distribución de opción D esperada: 190, encontrada: ${optionDistribution.D}`);
     }
   }
 
@@ -381,8 +417,8 @@ export function printValidationReport(report: ValidationReport) {
 }
 
 if (process.argv[1]?.includes('validate-question-bank.ts')) {
-  // Si estamos validando el estado actual o el target 360:
-  const expectedTotal = process.argv.includes('--current') ? seedQuestions.length : 360;
+  // Si estamos validando el estado actual o el target 762:
+  const expectedTotal = process.argv.includes('--current') ? seedQuestions.length : 762;
   const report = validateQuestionBank(seedQuestions, expectedTotal);
   printValidationReport(report);
 
