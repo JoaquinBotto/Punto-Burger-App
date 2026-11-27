@@ -798,6 +798,38 @@ describe('Gameplay Service (PPA-013)', () => {
 
       await expect(getGameResults(mockDb, 'raw-token')).rejects.toThrow(GameNotActiveError);
     });
+
+    it('PPA-HOTFIX-003: soporta categoryId = null en partida completada devolviendo Categorías mixtas', async () => {
+      const completedCompGame = {
+        id: fakeGameSessionId,
+        tableSessionId: fakeSessionId,
+        groupId: fakeGroupId,
+        categoryId: null,
+        status: 'completed' as const,
+        rankingEligible: false,
+        startedAt: new Date(Date.now() - 300000),
+        finishedAt: new Date(),
+        totalScore: 810,
+        correctCount: 6,
+        incorrectCount: 3,
+        unansweredCount: 1,
+        currentQuestionIndex: 9,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.spyOn(gameSessionsRepo, 'getGameSessionByTableSessionId').mockResolvedValue(
+        completedCompGame
+      );
+      vi.spyOn(gameQuestionsRepo, 'getGameQuestionsBySessionId').mockResolvedValue(mock10Questions);
+      vi.spyOn(answersRepo, 'getAnswersByGameSessionId').mockResolvedValue([]);
+
+      const result = await getGameResults(mockDb, 'raw-token');
+
+      expect(result.ok).toBe(true);
+      expect(result.game.category.slug).toBe('mixed');
+      expect(result.game.category.name).toBe('Categorías mixtas');
+    });
   });
 
   describe('closeTableSession', () => {

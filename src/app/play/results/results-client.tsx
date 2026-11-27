@@ -116,7 +116,7 @@ export function ResultsClient({ results, ranking, competitionContext }: ResultsC
         <p className="mt-1 text-xs text-pb-charcoal-muted">
           {isCompetition
             ? `Competencia de hoy · Ciclo ${completedRounds} de 3`
-            : `Categoría: ${results.category.name}`}
+            : `Categoría: ${results.category?.name || 'Categorías mixtas'}`}
         </p>
 
         {/* Tarjeta de Puntaje Principal */}

@@ -27,6 +27,7 @@ import {
   SessionNotFoundError,
 } from './errors';
 import type { GamePreparationResult, PlayPageData } from './types';
+import { getCompetitionRoundByGameSessionId } from '../competitions';
 
 /**
  * Prepara transaccionalmente la secuencia inmutable de 10 preguntas para la partida.
@@ -230,16 +231,79 @@ export async function getPlayPageData(
   const participantsList = await getParticipantsByGroupId(db, group.id);
 
   const gameSession = await getGameSessionByTableSessionId(db, session.id);
-  if (!gameSession || !gameSession.categoryId) {
-    throw new GameNotConfiguredError('No se encontró la partida configurada.');
+  if (!gameSession) {
+    throw new GameNotFoundError();
   }
 
-  const category = await getCategoryById(db, gameSession.categoryId);
-  if (!category) {
-    throw new CategoryNotAvailableError();
+  let mode: 'casual' | 'competition' = 'casual';
+  let competitionInfo: { id: string; name: string | null } | undefined;
+  let roundNumber: 1 | 2 | 3 | undefined;
+  let categoryViewModel: { slug: string; name: string };
+
+  if (gameSession.categoryId) {
+    const category = await getCategoryById(db, gameSession.categoryId);
+    if (!category) {
+      throw new CategoryNotAvailableError();
+    }
+    categoryViewModel = {
+      slug: category.slug,
+      name: category.name,
+    };
+  } else {
+    // Si categoryId == null, verificar si la game_session está vinculada a competition_rounds
+    const compRound = await getCompetitionRoundByGameSessionId(db, gameSession.id);
+
+    if (!compRound) {
+      throw new GameNotConfiguredError('No se encontró la partida configurada.');
+    }
+
+    mode = 'competition';
+    roundNumber = compRound.roundNumber as 1 | 2 | 3;
+    competitionInfo = {
+      id: compRound.competitionId,
+      name: compRound.competitionName,
+    };
+    categoryViewModel = {
+      slug: 'mixed',
+      name: 'Categorías mixtas',
+    };
   }
 
-  const questionsCount = (await getGameQuestionsBySessionId(db, gameSession.id)).length;
+  const existingQuestions = await getGameQuestionsBySessionId(db, gameSession.id);
+  const questionsCount = existingQuestions.length;
+
+  let initialCount = 0;
+  let mediumCount = 0;
+  let advancedCount = 0;
+
+  for (const q of existingQuestions) {
+    if (q.difficulty === 'initial') initialCount++;
+    else if (q.difficulty === 'medium') mediumCount++;
+    else if (q.difficulty === 'advanced') advancedCount++;
+  }
+
+  let structure: { initial: number; medium: number; advanced: number; total: number };
+
+  if (initialCount + mediumCount + advancedCount === questionsCount && questionsCount > 0) {
+    structure = {
+      initial: initialCount,
+      medium: mediumCount,
+      advanced: advancedCount,
+      total: questionsCount,
+    };
+  } else if (mode === 'competition') {
+    if (roundNumber === 1) {
+      structure = { initial: 5, medium: 4, advanced: 1, total: 10 };
+    } else if (roundNumber === 2) {
+      structure = { initial: 3, medium: 4, advanced: 3, total: 10 };
+    } else if (roundNumber === 3) {
+      structure = { initial: 1, medium: 4, advanced: 5, total: 10 };
+    } else {
+      structure = { initial: 3, medium: 4, advanced: 3, total: 10 };
+    }
+  } else {
+    structure = { initial: 3, medium: 4, advanced: 3, total: 10 };
+  }
 
   return {
     table: {
@@ -250,17 +314,13 @@ export async function getPlayPageData(
       name: group.name,
       participantCount: participantsList.length,
     },
-    category: {
-      slug: category.slug,
-      name: category.name,
-    },
-    structure: {
-      initial: 3,
-      medium: 4,
-      advanced: 3,
-      total: 10,
-    },
+    category: categoryViewModel,
+    structure,
     gameStatus: gameSession.status,
     isPrepared: questionsCount === 10,
+    gameId: gameSession.id,
+    mode,
+    ...(competitionInfo ? { competition: competitionInfo } : {}),
+    ...(roundNumber ? { roundNumber } : {}),
   };
 }

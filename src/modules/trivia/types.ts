@@ -52,6 +52,12 @@ export interface PlayPageData {
   gameStatus: string;
   isPrepared: boolean;
   gameId?: string;
+  mode: 'casual' | 'competition';
+  competition?: {
+    id: string;
+    name: string | null;
+  };
+  roundNumber?: 1 | 2 | 3;
 }
 
 export interface ActiveQuestionView {

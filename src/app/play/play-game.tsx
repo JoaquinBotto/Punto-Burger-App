@@ -227,6 +227,8 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
   // VISTA 1: Pantalla Preparatoria (status === 'created')
   // ==========================================
   if (gameStatus === 'created' || !question) {
+    const isCompetition = playData.mode === 'competition';
+
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 text-center">
         <BrandCard>
@@ -250,24 +252,48 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
             </div>
 
             <h1 className="text-3xl font-black tracking-tight text-pb-charcoal sm:text-4xl">
-              ¡Todo listo!
+              {isCompetition
+                ? playData.competition?.name || 'Competencia Punto Burger'
+                : '¡Todo listo!'}
             </h1>
             <p className="mt-1 text-xs font-bold uppercase tracking-wider text-pb-red">
               {playData.group.name}
             </p>
             <p className="mt-2 text-sm text-pb-charcoal-muted">
-              Preparamos 10 preguntas para tu equipo.
+              {isCompetition && playData.roundNumber
+                ? `Ciclo ${playData.roundNumber} de 3`
+                : 'Preparamos 10 preguntas para tu equipo.'}
             </p>
 
             {/* Ficha Resumen de Partida */}
             <div className="mt-6 space-y-3 rounded-2xl border border-pb-cream-border bg-pb-cream/40 p-4 text-left text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-pb-charcoal-muted">Categoría:</span>
-                <span className="inline-flex items-center gap-1.5 font-bold text-pb-red">
-                  <span className="h-2 w-2 rounded-full bg-pb-yellow" />
-                  {playData.category.name}
-                </span>
-              </div>
+              {isCompetition ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-pb-charcoal-muted">Modalidad:</span>
+                    <span className="inline-flex items-center gap-1.5 font-bold text-pb-red">
+                      <span className="h-2 w-2 rounded-full bg-pb-yellow" />
+                      Categorías mixtas
+                    </span>
+                  </div>
+                  {playData.roundNumber && (
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-pb-charcoal-muted">Ronda:</span>
+                      <span className="font-bold text-pb-charcoal">
+                        Ciclo {playData.roundNumber} de 3
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-pb-charcoal-muted">Categoría:</span>
+                  <span className="inline-flex items-center gap-1.5 font-bold text-pb-red">
+                    <span className="h-2 w-2 rounded-full bg-pb-yellow" />
+                    {playData.category.name}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-pb-charcoal-muted">Equipo:</span>
                 <span className="font-bold text-pb-charcoal">{playData.group.name}</span>
@@ -279,10 +305,10 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
                 </span>
               </div>
 
-              {/* Estructura de Dificultad (3/4/3) */}
+              {/* Estructura de Dificultad */}
               <div className="border-t border-pb-cream-border/80 pt-3">
                 <span className="block font-bold text-pb-charcoal mb-2">
-                  Estructura de la partida (10 preguntas):
+                  Estructura de la partida ({playData.structure.total} preguntas):
                 </span>
                 <DifficultyBlocks
                   initial={playData.structure.initial}
@@ -317,7 +343,9 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
             {/* Botón de Inicio */}
             <div className="mt-6">
               <PrimaryButton onClick={handleStartGame} loading={submitting}>
-                Comenzar
+                {isCompetition && playData.roundNumber
+                  ? `Comenzar Ciclo ${playData.roundNumber}`
+                  : 'Comenzar'}
               </PrimaryButton>
             </div>
           </div>

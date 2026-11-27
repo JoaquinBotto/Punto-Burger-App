@@ -48,6 +48,7 @@ describe('PlayPage (/play)', () => {
       structure: { initial: 3, medium: 4, advanced: 3, total: 10 },
       gameStatus: 'created',
       isPrepared: false,
+      mode: 'casual',
     });
 
     await PlayPage();
@@ -67,6 +68,7 @@ describe('PlayPage (/play)', () => {
       structure: { initial: 3, medium: 4, advanced: 3, total: 10 },
       gameStatus: 'created',
       isPrepared: true,
+      mode: 'casual',
     });
 
     const jsx = await PlayPage();
@@ -101,10 +103,47 @@ describe('PlayPage (/play)', () => {
       structure: { initial: 3, medium: 4, advanced: 3, total: 10 },
       gameStatus: 'completed',
       isPrepared: true,
+      mode: 'casual',
     });
 
     await PlayPage();
 
     expect(redirect).toHaveBeenCalledWith('/play/results');
+  });
+
+  it('PPA-HOTFIX-003: renderiza la pantalla de competition round con modalidad mixta y botón de ciclo específico', async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'session-token' }),
+    } as unknown as Awaited<ReturnType<typeof cookies>>);
+
+    vi.spyOn(triviaModule, 'getPlayPageData').mockResolvedValue({
+      table: { code: 'mesa-01', displayName: 'Mesa 01' },
+      group: { name: 'Los Bacon', participantCount: 2 },
+      category: { slug: 'mixed', name: 'Categorías mixtas' },
+      structure: { initial: 5, medium: 4, advanced: 1, total: 10 },
+      gameStatus: 'created',
+      isPrepared: true,
+      mode: 'competition',
+      competition: {
+        id: 'comp-1',
+        name: 'Competencia Punto Burger',
+      },
+      roundNumber: 1,
+    });
+
+    const jsx = await PlayPage();
+    render(jsx);
+
+    // Debe renderizar sin redirect
+    expect(screen.getByText('Competencia Punto Burger')).toBeDefined();
+    expect(screen.getAllByText(/Ciclo 1 de 3/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Categorías mixtas')).toBeDefined();
+    expect(screen.getByText(/5 iniciales/i)).toBeDefined();
+    expect(screen.getByText(/4 intermedias/i)).toBeDefined();
+    expect(screen.getByText(/1 avanzadas/i)).toBeDefined();
+
+    // Botón específico de ciclo
+    const startButton = screen.getByRole('button', { name: /Comenzar Ciclo 1/i });
+    expect(startButton).toBeDefined();
   });
 });

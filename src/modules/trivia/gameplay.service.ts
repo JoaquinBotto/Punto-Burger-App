@@ -266,8 +266,8 @@ export async function getGameState(
     incorrectCount: gameSession.incorrectCount,
     unansweredCount: gameSession.unansweredCount,
     category: {
-      slug: category?.slug ?? '',
-      name: category?.name ?? '',
+      slug: category?.slug ?? 'mixed',
+      name: category?.name ?? 'Categorías mixtas',
     },
     group: {
       name: group.name,
@@ -846,8 +846,8 @@ export async function getGameResults(
       incorrectCount: gameSession.incorrectCount,
       unansweredCount: gameSession.unansweredCount,
       category: {
-        slug: category?.slug ?? '',
-        name: category?.name ?? '',
+        slug: category?.slug ?? 'mixed',
+        name: category?.name ?? 'Categorías mixtas',
       },
       group: {
         name: group.name,

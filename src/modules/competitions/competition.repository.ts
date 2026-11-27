@@ -242,3 +242,31 @@ export async function getCompetitionEntriesWithRounds(db: DbClient, competitionI
     .innerJoin(groups, eq(competitionEntries.groupId, groups.id))
     .where(eq(competitionEntries.competitionId, competitionId));
 }
+
+/**
+ * Obtiene la ronda de competencia vinculada a una sesión de juego, incluyendo datos de la competencia.
+ */
+export async function getCompetitionRoundByGameSessionId(
+  db: DbClient,
+  gameSessionId: string
+): Promise<(CompetitionRound & { competitionId: string; competitionName: string | null }) | null> {
+  const [row] = await db
+    .select({
+      round: competitionRounds,
+      competitionId: competitionEntries.competitionId,
+      competitionName: competitions.name,
+    })
+    .from(competitionRounds)
+    .innerJoin(competitionEntries, eq(competitionRounds.competitionEntryId, competitionEntries.id))
+    .innerJoin(competitions, eq(competitionEntries.competitionId, competitions.id))
+    .where(eq(competitionRounds.gameSessionId, gameSessionId))
+    .limit(1);
+
+  if (!row) return null;
+
+  return {
+    ...row.round,
+    competitionId: row.competitionId,
+    competitionName: row.competitionName,
+  };
+}

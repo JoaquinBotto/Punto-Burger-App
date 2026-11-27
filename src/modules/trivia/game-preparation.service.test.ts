@@ -12,6 +12,7 @@ import * as auditRepo from '../../db/repositories/audit-events.repository';
 import {
   DeviceNotActiveError,
   GameAlreadyStartedError,
+  GameNotConfiguredError,
   GameSequenceIntegrityError,
   QuestionPoolInsufficientError,
   SessionExpiredError,
@@ -393,7 +394,11 @@ describe('Game Preparation Service (PPA-012)', () => {
     expect(playData.group.name).toBe('Los Bacon');
     expect(playData.group.participantCount).toBe(2);
     expect(playData.category.name).toBe('Deportes');
+    expect(playData.mode).toBe('casual');
     expect(playData.structure.total).toBe(10);
+    expect(playData.structure.initial).toBe(3);
+    expect(playData.structure.medium).toBe(4);
+    expect(playData.structure.advanced).toBe(3);
     expect(playData.isPrepared).toBe(true);
 
     // Verificar que no existen respuestas correctas en los datos retornados
@@ -401,5 +406,109 @@ describe('Game Preparation Service (PPA-012)', () => {
     expect(untyped.correctOption).toBeUndefined();
     expect(untyped.correctOptionSnapshot).toBeUndefined();
     expect(untyped.questions).toBeUndefined();
+  });
+
+  it('PPA-HOTFIX-003: getPlayPageData soporta competition round con categoryId = null y deriva 5/4/1 para Ciclo 1', async () => {
+    const compGameSession = {
+      ...mockGameSession,
+      categoryId: null,
+    };
+    vi.spyOn(gameSessionsRepo, 'getGameSessionByTableSessionId').mockResolvedValue(compGameSession);
+
+    const compRepo = await import('../competitions');
+    vi.spyOn(compRepo, 'getCompetitionRoundByGameSessionId').mockResolvedValue({
+      id: 'round-1',
+      competitionEntryId: 'entry-1',
+      roundNumber: 1,
+      gameSessionId: compGameSession.id,
+      createdAt: new Date(),
+      competitionId: 'comp-1',
+      competitionName: 'Torneo Apertura Punto Burger',
+    });
+
+    const compQuestions: GameQuestion[] = [
+      ...Array.from(
+        { length: 5 },
+        (_, i) => ({ id: `gq-init-${i}`, difficulty: 'initial' }) as unknown as GameQuestion
+      ),
+      ...Array.from(
+        { length: 4 },
+        (_, i) => ({ id: `gq-med-${i}`, difficulty: 'medium' }) as unknown as GameQuestion
+      ),
+      ...Array.from(
+        { length: 1 },
+        (_, i) => ({ id: `gq-adv-${i}`, difficulty: 'advanced' }) as unknown as GameQuestion
+      ),
+    ];
+    vi.spyOn(gameQuestionsRepo, 'getGameQuestionsBySessionId').mockResolvedValue(compQuestions);
+
+    const playData = await getPlayPageData(mockDb, 'valid-token');
+
+    expect(playData.mode).toBe('competition');
+    expect(playData.roundNumber).toBe(1);
+    expect(playData.competition?.name).toBe('Torneo Apertura Punto Burger');
+    expect(playData.category.name).toBe('Categorías mixtas');
+    expect(playData.category.slug).toBe('mixed');
+    expect(playData.structure.initial).toBe(5);
+    expect(playData.structure.medium).toBe(4);
+    expect(playData.structure.advanced).toBe(1);
+    expect(playData.structure.total).toBe(10);
+    expect(playData.isPrepared).toBe(true);
+  });
+
+  it('PPA-HOTFIX-003: getPlayPageData deriva 1/4/5 para Ciclo 3', async () => {
+    const compGameSession = {
+      ...mockGameSession,
+      categoryId: null,
+    };
+    vi.spyOn(gameSessionsRepo, 'getGameSessionByTableSessionId').mockResolvedValue(compGameSession);
+
+    const compRepo = await import('../competitions');
+    vi.spyOn(compRepo, 'getCompetitionRoundByGameSessionId').mockResolvedValue({
+      id: 'round-3',
+      competitionEntryId: 'entry-1',
+      roundNumber: 3,
+      gameSessionId: compGameSession.id,
+      createdAt: new Date(),
+      competitionId: 'comp-1',
+      competitionName: 'Torneo Apertura Punto Burger',
+    });
+
+    const compQuestions: GameQuestion[] = [
+      ...Array.from(
+        { length: 1 },
+        (_, i) => ({ id: `gq-init-${i}`, difficulty: 'initial' }) as unknown as GameQuestion
+      ),
+      ...Array.from(
+        { length: 4 },
+        (_, i) => ({ id: `gq-med-${i}`, difficulty: 'medium' }) as unknown as GameQuestion
+      ),
+      ...Array.from(
+        { length: 5 },
+        (_, i) => ({ id: `gq-adv-${i}`, difficulty: 'advanced' }) as unknown as GameQuestion
+      ),
+    ];
+    vi.spyOn(gameQuestionsRepo, 'getGameQuestionsBySessionId').mockResolvedValue(compQuestions);
+
+    const playData = await getPlayPageData(mockDb, 'valid-token');
+
+    expect(playData.mode).toBe('competition');
+    expect(playData.roundNumber).toBe(3);
+    expect(playData.structure.initial).toBe(1);
+    expect(playData.structure.medium).toBe(4);
+    expect(playData.structure.advanced).toBe(5);
+  });
+
+  it('PPA-HOTFIX-003: getPlayPageData lanza GameNotConfiguredError si categoryId es null y NO hay competition round', async () => {
+    const compGameSession = {
+      ...mockGameSession,
+      categoryId: null,
+    };
+    vi.spyOn(gameSessionsRepo, 'getGameSessionByTableSessionId').mockResolvedValue(compGameSession);
+
+    const compRepo = await import('../competitions');
+    vi.spyOn(compRepo, 'getCompetitionRoundByGameSessionId').mockResolvedValue(null);
+
+    await expect(getPlayPageData(mockDb, 'valid-token')).rejects.toThrow(GameNotConfiguredError);
   });
 });

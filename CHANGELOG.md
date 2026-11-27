@@ -10,6 +10,13 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ### Fixed
 
+- `PPA-HOTFIX-003`: Soporte de Competition Rounds de Categorías Mixtas en `/play`. Corrección del bucle de redirección pre-juego y compatibilidad de extremo a extremo para partidas de torneo con `categoryId: null`:
+  - Detección de rondas competitivas en `getPlayPageData` (`src/modules/trivia/game-preparation.service.ts`): consulta de vinculación a `competition_rounds` mediante `getCompetitionRoundByGameSessionId` en `src/modules/competitions/competition.repository.ts`, evitando falsos positivos de `GameNotConfiguredError` cuando `categoryId` es null y exponiendo el view-model `{ slug: 'mixed', name: 'Categorías mixtas' }`.
+  - Derivación dinámica de dificultad desde snapshots de preguntas congeladas: cálculo real de preguntas `initial`, `medium` y `advanced` (eliminando la asunción rígida de 3/4/3 para reflejar con exactitud 5/4/1 en Ciclo 1, 3/4/3 en Ciclo 2 y 1/4/5 en Ciclo 3).
+  - Interfaz de pre-juego en `/play` (`src/app/play/play-game.tsx`): encabezado con nombre de torneo, indicador "Ciclo X de 3", bloque didáctico con curva de dificultad real y botón de acción contextual "Comenzar Ciclo X".
+  - Resiliencia en runtime y resultados (`getGameState` y `getGameResults` en `gameplay.service.ts` y `ResultsClient` en `/play/results`): null-safety robusto ante categorías mixtas.
+  - Suite de 268 pruebas automatizadas (49 test suites) pasando al 100%; documentado en `docs/implementation/PPA-HOTFIX-003-play-competition-rounds.md`.
+
 - `PPA-HOTFIX-002`: Reintentos Idempotentes en Competition Setup. Corrección y blindaje de extremo a extremo ante cortes de red, doble clic y reintentos en el wizard de configuración (`/play/setup`) y el inicio de competencia:
   - Reconciliación in-place de participantes (`replaceGroupParticipants` en `participants.repository.ts`): actualización posicional que preserva inmutables los IDs (`participants.id`), previniendo violaciones de clave foránea `ON DELETE RESTRICT` causadas por referencias desde `game_questions.target_participant_id`.
   - Idempotencia estricta en guardado de setup (`saveGameSetup` en `groups.service.ts`): comparación semántica profunda contra el estado persistido; retornos 200 OK idénticos ante reintentos sin mutar la base de datos ni cambiar UUIDs.
@@ -86,6 +93,13 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ## [v0.1.0] - Inicio del Proyecto
 
 ### Fixed
+
+- `PPA-HOTFIX-003`: Soporte de Competition Rounds de Categorías Mixtas en `/play`. Corrección del bucle de redirección pre-juego y compatibilidad de extremo a extremo para partidas de torneo con `categoryId: null`:
+  - Detección de rondas competitivas en `getPlayPageData` (`src/modules/trivia/game-preparation.service.ts`): consulta de vinculación a `competition_rounds` mediante `getCompetitionRoundByGameSessionId` en `src/modules/competitions/competition.repository.ts`, evitando falsos positivos de `GameNotConfiguredError` cuando `categoryId` es null y exponiendo el view-model `{ slug: 'mixed', name: 'Categorías mixtas' }`.
+  - Derivación dinámica de dificultad desde snapshots de preguntas congeladas: cálculo real de preguntas `initial`, `medium` y `advanced` (eliminando la asunción rígida de 3/4/3 para reflejar con exactitud 5/4/1 en Ciclo 1, 3/4/3 en Ciclo 2 y 1/4/5 en Ciclo 3).
+  - Interfaz de pre-juego en `/play` (`src/app/play/play-game.tsx`): encabezado con nombre de torneo, indicador "Ciclo X de 3", bloque didáctico con curva de dificultad real y botón de acción contextual "Comenzar Ciclo X".
+  - Resiliencia en runtime y resultados (`getGameState` y `getGameResults` en `gameplay.service.ts` y `ResultsClient` en `/play/results`): null-safety robusto ante categorías mixtas.
+  - Suite de 268 pruebas automatizadas (49 test suites) pasando al 100%; documentado en `docs/implementation/PPA-HOTFIX-003-play-competition-rounds.md`.
 
 - `PPA-HOTFIX-002`: Reintentos Idempotentes en Competition Setup. Corrección y blindaje de extremo a extremo ante cortes de red, doble clic y reintentos en el wizard de configuración (`/play/setup`) y el inicio de competencia:
   - Reconciliación in-place de participantes (`replaceGroupParticipants` en `participants.repository.ts`): actualización posicional que preserva inmutables los IDs (`participants.id`), previniendo violaciones de clave foránea `ON DELETE RESTRICT` causadas por referencias desde `game_questions.target_participant_id`.
