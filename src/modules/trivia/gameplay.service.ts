@@ -92,8 +92,9 @@ function sanitizeQuestion(
 export async function startGame(
   db: Database,
   rawCookieToken: string | undefined,
-  now = new Date()
+  explicitNow?: Date
 ): Promise<StartGameResult> {
+  const now = explicitNow ?? new Date();
   if (!rawCookieToken || rawCookieToken.trim() === '') {
     throw new SessionNotFoundError();
   }
@@ -172,7 +173,7 @@ export async function startGame(
     }
 
     // Configurar temporizador autoritativo de servidor para la pregunta 1
-    const presentedAt = now;
+    const presentedAt = explicitNow ?? new Date();
     const expiresAt = new Date(presentedAt.getTime() + QUESTION_DURATION_MS);
     await updateGameQuestionTiming(tx, q1.id, presentedAt, expiresAt);
 
@@ -215,7 +216,7 @@ export async function startGame(
         currentQuestionIndex: 0,
         currentPosition: 1,
       },
-      question: sanitizeQuestion(updatedQ1, alias, now),
+      question: sanitizeQuestion(updatedQ1, alias, explicitNow ?? new Date()),
     };
   });
 }
@@ -712,8 +713,9 @@ export async function submitAnswer(
 export async function advanceGame(
   db: Database,
   rawCookieToken: string | undefined,
-  now = new Date()
+  explicitNow?: Date
 ): Promise<AdvanceGameResult> {
+  const now = explicitNow ?? new Date();
   if (!rawCookieToken || rawCookieToken.trim() === '') {
     throw new SessionNotFoundError();
   }
@@ -809,7 +811,7 @@ export async function advanceGame(
         throw new GameSequenceIntegrityError();
       }
 
-      const presentedAt = now;
+      const presentedAt = explicitNow ?? new Date();
       const expiresAt = new Date(presentedAt.getTime() + QUESTION_DURATION_MS);
       await updateGameQuestionTiming(tx, nextQuestion.id, presentedAt, expiresAt);
 
@@ -846,7 +848,7 @@ export async function advanceGame(
         completed: false,
         currentQuestionIndex: nextIndex,
         currentPosition: nextPosition,
-        question: sanitizeQuestion(updatedNextQuestion, alias, now),
+        question: sanitizeQuestion(updatedNextQuestion, alias, explicitNow ?? new Date()),
       };
     }
 
