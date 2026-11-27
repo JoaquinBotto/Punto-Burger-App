@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { Database } from '../../db/client';
 import { gameSessions } from '../../db/schema/game-sessions';
 import type { GameQuestion } from '../../db/schema/game-questions';
@@ -23,6 +23,7 @@ import {
   createAnswer,
   getAnswerByGameQuestionId,
   getAnswersByGameSessionId,
+  updateAnswer,
 } from '../../db/repositories/answers.repository';
 import { getParticipantById } from '../../db/repositories/participants.repository';
 import { createAuditEvent } from '../../db/repositories/audit-events.repository';
@@ -41,6 +42,7 @@ import {
   GameSequenceIntegrityError,
   InvalidAnswerOptionError,
   QuestionNotResolvedError,
+  QuestionPositionMismatchError,
   SessionExpiredError,
   SessionNotFoundError,
 } from './errors';
@@ -77,6 +79,7 @@ function sanitizeQuestion(
     presentedAt: question.presentedAt?.toISOString() ?? null,
     expiresAt: question.expiresAt?.toISOString() ?? null,
     serverNow: now.toISOString(),
+    questionId: question.questionId,
   };
 }
 
@@ -169,11 +172,12 @@ export async function startGame(
     }
 
     // Configurar temporizador autoritativo de servidor para la pregunta 1
-    const expiresAt = new Date(now.getTime() + QUESTION_DURATION_MS);
-    await updateGameQuestionTiming(tx, q1.id, now, expiresAt);
+    const presentedAt = now;
+    const expiresAt = new Date(presentedAt.getTime() + QUESTION_DURATION_MS);
+    await updateGameQuestionTiming(tx, q1.id, presentedAt, expiresAt);
 
     // Activar sesión de juego
-    await updateGameSessionStatus(tx, lockedGame.id, 'active', now);
+    await updateGameSessionStatus(tx, lockedGame.id, 'active', presentedAt);
 
     // Auditoría
     await createAuditEvent(tx, {
@@ -186,7 +190,7 @@ export async function startGame(
       metadata: {
         gameSessionId: lockedGame.id,
         firstQuestionId: q1.questionId,
-        presentedAt: now.toISOString(),
+        presentedAt: presentedAt.toISOString(),
         expiresAt: expiresAt.toISOString(),
       },
     });
@@ -199,7 +203,7 @@ export async function startGame(
 
     const updatedQ1: GameQuestion = {
       ...q1,
-      presentedAt: now,
+      presentedAt,
       expiresAt,
     };
 
@@ -318,11 +322,7 @@ export async function getGameState(
   let answer = await getAnswerByGameQuestionId(db, currentQuestion.id);
 
   // Normalización perezosa si expiró y no tiene respuesta
-  if (
-    !answer &&
-    currentQuestion.expiresAt &&
-    now.getTime() >= currentQuestion.expiresAt.getTime()
-  ) {
+  if (!answer && currentQuestion.expiresAt && now.getTime() > currentQuestion.expiresAt.getTime()) {
     try {
       answer = await db.transaction(async (tx) => {
         const existing = await getAnswerByGameQuestionId(tx, currentQuestion.id);
@@ -377,7 +377,7 @@ export async function getGameState(
     return {
       ok: true,
       game: baseGameInfo,
-      question: sanitizeQuestion(currentQuestion, alias, now),
+      question: sanitizeQuestion(currentQuestion, alias, new Date()),
       feedback,
       isResolved: true,
       next: currentPosition === 10 ? '/play/results' : undefined,
@@ -388,7 +388,7 @@ export async function getGameState(
   return {
     ok: true,
     game: baseGameInfo,
-    question: sanitizeQuestion(currentQuestion, alias, now),
+    question: sanitizeQuestion(currentQuestion, alias, new Date()),
     feedback: null,
     isResolved: false,
   };
@@ -397,15 +397,17 @@ export async function getGameState(
 /**
  * Registra una respuesta para la pregunta activa:
  * - Valida opción ('A'|'B'|'C'|'D').
- * - Autoridad del servidor: valida expires_at. Si expiró, registra 'unanswered' (+0).
+ * - Autoridad del servidor: valida expires_at según receivedAt. Si expiró, registra 'unanswered' (+0).
  * - Si está en tiempo, compara con correctOptionSnapshot y asigna puntos sin bonus de velocidad.
  * - Idempotente ante reenvíos para la misma pregunta.
+ * - Recuperación contra lazy-normalization si la respuesta llegó antes del deadline.
  */
 export async function submitAnswer(
   db: Database,
   rawCookieToken: string | undefined,
   selectedOption: 'A' | 'B' | 'C' | 'D',
-  now = new Date()
+  receivedAt = new Date(),
+  validation?: { expectedPosition?: number; expectedQuestionId?: string }
 ): Promise<SubmitAnswerResult> {
   if (!rawCookieToken || rawCookieToken.trim() === '') {
     throw new SessionNotFoundError();
@@ -416,7 +418,7 @@ export async function submitAnswer(
     throw new InvalidAnswerOptionError();
   }
 
-  const resolved = await resolveSessionFromCookie(db, rawCookieToken, now);
+  const resolved = await resolveSessionFromCookie(db, rawCookieToken, receivedAt);
   if (!resolved) {
     throw new SessionExpiredError();
   }
@@ -451,30 +453,154 @@ export async function submitAnswer(
     }
 
     const currentPosition = lockedGame.currentQuestionIndex + 1;
+
+    // Validación de identidad de pregunta para prevenir responder preguntas pasadas o futuras en reintentos
+    if (validation?.expectedPosition && validation.expectedPosition !== currentPosition) {
+      if (validation.expectedPosition < currentPosition) {
+        // La pregunta ya avanzó: recuperar feedback registrado previamente para no desfasar
+        const pastQuestion = await getGameQuestionByPosition(
+          tx,
+          lockedGame.id,
+          validation.expectedPosition
+        );
+        if (pastQuestion) {
+          const pastAnswer = await getAnswerByGameQuestionId(tx, pastQuestion.id);
+          if (pastAnswer) {
+            return {
+              ok: true,
+              answer: {
+                result: pastAnswer.result as 'correct' | 'incorrect' | 'unanswered',
+                selectedOption: pastAnswer.selectedOption as 'A' | 'B' | 'C' | 'D' | null,
+                correctOption: pastQuestion.correctOptionSnapshot as 'A' | 'B' | 'C' | 'D',
+                explanation: pastQuestion.explanationSnapshot,
+                pointsAwarded: pastAnswer.pointsAwarded,
+                totalScore: lockedGame.totalScore,
+              },
+              isLastQuestion: validation.expectedPosition === 10,
+            };
+          }
+        }
+      }
+      throw new QuestionPositionMismatchError();
+    }
+
     const question = await getGameQuestionByPosition(tx, lockedGame.id, currentPosition);
     if (!question) {
       throw new GameSequenceIntegrityError();
     }
 
-    // Idempotencia: si ya existe respuesta registrada, devolver el feedback existente
+    if (
+      validation?.expectedQuestionId &&
+      question.questionId !== validation.expectedQuestionId &&
+      question.id !== validation.expectedQuestionId
+    ) {
+      throw new QuestionPositionMismatchError();
+    }
+
+    // Idempotencia y protección contra carreras con lazy-evaluation
     const existingAnswer = await getAnswerByGameQuestionId(tx, question.id);
     if (existingAnswer) {
+      // Si el usuario ya respondió con una opción explícita (A, B, C, D)
+      if (existingAnswer.selectedOption !== null) {
+        return {
+          ok: true,
+          answer: {
+            result: existingAnswer.result as 'correct' | 'incorrect' | 'unanswered',
+            selectedOption: existingAnswer.selectedOption as 'A' | 'B' | 'C' | 'D' | null,
+            correctOption: question.correctOptionSnapshot as 'A' | 'B' | 'C' | 'D',
+            explanation: question.explanationSnapshot,
+            pointsAwarded: existingAnswer.pointsAwarded,
+            totalScore: lockedGame.totalScore,
+          },
+          isLastQuestion: currentPosition === 10,
+        };
+      }
+
+      // Si la respuesta fue registrada como 'unanswered' por normalización perezosa
+      // pero la petición real llegó a tiempo (receivedAt <= expiresAt):
+      const wasReceivedOnTime =
+        question.expiresAt && receivedAt.getTime() <= question.expiresAt.getTime();
+
+      if (wasReceivedOnTime) {
+        const isCorrect = selectedOption === question.correctOptionSnapshot;
+        const resultType = isCorrect ? 'correct' : 'incorrect';
+        const pointsAwarded = calculatePoints(
+          question.difficulty as 'initial' | 'medium' | 'advanced',
+          resultType
+        );
+
+        await updateAnswer(tx, existingAnswer.id, {
+          selectedOption,
+          result: resultType,
+          pointsAwarded,
+          answeredAt: receivedAt,
+        });
+
+        const [updatedGame] = await tx
+          .update(gameSessions)
+          .set({
+            totalScore: sql<number>`${gameSessions.totalScore} + ${pointsAwarded}`,
+            unansweredCount: sql<number>`GREATEST(0, ${gameSessions.unansweredCount} - 1)`,
+            correctCount: sql<number>`${gameSessions.correctCount} + ${resultType === 'correct' ? 1 : 0}`,
+            incorrectCount: sql<number>`${gameSessions.incorrectCount} + ${resultType === 'incorrect' ? 1 : 0}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(gameSessions.id, lockedGame.id))
+          .returning();
+
+        const currentTotalScore = updatedGame
+          ? updatedGame.totalScore
+          : lockedGame.totalScore + pointsAwarded;
+
+        await createAuditEvent(tx, {
+          venueId: session.venueId,
+          eventType: 'question_answered',
+          entityType: 'game_question',
+          entityId: question.id,
+          actorType: 'device',
+          actorId: device.id,
+          metadata: {
+            gameSessionId: lockedGame.id,
+            position: currentPosition,
+            selectedOption,
+            result: resultType,
+            pointsAwarded,
+            totalScore: currentTotalScore,
+            recoveredFromLazyTimeout: true,
+          },
+        });
+
+        return {
+          ok: true,
+          answer: {
+            result: resultType,
+            selectedOption,
+            correctOption: question.correctOptionSnapshot as 'A' | 'B' | 'C' | 'D',
+            explanation: question.explanationSnapshot,
+            pointsAwarded,
+            totalScore: currentTotalScore,
+          },
+          isLastQuestion: currentPosition === 10,
+        };
+      }
+
+      // Expiró realmente y ya estaba unanswered
       return {
         ok: true,
         answer: {
-          result: existingAnswer.result as 'correct' | 'incorrect' | 'unanswered',
-          selectedOption: existingAnswer.selectedOption as 'A' | 'B' | 'C' | 'D' | null,
+          result: 'unanswered',
+          selectedOption: null,
           correctOption: question.correctOptionSnapshot as 'A' | 'B' | 'C' | 'D',
           explanation: question.explanationSnapshot,
-          pointsAwarded: existingAnswer.pointsAwarded,
+          pointsAwarded: 0,
           totalScore: lockedGame.totalScore,
         },
         isLastQuestion: currentPosition === 10,
       };
     }
 
-    // Autoridad estricta del temporizador en servidor
-    const isExpired = question.expiresAt && now.getTime() > question.expiresAt.getTime();
+    // Autoridad estricta del temporizador en servidor según receivedAt
+    const isExpired = question.expiresAt && receivedAt.getTime() > question.expiresAt.getTime();
 
     if (isExpired) {
       // Expirada: 0 puntos
@@ -484,7 +610,7 @@ export async function submitAnswer(
         selectedOption: null,
         result: 'unanswered',
         pointsAwarded: 0,
-        answeredAt: now,
+        answeredAt: receivedAt,
       });
 
       const updatedGame = await updateGameSessionScoreAndCounts(tx, lockedGame.id, 0, 'unanswered');
@@ -534,7 +660,7 @@ export async function submitAnswer(
       selectedOption,
       result: resultType,
       pointsAwarded,
-      answeredAt: now,
+      answeredAt: receivedAt,
     });
 
     const updatedGame = await updateGameSessionScoreAndCounts(
@@ -641,7 +767,7 @@ export async function advanceGame(
 
     // Si aún no está respondida, verificar si expiró
     if (!answer) {
-      if (currentQuestion.expiresAt && now.getTime() >= currentQuestion.expiresAt.getTime()) {
+      if (currentQuestion.expiresAt && now.getTime() > currentQuestion.expiresAt.getTime()) {
         answer = await createAnswer(tx, {
           gameSessionId: lockedGame.id,
           gameQuestionId: currentQuestion.id,
@@ -683,8 +809,9 @@ export async function advanceGame(
         throw new GameSequenceIntegrityError();
       }
 
-      const expiresAt = new Date(now.getTime() + QUESTION_DURATION_MS);
-      await updateGameQuestionTiming(tx, nextQuestion.id, now, expiresAt);
+      const presentedAt = now;
+      const expiresAt = new Date(presentedAt.getTime() + QUESTION_DURATION_MS);
+      await updateGameQuestionTiming(tx, nextQuestion.id, presentedAt, expiresAt);
 
       await createAuditEvent(tx, {
         venueId: session.venueId,
@@ -696,7 +823,7 @@ export async function advanceGame(
         metadata: {
           gameSessionId: lockedGame.id,
           position: nextPosition,
-          presentedAt: now.toISOString(),
+          presentedAt: presentedAt.toISOString(),
           expiresAt: expiresAt.toISOString(),
         },
       });
@@ -709,7 +836,7 @@ export async function advanceGame(
 
       const updatedNextQuestion: GameQuestion = {
         ...nextQuestion,
-        presentedAt: now,
+        presentedAt,
         expiresAt,
       };
 

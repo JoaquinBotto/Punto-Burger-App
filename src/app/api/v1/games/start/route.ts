@@ -26,6 +26,10 @@ export async function POST(request: NextRequest) {
     await assertCompetitionPresence(db, sessionCookie, request.headers, request.cookies);
     const result = await startGame(db, sessionCookie);
 
+    if (result.question) {
+      result.question.serverNow = new Date().toISOString();
+    }
+
     return NextResponse.json(result, {
       status: 200,
       headers: {

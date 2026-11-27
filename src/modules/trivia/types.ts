@@ -73,6 +73,7 @@ export interface ActiveQuestionView {
   presentedAt: string | null;
   expiresAt: string | null;
   serverNow: string;
+  questionId?: string;
 }
 
 export interface AnswerFeedbackView {

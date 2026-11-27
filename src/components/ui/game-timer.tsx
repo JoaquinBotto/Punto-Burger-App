@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface GameTimerProps {
   expiresAt: string | null;
   serverNow?: string | null;
+  estimatedLatencyMs?: number;
   totalDurationSeconds?: number;
   onTimeout?: () => void;
   isPaused?: boolean;
@@ -13,21 +14,62 @@ interface GameTimerProps {
 export function GameTimer({
   expiresAt,
   serverNow,
+  estimatedLatencyMs = 0,
   totalDurationSeconds = 20,
   onTimeout,
   isPaused = false,
 }: GameTimerProps) {
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(totalDurationSeconds);
-  const clockOffsetRef = React.useRef<number>(0);
+  // Anclaje de sincronización que vincula el reloj monotónico local (performance.now) con el tiempo del servidor
+  const syncAnchorRef = useRef<{
+    serverMs: number;
+    perfMs: number;
+  } | null>(null);
 
-  // Calcular el desfase respecto al servidor únicamente cuando serverNow cambia
+  // Offset de respaldo ante ausencia o reinicio del reloj monotónico
+  const clockOffsetRef = useRef<number>(0);
+
+  // Calibrar la hora sincronizada cada vez que serverNow o estimatedLatencyMs cambian
   useEffect(() => {
     if (serverNow) {
-      clockOffsetRef.current = new Date(serverNow).getTime() - Date.now();
+      const serverMs = new Date(serverNow).getTime();
+      const latency = Math.max(0, estimatedLatencyMs || 0);
+      const estimatedServerMsNow = serverMs + latency;
+
+      if (
+        typeof window !== 'undefined' &&
+        window.performance &&
+        typeof window.performance.now === 'function'
+      ) {
+        syncAnchorRef.current = {
+          serverMs: estimatedServerMsNow,
+          perfMs: window.performance.now(),
+        };
+      }
+      clockOffsetRef.current = estimatedServerMsNow - Date.now();
     } else {
+      syncAnchorRef.current = null;
       clockOffsetRef.current = 0;
     }
-  }, [serverNow]);
+  }, [serverNow, estimatedLatencyMs]);
+
+  // Inicialización de estado calculada de props sin leer refs durante render
+  const [secondsRemaining, setSecondsRemaining] = useState<number>(() => {
+    if (!expiresAt) return totalDurationSeconds;
+    const targetTime = new Date(expiresAt).getTime();
+    const initialServerTime = serverNow
+      ? new Date(serverNow).getTime() + (estimatedLatencyMs || 0)
+      : Date.now();
+    return Math.max(0, Math.ceil((targetTime - initialServerTime) / 1000));
+  });
+
+  // Mantener referencia estable al callback onTimeout
+  const onTimeoutRef = useRef(onTimeout);
+  useEffect(() => {
+    onTimeoutRef.current = onTimeout;
+  }, [onTimeout]);
+
+  // Evitar disparos repetidos de timeout para el mismo deadline
+  const timeoutFiredForRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!expiresAt || isPaused) {
@@ -36,26 +78,61 @@ export function GameTimer({
 
     const targetTime = new Date(expiresAt).getTime();
 
+    // Declarar timerInterval antes de que updateTimer pueda ser ejecutada para evitar ReferenceError
+    let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+    const getSynchronizedServerTime = () => {
+      if (
+        syncAnchorRef.current &&
+        typeof window !== 'undefined' &&
+        window.performance &&
+        typeof window.performance.now === 'function'
+      ) {
+        const elapsed = window.performance.now() - syncAnchorRef.current.perfMs;
+        return syncAnchorRef.current.serverMs + elapsed;
+      }
+      return Date.now() + clockOffsetRef.current;
+    };
+
     const updateTimer = () => {
-      const currentSynchronizedTime = Date.now() + clockOffsetRef.current;
-      const msRemaining = Math.max(0, targetTime - currentSynchronizedTime);
+      const currentServerTime = getSynchronizedServerTime();
+      const msRemaining = Math.max(0, targetTime - currentServerTime);
       const remaining = Math.ceil(msRemaining / 1000);
 
       setSecondsRemaining(remaining);
 
       if (msRemaining <= 0) {
-        clearInterval(timerInterval);
-        if (onTimeout) {
-          onTimeout();
+        if (timerInterval !== null) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        // Ejecutar callback de timeout exactamente una sola vez por deadline
+        if (timeoutFiredForRef.current !== expiresAt) {
+          timeoutFiredForRef.current = expiresAt;
+          if (onTimeoutRef.current) {
+            onTimeoutRef.current();
+          }
         }
       }
     };
 
+    // Ejecutar inmediatamente para reflejar el estado actual
     updateTimer();
-    const timerInterval = setInterval(updateTimer, 250);
 
-    return () => clearInterval(timerInterval);
-  }, [expiresAt, isPaused, onTimeout]);
+    // Solo iniciar el intervalo si aún queda tiempo restante
+    const initialServerTime = getSynchronizedServerTime();
+    if (targetTime > initialServerTime) {
+      timerInterval = setInterval(updateTimer, 200);
+    }
+
+    return () => {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    };
+  }, [expiresAt, isPaused, totalDurationSeconds, serverNow, estimatedLatencyMs]);
 
   const fraction = Math.max(0, Math.min(1, secondsRemaining / totalDurationSeconds));
   const isUrgent = secondsRemaining <= 5;

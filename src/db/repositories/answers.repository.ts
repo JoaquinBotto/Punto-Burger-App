@@ -29,3 +29,17 @@ export async function createAnswer(db: DbClient, data: NewAnswer): Promise<Answe
   }
   return created;
 }
+
+export async function updateAnswer(
+  db: DbClient,
+  answerId: string,
+  data: Partial<NewAnswer>
+): Promise<Answer> {
+  const [updated] = await db.update(answers).set(data).where(eq(answers.id, answerId)).returning();
+
+  if (!updated) {
+    throw new Error(`Respuesta ${answerId} no encontrada.`);
+  }
+
+  return updated;
+}

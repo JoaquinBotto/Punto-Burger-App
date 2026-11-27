@@ -129,6 +129,17 @@ export class QuestionAlreadyAnsweredError extends DomainError {
   }
 }
 
+export class QuestionPositionMismatchError extends DomainError {
+  readonly code = 'QUESTION_POSITION_MISMATCH';
+  readonly statusCode = 409;
+
+  constructor(
+    message = 'La pregunta seleccionada no coincide con la pregunta activa actual de la partida.'
+  ) {
+    super(message);
+  }
+}
+
 export class QuestionNotResolvedError extends DomainError {
   readonly code = 'QUESTION_NOT_RESOLVED';
   readonly statusCode = 400;

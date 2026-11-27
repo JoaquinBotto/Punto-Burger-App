@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
   try {
     const result = await getGameState(db, sessionCookie);
 
+    if (result.question) {
+      result.question.serverNow = new Date().toISOString();
+    }
+
     return NextResponse.json(result, {
       status: 200,
       headers: {

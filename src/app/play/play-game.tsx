@@ -47,6 +47,7 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
   );
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [estimatedLatencyMs, setEstimatedLatencyMs] = useState<number>(0);
 
   // Consulta el estado actualizado del juego desde el servidor
   const refreshGameState = useCallback(async () => {
@@ -116,13 +117,37 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
     };
   }, [gameStatus, question]);
 
+  // Utilidad para medir RTT y latencia en acciones disparadas por el usuario
+  const measureFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const tStart =
+      typeof window !== 'undefined' &&
+      window.performance &&
+      typeof window.performance.now === 'function'
+        ? window.performance.now()
+        : Date.now();
+
+    const response = await fetch(input, init);
+
+    const tEnd =
+      typeof window !== 'undefined' &&
+      window.performance &&
+      typeof window.performance.now === 'function'
+        ? window.performance.now()
+        : Date.now();
+
+    const rtt = Math.max(0, tEnd - tStart);
+    setEstimatedLatencyMs(Math.round(rtt / 2));
+
+    return response;
+  };
+
   // Iniciar partida (Comenzar)
   const handleStartGame = async () => {
     setSubmitting(true);
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/api/v1/games/start', {
+      const res = await measureFetch('/api/v1/games/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -156,10 +181,14 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/api/v1/games/answer', {
+      const res = await measureFetch('/api/v1/games/answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selectedOption }),
+        body: JSON.stringify({
+          selectedOption,
+          questionPosition: currentPosition,
+          questionId: question?.questionId,
+        }),
       });
 
       const data = await res.json();
@@ -172,6 +201,41 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
       setIsResolved(true);
       setTotalScore(data.answer.totalScore);
     } catch {
+      // Manejo de error de red: recuperar feedback si la respuesta ya fue procesada por el servidor
+      try {
+        const stateRes = await measureFetch('/api/v1/games/state', {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+
+        if (stateRes.ok) {
+          const stateData: GameStateResult = await stateRes.json();
+          if (stateData.ok) {
+            if (stateData.isResolved && stateData.feedback) {
+              setFeedback(stateData.feedback);
+              setIsResolved(true);
+              setTotalScore(stateData.game.totalScore);
+              if (stateData.feedback.selectedOption) {
+                setSelectedOption(stateData.feedback.selectedOption);
+              }
+              return;
+            } else if (stateData.question) {
+              setQuestion(stateData.question);
+              const serverMs = new Date(stateData.question.serverNow).getTime();
+              const expiresMs = stateData.question.expiresAt
+                ? new Date(stateData.question.expiresAt).getTime()
+                : 0;
+              if (expiresMs && serverMs > expiresMs) {
+                await refreshGameState();
+                return;
+              }
+            }
+          }
+        }
+      } catch {
+        // Ignorar error secundario de consulta de estado
+      }
+
       setErrorMessage('Ocurrió un error al enviar tu respuesta. Reintentá.');
     } finally {
       setSubmitting(false);
@@ -191,7 +255,7 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/api/v1/games/advance', {
+      const res = await measureFetch('/api/v1/games/advance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -451,6 +515,7 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
           <GameTimer
             expiresAt={question.expiresAt}
             serverNow={question.serverNow}
+            estimatedLatencyMs={estimatedLatencyMs}
             totalDurationSeconds={20}
             onTimeout={handleTimeout}
             isPaused={isResolved || submitting}

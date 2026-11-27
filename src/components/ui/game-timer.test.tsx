@@ -203,4 +203,101 @@ describe('GameTimer Component', () => {
     // Total transcurrido: 3s + 2s = 5s. Quedan 15s.
     expect(screen.getByText('15s')).toBeInTheDocument();
   });
+
+  it('Escenario 10: pregunta ya vencida al montar GameTimer no lanza excepciones y muestra 0s', () => {
+    const baseTime = new Date('2026-11-27T10:00:00Z').getTime();
+    vi.setSystemTime(baseTime);
+
+    // Vencida hace 3 segundos
+    const expiresAt = new Date(baseTime - 3000).toISOString();
+    const onTimeout = vi.fn();
+
+    expect(() => {
+      render(
+        <GameTimer
+          expiresAt={expiresAt}
+          serverNow={new Date(baseTime).toISOString()}
+          totalDurationSeconds={20}
+          isPaused={false}
+          onTimeout={onTimeout}
+        />
+      );
+    }).not.toThrow();
+
+    expect(screen.getByText('0s')).toBeInTheDocument();
+    expect(onTimeout).toHaveBeenCalledTimes(1);
+  });
+
+  it('Escenario 9: latencia elevada al cargar una pregunta compensa el tiempo restante con estimatedLatencyMs', () => {
+    const serverTime = new Date('2026-11-27T10:00:00Z').getTime();
+    // La respuesta tardó 2000 ms en viajar por la red (one-way latency = 1000ms)
+    const clientTime = serverTime + 2000;
+    vi.setSystemTime(clientTime);
+
+    // El servidor fijó expiresAt = serverTime + 20000 (quedaban 20s en el servidor al enviar)
+    const expiresAt = new Date(serverTime + 20000).toISOString();
+
+    render(
+      <GameTimer
+        expiresAt={expiresAt}
+        serverNow={new Date(serverTime).toISOString()}
+        estimatedLatencyMs={1000}
+        totalDurationSeconds={20}
+        isPaused={false}
+      />
+    );
+
+    // En el cliente, con 1000ms de latencia estimada, deben quedar 19s (20000 - 1000 = 19000ms)
+    expect(screen.getByText('19s')).toBeInTheDocument();
+  });
+
+  it('Escenario 11: cambio de pregunta resincroniza correctamente el nuevo temporizador', () => {
+    const baseTime = new Date('2026-11-27T10:00:00Z').getTime();
+    vi.setSystemTime(baseTime);
+
+    const question1ExpiresAt = new Date(baseTime + 20000).toISOString();
+    const onTimeoutQ1 = vi.fn();
+
+    const { rerender } = render(
+      <GameTimer
+        expiresAt={question1ExpiresAt}
+        serverNow={new Date(baseTime).toISOString()}
+        totalDurationSeconds={20}
+        isPaused={false}
+        onTimeout={onTimeoutQ1}
+      />
+    );
+
+    expect(screen.getByText('20s')).toBeInTheDocument();
+
+    // Pasan 12 segundos en la pregunta 1
+    act(() => {
+      vi.advanceTimersByTime(12000);
+    });
+    expect(screen.getByText('8s')).toBeInTheDocument();
+
+    // Se avanza a la pregunta 2 en T + 12s
+    const question2Time = baseTime + 12000;
+    const question2ExpiresAt = new Date(question2Time + 20000).toISOString();
+    const onTimeoutQ2 = vi.fn();
+
+    rerender(
+      <GameTimer
+        expiresAt={question2ExpiresAt}
+        serverNow={new Date(question2Time).toISOString()}
+        totalDurationSeconds={20}
+        isPaused={false}
+        onTimeout={onTimeoutQ2}
+      />
+    );
+
+    // El temporizador de la nueva pregunta debe reiniciarse en 20s
+    expect(screen.getByText('20s')).toBeInTheDocument();
+
+    // Avanzamos 4 segundos en la pregunta 2
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(screen.getByText('16s')).toBeInTheDocument();
+  });
 });

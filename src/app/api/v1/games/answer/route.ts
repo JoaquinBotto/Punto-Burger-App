@@ -9,9 +9,14 @@ const answerSchema = z.object({
   selectedOption: z.enum(['A', 'B', 'C', 'D'], {
     errorMap: () => ({ message: 'La opción de respuesta debe ser A, B, C o D.' }),
   }),
+  questionPosition: z.number().int().min(1).max(10).optional(),
+  questionId: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  // Captura inmediata del timestamp de recepción antes de cualquier await o procesamiento
+  const receivedAt = new Date();
+
   const sessionCookie = request.cookies.get(TABLE_SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie || sessionCookie.trim() === '') {
     return NextResponse.json(
@@ -62,7 +67,16 @@ export async function POST(request: NextRequest) {
 
   try {
     await assertCompetitionPresence(db, sessionCookie, request.headers, request.cookies);
-    const result = await submitAnswer(db, sessionCookie, parseResult.data.selectedOption);
+    const result = await submitAnswer(
+      db,
+      sessionCookie,
+      parseResult.data.selectedOption,
+      receivedAt,
+      {
+        expectedPosition: parseResult.data.questionPosition,
+        expectedQuestionId: parseResult.data.questionId,
+      }
+    );
 
     return NextResponse.json(result, {
       status: 200,
