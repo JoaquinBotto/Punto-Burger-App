@@ -55,7 +55,9 @@ async function run() {
 
   // 0. Renovar mesa de prueba antes de comenzar
   console.log(`>>> [Paso 0] Renovando ${testTableCode}...`);
-  sshExec(`cd /var/www/punto-burger-app/current && npm run table:renew -- ${testTableCode} --force`);
+  sshExec(
+    `cd /var/www/punto-burger-app/current && npm run table:renew -- ${testTableCode} --force`
+  );
 
   // Obtener qr_token
   const tableData = getTableQrToken(testTableCode);
@@ -100,10 +102,14 @@ async function run() {
   }
   const participantIds1 = setupData1.participants.map((p) => p.id);
   const groupId1 = setupData1.group.id;
-  console.log(`✓ Setup inicial guardado: groupId=${groupId1}, participants=${participantIds1.join(', ')}`);
+  console.log(
+    `✓ Setup inicial guardado: groupId=${groupId1}, participants=${participantIds1.join(', ')}`
+  );
 
   // 3. REINTENTO de setup con el MISMO payload (simula retry de red)
-  console.log('\n>>> [Paso 3] Reintentando setup con IDÉNTICO payload (simulación de drop/doble clic)...');
+  console.log(
+    '\n>>> [Paso 3] Reintentando setup con IDÉNTICO payload (simulación de drop/doble clic)...'
+  );
   const setupRes2 = await fetch(`${BASE_URL}/api/v1/games/setup`, {
     method: 'POST',
     headers: {
@@ -125,7 +131,9 @@ async function run() {
   if (participantIds1.join(',') !== participantIds2.join(',')) {
     throw new Error(`Participant IDs cambiaron en retry: ${participantIds1} vs ${participantIds2}`);
   }
-  console.log('✓ Idempotencia de Setup validada: los IDs de participantes se preservaron idénticos sin error.');
+  console.log(
+    '✓ Idempotencia de Setup validada: los IDs de participantes se preservaron idénticos sin error.'
+  );
 
   // 4. Inscribirse a la competencia
   console.log('\n>>> [Paso 4] Inscribiendo mesa a la competencia activa...');
@@ -179,10 +187,14 @@ async function run() {
     throw new Error(`Round 1 prepare falló: ${JSON.stringify(roundData1)}`);
   }
   const gameSessionId1 = roundData1.gameSessionId;
-  console.log(`✓ Ciclo 1 preparado: roundNumber=${roundData1.roundNumber}, gameSessionId=${gameSessionId1}`);
+  console.log(
+    `✓ Ciclo 1 preparado: roundNumber=${roundData1.roundNumber}, gameSessionId=${gameSessionId1}`
+  );
 
   // 7. REINTENTO de preparación de Ronda 1
-  console.log('\n>>> [Paso 7] Reintentando rounds/next para Ciclo 1 (simulación de drop/doble clic)...');
+  console.log(
+    '\n>>> [Paso 7] Reintentando rounds/next para Ciclo 1 (simulación de drop/doble clic)...'
+  );
   const roundRes2 = await fetch(`${BASE_URL}/api/v1/competitions/current/rounds/next`, {
     method: 'POST',
     headers: {
@@ -196,10 +208,14 @@ async function run() {
     throw new Error(`Reintento de Round 1 falló: ${JSON.stringify(roundData2)}`);
   }
   if (!roundData2.existing) {
-    throw new Error(`Se esperaba existing: true en retry de ronda, obtenido: ${JSON.stringify(roundData2)}`);
+    throw new Error(
+      `Se esperaba existing: true en retry de ronda, obtenido: ${JSON.stringify(roundData2)}`
+    );
   }
   if (roundData2.gameSessionId !== gameSessionId1) {
-    throw new Error(`GameSessionId difiere en retry: ${gameSessionId1} vs ${roundData2.gameSessionId}`);
+    throw new Error(
+      `GameSessionId difiere en retry: ${gameSessionId1} vs ${roundData2.gameSessionId}`
+    );
   }
   console.log('✓ Idempotencia de rounds/next validada: existing=true, misma partida devuelta.');
 
@@ -216,9 +232,13 @@ async function run() {
   });
   const setupDataFrozenSame = await setupResFrozenSame.json();
   if (!setupResFrozenSame.ok || !setupDataFrozenSame.ok) {
-    throw new Error(`Setup con payload idéntico y preguntas congeladas falló: ${JSON.stringify(setupDataFrozenSame)}`);
+    throw new Error(
+      `Setup con payload idéntico y preguntas congeladas falló: ${JSON.stringify(setupDataFrozenSame)}`
+    );
   }
-  console.log('    ✓ Payload idéntico retornó 200 OK sin tocar participantes referenciados ni violar FKs.');
+  console.log(
+    '    ✓ Payload idéntico retornó 200 OK sin tocar participantes referenciados ni violar FKs.'
+  );
 
   console.log('    b) Con payload modificado (debe ser 409 Conflict SETUP_ALREADY_LOCKED)');
   const modifiedSetupPayload = {
@@ -234,10 +254,17 @@ async function run() {
     body: JSON.stringify(modifiedSetupPayload),
   });
   const setupDataFrozenDiff = await setupResFrozenDiff.json();
-  if (setupResFrozenDiff.status !== 409 || setupDataFrozenDiff.error?.code !== 'SETUP_ALREADY_LOCKED') {
-    throw new Error(`Se esperaba 409 SETUP_ALREADY_LOCKED, obtenido status=${setupResFrozenDiff.status}: ${JSON.stringify(setupDataFrozenDiff)}`);
+  if (
+    setupResFrozenDiff.status !== 409 ||
+    setupDataFrozenDiff.error?.code !== 'SETUP_ALREADY_LOCKED'
+  ) {
+    throw new Error(
+      `Se esperaba 409 SETUP_ALREADY_LOCKED, obtenido status=${setupResFrozenDiff.status}: ${JSON.stringify(setupDataFrozenDiff)}`
+    );
   }
-  console.log(`    ✓ Payload modificado rechazado limpiamente con 409 SETUP_ALREADY_LOCKED: "${setupDataFrozenDiff.error?.message}"`);
+  console.log(
+    `    ✓ Payload modificado rechazado limpiamente con 409 SETUP_ALREADY_LOCKED: "${setupDataFrozenDiff.error?.message}"`
+  );
 
   // 9. Iniciar partida y responder 1 pregunta para validar gameplay
   console.log('\n>>> [Paso 9] Iniciando juego y respondiendo 1 pregunta...');
@@ -271,11 +298,15 @@ async function run() {
   if (!answerRes.ok || !answerData.ok) {
     throw new Error(`Answer falló: ${JSON.stringify(answerData)}`);
   }
-  console.log(`✓ Pregunta 1 respondida: result=${answerData.answer.result}, pointsAwarded=${answerData.answer.pointsAwarded}`);
+  console.log(
+    `✓ Pregunta 1 respondida: result=${answerData.answer.result}, pointsAwarded=${answerData.answer.pointsAwarded}`
+  );
 
   // 10. Limpieza y renovación final de mesa de prueba
   console.log(`\n>>> [Paso 10] Renovando ${testTableCode} para dejarla disponible...`);
-  sshExec(`cd /var/www/punto-burger-app/current && npm run table:renew -- ${testTableCode} --force`);
+  sshExec(
+    `cd /var/www/punto-burger-app/current && npm run table:renew -- ${testTableCode} --force`
+  );
   console.log(`✓ Mesa ${testTableCode} renovada y disponible.`);
 
   console.log('\n===============================================================');
