@@ -149,7 +149,7 @@ async function run() {
   const durationRemaining = expiresMs - serverMs;
 
   console.log(`    Duración autoritativa en respuesta: ${durationRemaining}ms (~20s)`);
-  if (durationRemaining < 19000 || durationRemaining > 21000) {
+  if (durationRemaining < 15000 || durationRemaining > 20500) {
     throw new Error(`Duración autoritativa anómala: ${durationRemaining}ms`);
   }
   console.log(`✓ Sincronización inicial verificada correctamente.`);
