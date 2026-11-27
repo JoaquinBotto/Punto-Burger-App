@@ -8,6 +8,14 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [Unreleased]
 
+### Changed
+
+- `UX-GAMEPLAY-TIMER`: Pausa visual inmediata del temporizador al confirmar respuesta (`isPaused={isResolved || submitting}`):
+  - Congelamiento instantáneo del `GameTimer` en `src/app/play/play-game.tsx` al momento en que el usuario pulsa "Confirmar respuesta" (`submitting === true`), evitando la confusión visual de ver el contador seguir descendiendo mientras la petición de respuesta está en vuelo.
+  - Sincronización robusta en `src/components/ui/game-timer.tsx`: cálculo del desfase con `serverNow` acotado exclusivamente a cambios de `serverNow`, preservando el valor visual durante la pausa.
+  - En caso de error de red o fallo en el request (`submitting` retorna a false), el temporizador se resincroniza autoritativamente contra `expiresAt` descontando el tiempo real transcurrido sin regalar segundos adicionales.
+  - Al resolverse la pregunta (`isResolved === true`), el temporizador se mantiene congelado mientras se presenta el panel de feedback.
+
 ### Fixed
 
 - `PPA-HOTFIX-003`: Soporte de Competition Rounds de Categorías Mixtas en `/play`. Corrección del bucle de redirección pre-juego y compatibilidad de extremo a extremo para partidas de torneo con `categoryId: null`:

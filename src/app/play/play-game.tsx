@@ -453,7 +453,7 @@ export function PlayGame({ playData, initialState }: PlayGameProps) {
             serverNow={question.serverNow}
             totalDurationSeconds={20}
             onTimeout={handleTimeout}
-            isPaused={isResolved}
+            isPaused={isResolved || submitting}
           />
         </div>
 

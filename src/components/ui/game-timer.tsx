@@ -18,6 +18,16 @@ export function GameTimer({
   isPaused = false,
 }: GameTimerProps) {
   const [secondsRemaining, setSecondsRemaining] = useState<number>(totalDurationSeconds);
+  const clockOffsetRef = React.useRef<number>(0);
+
+  // Calcular el desfase respecto al servidor únicamente cuando serverNow cambia
+  useEffect(() => {
+    if (serverNow) {
+      clockOffsetRef.current = new Date(serverNow).getTime() - Date.now();
+    } else {
+      clockOffsetRef.current = 0;
+    }
+  }, [serverNow]);
 
   useEffect(() => {
     if (!expiresAt || isPaused) {
@@ -25,13 +35,9 @@ export function GameTimer({
     }
 
     const targetTime = new Date(expiresAt).getTime();
-    // Calcular el desfase inicial del reloj local respecto al servidor si serverNow está disponible
-    const clientNow = Date.now();
-    const serverTime = serverNow ? new Date(serverNow).getTime() : clientNow;
-    const clockOffset = serverTime - clientNow;
 
     const updateTimer = () => {
-      const currentSynchronizedTime = Date.now() + clockOffset;
+      const currentSynchronizedTime = Date.now() + clockOffsetRef.current;
       const msRemaining = Math.max(0, targetTime - currentSynchronizedTime);
       const remaining = Math.ceil(msRemaining / 1000);
 
@@ -49,7 +55,7 @@ export function GameTimer({
     const timerInterval = setInterval(updateTimer, 250);
 
     return () => clearInterval(timerInterval);
-  }, [expiresAt, serverNow, isPaused, onTimeout]);
+  }, [expiresAt, isPaused, onTimeout]);
 
   const fraction = Math.max(0, Math.min(1, secondsRemaining / totalDurationSeconds));
   const isUrgent = secondsRemaining <= 5;
