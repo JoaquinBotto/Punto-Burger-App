@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createCompetition, getCurrentCompetition, joinCompetition } from './competition.service';
+import {
+  createCompetition,
+  getCurrentCompetition,
+  joinCompetition,
+  startNextCompetitionRound,
+} from './competition.service';
 import {
   CompetitionNotFoundError,
   CompetitionRegistrationClosedError,
@@ -30,6 +35,7 @@ function createMockDb(compList: unknown[] = []) {
 describe('CompetitionService', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(compRepo, 'getCompetitionEntryByTableSessionId').mockResolvedValue(null);
   });
 
   describe('createCompetition', () => {
@@ -268,6 +274,104 @@ describe('CompetitionService', () => {
           cookies: { get: () => undefined },
         })
       ).rejects.toThrow(CompetitionRegistrationClosedError);
+    });
+
+    it('devuelve entrada existente de forma idempotente en reintento (200 OK)', async () => {
+      vi.spyOn(sessionsModule, 'resolveSessionFromCookie').mockResolvedValue({
+        session: { id: 'ts-1', venueId: 'v-1' } as unknown as TableSession,
+        table: { id: 't-1' } as unknown as Table,
+        device: { id: 'd-1' } as unknown as Device,
+        venue: { id: 'v-1' } as unknown as Venue,
+      });
+
+      vi.spyOn(presenceModule, 'checkPresence').mockReturnValue({
+        mode: 'off',
+        verified: true,
+        required: false,
+      });
+
+      const mockDb = createMockDb([
+        {
+          id: 'comp-1',
+          status: 'active',
+          timingMode: 'open',
+        },
+      ]);
+
+      vi.spyOn(compRepo, 'getActiveOpenCompetitionByVenue').mockResolvedValue({
+        id: 'comp-1',
+        status: 'active',
+        timingMode: 'open',
+      } as unknown as Competition);
+
+      vi.spyOn(compRepo, 'getCompetitionEntryByTableSessionId').mockResolvedValue({
+        id: 'ce-existing-1',
+        competitionId: 'comp-1',
+        tableSessionId: 'ts-1',
+        status: 'registered',
+      } as never);
+
+      const result = await joinCompetition(mockDb, 'token-1', {
+        headers: new Headers(),
+        cookies: { get: () => undefined },
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.entryId).toBe('ce-existing-1');
+      expect(result.competitionId).toBe('comp-1');
+      expect(result.next).toBe('/play');
+    });
+  });
+
+  describe('startNextCompetitionRound (Idempotencia)', () => {
+    it('devuelve ciclo existente si ya está en status created o active sin crear duplicados', async () => {
+      vi.spyOn(sessionsModule, 'resolveSessionFromCookie').mockResolvedValue({
+        session: { id: 'ts-1', venueId: 'v-1' } as unknown as TableSession,
+        table: { id: 't-1' } as unknown as Table,
+        device: { id: 'd-1' } as unknown as Device,
+        venue: { id: 'v-1' } as unknown as Venue,
+      });
+
+      vi.spyOn(presenceModule, 'checkPresence').mockReturnValue({
+        mode: 'off',
+        verified: true,
+        required: false,
+      });
+
+      vi.spyOn(compRepo, 'getCompetitionEntryByTableSessionId').mockResolvedValue({
+        id: 'ce-1',
+        competitionId: 'comp-1',
+        tableSessionId: 'ts-1',
+        status: 'active',
+      } as never);
+
+      // Ronda 1 ya creada con gameSession en status created
+      vi.spyOn(compRepo, 'getCompetitionRounds').mockResolvedValue([
+        {
+          id: 'cr-1',
+          roundNumber: 1,
+          competitionEntryId: 'ce-1',
+          gameSessionId: 'gs-round-1',
+          gameSession: {
+            id: 'gs-round-1',
+            status: 'created',
+            totalScore: 0,
+          },
+        },
+      ] as never);
+
+      const mockDb = {} as Database;
+
+      const result = await startNextCompetitionRound(mockDb, 'token-1', {
+        headers: new Headers(),
+        cookies: { get: () => undefined },
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.existing).toBe(true);
+      expect(result.roundNumber).toBe(1);
+      expect(result.gameSessionId).toBe('gs-round-1');
+      expect(result.next).toBe('/play');
     });
   });
 });

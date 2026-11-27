@@ -5,6 +5,7 @@ import * as sessionsService from '../sessions/sessions.service';
 import * as groupsRepo from '../../db/repositories/groups.repository';
 import * as participantsRepo from '../../db/repositories/participants.repository';
 import * as gameSessionsRepo from '../../db/repositories/game-sessions.repository';
+import * as gameQuestionsRepo from '../../db/repositories/game-questions.repository';
 import * as categoriesRepo from '../../db/repositories/categories.repository';
 import * as auditRepo from '../../db/repositories/audit-events.repository';
 import {
@@ -18,6 +19,7 @@ import {
   ParticipantInvalidError,
   SessionExpiredError,
   SessionNotFoundError,
+  SetupAlreadyLockedError,
 } from './errors';
 
 describe('Groups & Game Setup Service (PPA-011)', () => {
@@ -92,6 +94,14 @@ describe('Groups & Game Setup Service (PPA-011)', () => {
 
     mockDb = {
       transaction: vi.fn(async (cb) => cb(mockDb)),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([]),
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      }),
     } as unknown as Database;
 
     vi.spyOn(sessionsService, 'resolveSessionFromCookie').mockResolvedValue(mockResolvedSession);
@@ -103,7 +113,10 @@ describe('Groups & Game Setup Service (PPA-011)', () => {
       advancedCount: 4,
     });
     vi.spyOn(gameSessionsRepo, 'getGameSessionByTableSessionId').mockResolvedValue(null);
+    vi.spyOn(gameSessionsRepo, 'getGameSessionsByTableSessionId').mockResolvedValue([]);
+    vi.spyOn(gameQuestionsRepo, 'countGameQuestionsBySessionId').mockResolvedValue(0);
     vi.spyOn(groupsRepo, 'getGroupByTableSessionId').mockResolvedValue(null);
+    vi.spyOn(participantsRepo, 'getParticipantsByGroupId').mockResolvedValue([]);
     vi.spyOn(groupsRepo, 'createGroup').mockResolvedValue({
       id: fakeGroupId,
       tableSessionId: fakeSessionId,
@@ -480,6 +493,188 @@ describe('Groups & Game Setup Service (PPA-011)', () => {
       ],
       categorySlug: 'deportes',
       isSaved: true,
+    });
+  });
+
+  describe('PPA-HOTFIX-002: Idempotencia y Setup Lock', () => {
+    it('reintento con payload idéntico y preguntas congeladas retorna setup existente de forma idempotente sin eliminar participantes', async () => {
+      const existingGroup = {
+        id: fakeGroupId,
+        tableSessionId: fakeSessionId,
+        name: 'Los Bacon',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const existingParticipants = [
+        {
+          id: 'p-1',
+          groupId: fakeGroupId,
+          alias: 'Joaco',
+          ageRange: 'adult',
+          educationLevel: 'higher',
+          position: 1,
+          createdAt: new Date(),
+        },
+      ];
+      const gameWithQuestions = {
+        id: fakeGameSessionId,
+        tableSessionId: fakeSessionId,
+        groupId: fakeGroupId,
+        categoryId: fakeCategoryId,
+        status: 'created' as const,
+        rankingEligible: true,
+        startedAt: null,
+        finishedAt: null,
+        totalScore: 0,
+        correctCount: 0,
+        incorrectCount: 0,
+        unansweredCount: 0,
+        currentQuestionIndex: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.spyOn(groupsRepo, 'getGroupByTableSessionId').mockResolvedValue(existingGroup);
+      vi.spyOn(participantsRepo, 'getParticipantsByGroupId').mockResolvedValue(
+        existingParticipants as never
+      );
+      vi.spyOn(gameSessionsRepo, 'getGameSessionsByTableSessionId').mockResolvedValue([
+        gameWithQuestions,
+      ]);
+
+      // Mock countGameQuestionsBySessionId to return 10 (questions frozen!)
+      const gameQuestionsRepo = await import('../../db/repositories/game-questions.repository');
+      vi.spyOn(gameQuestionsRepo, 'countGameQuestionsBySessionId').mockResolvedValue(10);
+
+      const result = await saveGameSetup(mockDb, 'valid-token', validPayload);
+
+      expect(result.ok).toBe(true);
+      expect(result.group.id).toBe(fakeGroupId);
+      expect(result.participants[0]?.id).toBe('p-1');
+      // Asegurar que no se llamó a replaceGroupParticipants ni delete
+      expect(participantsRepo.replaceGroupParticipants).not.toHaveBeenCalled();
+    });
+
+    it('intento de modificar setup cuando la partida tiene preguntas congeladas lanza SetupAlreadyLockedError (409)', async () => {
+      const existingGroup = {
+        id: fakeGroupId,
+        tableSessionId: fakeSessionId,
+        name: 'Los Bacon',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const existingParticipants = [
+        {
+          id: 'p-1',
+          groupId: fakeGroupId,
+          alias: 'Joaco',
+          ageRange: 'adult',
+          educationLevel: 'higher',
+          position: 1,
+          createdAt: new Date(),
+        },
+      ];
+      const gameWithQuestions = {
+        id: fakeGameSessionId,
+        tableSessionId: fakeSessionId,
+        groupId: fakeGroupId,
+        categoryId: fakeCategoryId,
+        status: 'created' as const,
+        rankingEligible: true,
+        startedAt: null,
+        finishedAt: null,
+        totalScore: 0,
+        correctCount: 0,
+        incorrectCount: 0,
+        unansweredCount: 0,
+        currentQuestionIndex: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.spyOn(groupsRepo, 'getGroupByTableSessionId').mockResolvedValue(existingGroup);
+      vi.spyOn(participantsRepo, 'getParticipantsByGroupId').mockResolvedValue(
+        existingParticipants as never
+      );
+      vi.spyOn(gameSessionsRepo, 'getGameSessionsByTableSessionId').mockResolvedValue([
+        gameWithQuestions,
+      ]);
+
+      const gameQuestionsRepo = await import('../../db/repositories/game-questions.repository');
+      vi.spyOn(gameQuestionsRepo, 'countGameQuestionsBySessionId').mockResolvedValue(10);
+
+      // Payload con nombre modificado
+      await expect(
+        saveGameSetup(mockDb, 'valid-token', {
+          ...validPayload,
+          groupName: 'Otro Nombre',
+        })
+      ).rejects.toThrow(SetupAlreadyLockedError);
+
+      // Payload con participantes diferentes
+      await expect(
+        saveGameSetup(mockDb, 'valid-token', {
+          ...validPayload,
+          participants: [{ alias: 'Otro Jugador', ageRange: 'teen' }],
+        })
+      ).rejects.toThrow(SetupAlreadyLockedError);
+    });
+
+    it('intento de modificar setup cuando la partida está activa lanza SetupAlreadyLockedError (409)', async () => {
+      const existingGroup = {
+        id: fakeGroupId,
+        tableSessionId: fakeSessionId,
+        name: 'Los Bacon',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const existingParticipants = [
+        {
+          id: 'p-1',
+          groupId: fakeGroupId,
+          alias: 'Joaco',
+          ageRange: 'adult',
+          educationLevel: 'higher',
+          position: 1,
+          createdAt: new Date(),
+        },
+      ];
+      const activeGame = {
+        id: fakeGameSessionId,
+        tableSessionId: fakeSessionId,
+        groupId: fakeGroupId,
+        categoryId: fakeCategoryId,
+        status: 'active' as const,
+        rankingEligible: true,
+        startedAt: new Date(),
+        finishedAt: null,
+        totalScore: 100,
+        correctCount: 1,
+        incorrectCount: 0,
+        unansweredCount: 0,
+        currentQuestionIndex: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.spyOn(groupsRepo, 'getGroupByTableSessionId').mockResolvedValue(existingGroup);
+      vi.spyOn(participantsRepo, 'getParticipantsByGroupId').mockResolvedValue(
+        existingParticipants as never
+      );
+      vi.spyOn(gameSessionsRepo, 'getGameSessionsByTableSessionId').mockResolvedValue([activeGame]);
+
+      // Payload diferente lanza 409 GameAlreadyStartedError
+      await expect(
+        saveGameSetup(mockDb, 'valid-token', {
+          ...validPayload,
+          groupName: 'Cambio Nombre',
+        })
+      ).rejects.toThrow(GameAlreadyStartedError);
+
+      // Payload idéntico es idempotente y exitoso
+      const result = await saveGameSetup(mockDb, 'valid-token', validPayload);
+      expect(result.ok).toBe(true);
+      expect(result.group.id).toBe(fakeGroupId);
     });
   });
 });

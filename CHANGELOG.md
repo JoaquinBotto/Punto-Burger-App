@@ -8,6 +8,18 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [Unreleased]
 
+### Fixed
+
+- `PPA-HOTFIX-002`: Reintentos Idempotentes en Competition Setup. Corrección y blindaje de extremo a extremo ante cortes de red, doble clic y reintentos en el wizard de configuración (`/play/setup`) y el inicio de competencia:
+  - Reconciliación in-place de participantes (`replaceGroupParticipants` en `participants.repository.ts`): actualización posicional que preserva inmutables los IDs (`participants.id`), previniendo violaciones de clave foránea `ON DELETE RESTRICT` causadas por referencias desde `game_questions.target_participant_id`.
+  - Idempotencia estricta en guardado de setup (`saveGameSetup` en `groups.service.ts`): comparación semántica profunda contra el estado persistido; retornos 200 OK idénticos ante reintentos sin mutar la base de datos ni cambiar UUIDs.
+  - Bloqueo controlado con HTTP 409 (`SETUP_ALREADY_LOCKED`): rechazo amigable de modificaciones a grupos cuyas preguntas ya han sido congeladas para la partida, guiando al usuario a continuar jugando sin arrojar errores 500 no capturados.
+  - Idempotencia en inscripción a torneos (`joinCompetition` en `competition.service.ts`): detección y retorno de inscripción existente sin error ni duplicación de registros en `competition_entries`.
+  - Idempotencia en preparación y avance de rondas (`prepareCompetitionRound` y `startNextCompetitionRound` en `competition.service.ts`): retorno de rondas ya preparadas o activas (`existing: true`) sin colisión de rondas ni errores de secuencia.
+  - Resiliencia en frontend (`play-setup-wizard.tsx`): comprobación de estado de ronda activa antes de re-ejecutar requests, botón de acción directa "Continuar Ciclo X" ante partidas en curso y bloqueo de re-POSTs innecesarios.
+  - Mejora en renovación operativa de mesas (`table-renewal.service.ts`): marcado automático de inscripciones de competencia activas/registradas como `abandoned` al renovar la mesa.
+  - Suite de 259 pruebas automatizadas (48 test suites) pasando al 100%; documentado en `docs/implementation/PPA-HOTFIX-002-idempotent-competition-setup.md`.
+
 ### Added
 
 - `PPA-TESTMODE-001`: Competencia Abierta + Renovación Operativa de Mesas. Soporte de modalidad de competencia abierta y renovación operativa para pruebas reales en el local físico de Punto Burger Esperanza:
@@ -72,6 +84,18 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - Especificación funcional de visión de producto (`PPA-002`) revisada y aprobada oficialmente (v1.0.0). Documenta el propósito, objetivos y límites del ecosistema de Punto Burger, priorizando a las escuelas desde el lanzamiento público.
 
 ## [v0.1.0] - Inicio del Proyecto
+
+### Fixed
+
+- `PPA-HOTFIX-002`: Reintentos Idempotentes en Competition Setup. Corrección y blindaje de extremo a extremo ante cortes de red, doble clic y reintentos en el wizard de configuración (`/play/setup`) y el inicio de competencia:
+  - Reconciliación in-place de participantes (`replaceGroupParticipants` en `participants.repository.ts`): actualización posicional que preserva inmutables los IDs (`participants.id`), previniendo violaciones de clave foránea `ON DELETE RESTRICT` causadas por referencias desde `game_questions.target_participant_id`.
+  - Idempotencia estricta en guardado de setup (`saveGameSetup` en `groups.service.ts`): comparación semántica profunda contra el estado persistido; retornos 200 OK idénticos ante reintentos sin mutar la base de datos ni cambiar UUIDs.
+  - Bloqueo controlado con HTTP 409 (`SETUP_ALREADY_LOCKED`): rechazo amigable de modificaciones a grupos cuyas preguntas ya han sido congeladas para la partida, guiando al usuario a continuar jugando sin arrojar errores 500 no capturados.
+  - Idempotencia en inscripción a torneos (`joinCompetition` en `competition.service.ts`): detección y retorno de inscripción existente sin error ni duplicación de registros en `competition_entries`.
+  - Idempotencia en preparación y avance de rondas (`prepareCompetitionRound` y `startNextCompetitionRound` en `competition.service.ts`): retorno de rondas ya preparadas o activas (`existing: true`) sin colisión de rondas ni errores de secuencia.
+  - Resiliencia en frontend (`play-setup-wizard.tsx`): comprobación de estado de ronda activa antes de re-ejecutar requests, botón de acción directa "Continuar Ciclo X" ante partidas en curso y bloqueo de re-POSTs innecesarios.
+  - Mejora en renovación operativa de mesas (`table-renewal.service.ts`): marcado automático de inscripciones de competencia activas/registradas como `abandoned` al renovar la mesa.
+  - Suite de 259 pruebas automatizadas (48 test suites) pasando al 100%; documentado en `docs/implementation/PPA-HOTFIX-002-idempotent-competition-setup.md`.
 
 ### Added
 

@@ -12,9 +12,11 @@ import {
 import {
   createGameSession,
   getGameSessionByTableSessionId,
+  getGameSessionsByTableSessionId,
   getGameSessionWithCategory,
   updateGameSessionCategory,
 } from '../../db/repositories/game-sessions.repository';
+import { countGameQuestionsBySessionId } from '../../db/repositories/game-questions.repository';
 import {
   checkCategoryReadiness,
   getActiveCategoriesWithReadiness,
@@ -33,6 +35,7 @@ import {
   ParticipantInvalidError,
   SessionExpiredError,
   SessionNotFoundError,
+  SetupAlreadyLockedError,
   SetupCreationFailedError,
 } from './errors';
 import type {
@@ -42,6 +45,7 @@ import type {
   CanonicalAgeRange,
   CanonicalEducationLevel,
 } from './types';
+import type { Participant } from '../../db/schema';
 
 /**
  * Guarda o actualiza transaccionalmente la configuración del equipo, participantes y categoría.
@@ -109,17 +113,91 @@ export async function saveGameSetup(
     throw new CategoryNotReadyError();
   }
 
-  // 4. Verificación de estado de partida previa (bloqueo si ya está activa)
+  // 4. Verificación de estado de partida previa y bloqueo de setup
   const existingGame = await getGameSessionByTableSessionId(db, session.id);
-  if (existingGame && existingGame.status !== 'created') {
-    throw new GameAlreadyStartedError();
+  const sessionGames = await getGameSessionsByTableSessionId(db, session.id);
+  const allGames = sessionGames.length > 0 ? sessionGames : existingGame ? [existingGame] : [];
+
+  const hasActiveOrCompletedGame = allGames.some(
+    (g) => g.status === 'active' || g.status === 'completed'
+  );
+
+  let hasFrozenQuestions = false;
+  for (const game of allGames) {
+    const qCount = await countGameQuestionsBySessionId(db, game.id);
+    if (qCount > 0) {
+      hasFrozenQuestions = true;
+      break;
+    }
+  }
+
+  const isSetupLocked = hasActiveOrCompletedGame || hasFrozenQuestions;
+
+  // Comparar semánticamente si el payload recibido es idéntico al estado persistido
+  const existingGroup = await getGroupByTableSessionId(db, session.id);
+  let isIdenticalPayload = false;
+  let existingParticipantsList: Participant[] = [];
+
+  if (existingGroup) {
+    existingParticipantsList = await getParticipantsByGroupId(db, existingGroup.id);
+    if (
+      existingGroup.name.trim() === data.groupName.trim() &&
+      existingParticipantsList.length === data.participants.length
+    ) {
+      isIdenticalPayload = data.participants.every((p, idx) => {
+        const ex = existingParticipantsList[idx];
+        return (
+          ex &&
+          ex.alias.trim() === p.alias.trim() &&
+          ex.ageRange === p.ageRange &&
+          (ex.educationLevel ?? null) === (p.educationLevel ?? null) &&
+          ex.position === idx + 1
+        );
+      });
+    }
+  }
+
+  if (isSetupLocked) {
+    if (isIdenticalPayload) {
+      // Reintento legítimo e idempotente con preguntas ya congeladas / partida en curso
+      const latestGame = allGames.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+      return {
+        ok: true,
+        group: {
+          id: existingGroup!.id,
+          name: existingGroup!.name,
+        },
+        participants: existingParticipantsList.map((p) => ({
+          id: p.id,
+          alias: p.alias,
+          ageRange: p.ageRange as CanonicalAgeRange,
+          educationLevel: (p.educationLevel as CanonicalEducationLevel) ?? null,
+          position: p.position,
+        })),
+        gameSession: {
+          id: latestGame ? latestGame.id : '',
+          status: 'created' as const,
+          categoryId: category.id,
+          categoryName: category.name,
+          categorySlug: category.slug,
+        },
+        next: '/play/setup',
+      };
+    }
+
+    if (hasActiveOrCompletedGame) {
+      throw new GameAlreadyStartedError();
+    }
+
+    // Intento de modificar setup cuando las preguntas ya están congeladas
+    throw new SetupAlreadyLockedError();
   }
 
   // 5. Transacción atómica en PostgreSQL
   try {
     return await db.transaction(async (tx) => {
       // 5.1 Gestión de Grupo (Crear o Actualizar)
-      let currentGroup = await getGroupByTableSessionId(tx, session.id);
+      let currentGroup = existingGroup;
 
       if (!currentGroup) {
         currentGroup = await createGroup(tx, {
@@ -159,31 +237,36 @@ export async function saveGameSetup(
       }
 
       // 5.2 Gestión de Participantes (posiciones estables 1..N)
-      const participantsWithPosition = data.participants.map((p, idx) => ({
-        alias: p.alias,
-        ageRange: p.ageRange,
-        educationLevel: p.educationLevel ?? null,
-        position: idx + 1,
-      }));
+      let savedParticipants: Participant[];
+      if (isIdenticalPayload && existingParticipantsList.length > 0) {
+        savedParticipants = existingParticipantsList;
+      } else {
+        const participantsWithPosition = data.participants.map((p, idx) => ({
+          alias: p.alias,
+          ageRange: p.ageRange,
+          educationLevel: p.educationLevel ?? null,
+          position: idx + 1,
+        }));
 
-      const savedParticipants = await replaceGroupParticipants(
-        tx,
-        currentGroup.id,
-        participantsWithPosition
-      );
+        savedParticipants = await replaceGroupParticipants(
+          tx,
+          currentGroup.id,
+          participantsWithPosition
+        );
 
-      await createAuditEvent(tx, {
-        venueId: venue.id,
-        eventType: 'participants_configured',
-        entityType: 'group',
-        entityId: currentGroup.id,
-        actorType: 'device',
-        actorId: device.id,
-        metadata: {
-          participantCount: savedParticipants.length,
-          tableSessionId: session.id,
-        },
-      });
+        await createAuditEvent(tx, {
+          venueId: venue.id,
+          eventType: 'participants_configured',
+          entityType: 'group',
+          entityId: currentGroup.id,
+          actorType: 'device',
+          actorId: device.id,
+          metadata: {
+            participantCount: savedParticipants.length,
+            tableSessionId: session.id,
+          },
+        });
+      }
 
       // 5.3 Gestión de Game Session (Crear o Actualizar categoría)
       let currentGameSession = await getGameSessionByTableSessionId(tx, session.id);
@@ -211,7 +294,7 @@ export async function saveGameSetup(
           },
         });
       } else {
-        if (currentGameSession.categoryId !== category.id) {
+        if (currentGameSession.categoryId && currentGameSession.categoryId !== category.id) {
           currentGameSession = await updateGameSessionCategory(
             tx,
             currentGameSession.id,
@@ -269,7 +352,8 @@ export async function saveGameSetup(
       error instanceof CategoryNotFoundError ||
       error instanceof CategoryNotAvailableError ||
       error instanceof CategoryNotReadyError ||
-      error instanceof GameAlreadyStartedError
+      error instanceof GameAlreadyStartedError ||
+      error instanceof SetupAlreadyLockedError
     ) {
       throw error;
     }
@@ -307,7 +391,7 @@ export async function getPlaySetupData(
     const participantsList = await getParticipantsByGroupId(db, currentGroup.id);
     const currentGame = await getGameSessionWithCategory(db, session.id);
 
-    if (currentGame && currentGame.status === 'created') {
+    if (participantsList.length > 0) {
       existingSetup = {
         groupName: currentGroup.name,
         participants: participantsList.map((p) => ({
@@ -316,7 +400,7 @@ export async function getPlaySetupData(
           educationLevel: (p.educationLevel as CanonicalEducationLevel) ?? null,
           position: p.position,
         })),
-        categorySlug: currentGame.category?.slug ?? '',
+        categorySlug: currentGame?.category?.slug ?? categoriesList[0]?.slug ?? '',
         isSaved: true,
       };
     }

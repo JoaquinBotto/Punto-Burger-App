@@ -311,9 +311,20 @@ export async function joinCompetition(
     );
   }
 
+  // 3. Comprobar si la sesión ya está inscripta (Idempotencia)
+  const existingEntry = await getCompetitionEntryByTableSessionId(db, session.id);
+  if (existingEntry) {
+    return {
+      ok: true,
+      competitionId: comp.id,
+      entryId: existingEntry.id,
+      next: '/play',
+    };
+  }
+
   const now = new Date();
 
-  // 3. Validar ventana de registro
+  // 4. Validar ventana de registro
   if (comp.timingMode === 'open') {
     if (comp.status !== 'active') {
       throw new CompetitionRegistrationClosedError(
@@ -332,17 +343,6 @@ export async function joinCompetition(
         'El horario límite de inscripción para la competencia de hoy ha finalizado.'
       );
     }
-  }
-
-  // 4. Comprobar si la sesión ya está inscripta
-  const existingEntry = await getCompetitionEntryByTableSessionId(db, session.id);
-  if (existingEntry) {
-    return {
-      ok: true,
-      competitionId: comp.id,
-      entryId: existingEntry.id,
-      next: '/play',
-    };
   }
 
   if (!group) {
@@ -399,7 +399,7 @@ export async function prepareCompetitionRound(
   entryId: string,
   roundNumber: 1 | 2 | 3,
   rng: () => number = defaultRng
-): Promise<{ ok: true; roundNumber: number; gameSessionId: string }> {
+): Promise<{ ok: true; roundNumber: number; gameSessionId: string; existing?: boolean }> {
   return db.transaction(async (tx) => {
     // 1. Cargar entrada con lock
     const [entry] = await tx
@@ -459,11 +459,22 @@ export async function prepareCompetitionRound(
       }
     }
 
-    // 3. Comprobar rondas previas y unicidad
+    // 3. Comprobar rondas previas y unicidad (Idempotencia)
     const existingRounds = await getCompetitionRounds(tx, entryId);
-    const existingRoundNumbers = new Set(existingRounds.map((r) => r.roundNumber));
+    const existingRound = existingRounds.find((r) => r.roundNumber === roundNumber);
 
-    if (existingRoundNumbers.has(roundNumber)) {
+    if (existingRound) {
+      if (
+        existingRound.gameSession.status === 'created' ||
+        existingRound.gameSession.status === 'active'
+      ) {
+        return {
+          ok: true,
+          existing: true,
+          roundNumber: existingRound.roundNumber,
+          gameSessionId: existingRound.gameSessionId,
+        };
+      }
       throw new CompetitionRoundAlreadyExistsError();
     }
 
@@ -510,15 +521,27 @@ export async function prepareCompetitionRound(
     // 7. Seleccionar 10 preguntas distintas acordes al blueprint sin repetir ninguna previa
     const newGameQuestions: NewGameQuestion[] = [];
 
-    // Limpiar cualquier sesión huérfana previa en estado 'created' para no violar el índice único
-    await tx
-      .delete(gameSessions)
+    // Limpiar cualquier sesión huérfana previa en estado 'created' (solo casuales que no pertenezcan a competition_rounds)
+    const existingCompRounds = await tx
+      .select({ gameSessionId: competitionRounds.gameSessionId })
+      .from(competitionRounds);
+    const compGameSessionIds = new Set(existingCompRounds.map((r) => r.gameSessionId));
+
+    const orphanSessions = await tx
+      .select()
+      .from(gameSessions)
       .where(
         and(
           eq(gameSessions.tableSessionId, entry.tableSessionId),
           eq(gameSessions.status, 'created')
         )
       );
+
+    for (const orphan of orphanSessions) {
+      if (!compGameSessionIds.has(orphan.id)) {
+        await tx.delete(gameSessions).where(eq(gameSessions.id, orphan.id));
+      }
+    }
 
     // Para crear game_session
     const [gameSession] = await tx
@@ -617,7 +640,13 @@ export async function startNextCompetitionRound(
   tableSessionToken: string,
   requestContext: { headers: Headers; cookies: RequestCookiesReader },
   rng: () => number = defaultRng
-): Promise<{ ok: true; roundNumber: number; gameSessionId: string; next: string }> {
+): Promise<{
+  ok: true;
+  roundNumber: number;
+  gameSessionId: string;
+  next: string;
+  existing?: boolean;
+}> {
   const resolved = await resolveSessionFromCookie(db, tableSessionToken);
   if (!resolved) {
     throw new SessionNotFoundError();
@@ -637,12 +666,28 @@ export async function startNextCompetitionRound(
 
   const rounds = await getCompetitionRounds(db, entry.id);
 
+  // Comprobar si existe un ciclo en progreso (created o active) que aún no terminó (Idempotencia)
+  const unfinishedRound = rounds.find(
+    (r) => r.gameSession.status === 'created' || r.gameSession.status === 'active'
+  );
+  if (unfinishedRound) {
+    return {
+      ok: true,
+      existing: true,
+      roundNumber: unfinishedRound.roundNumber,
+      gameSessionId: unfinishedRound.gameSessionId,
+      next: '/play',
+    };
+  }
+
+  const completedRounds = rounds.filter((r) => r.gameSession.status === 'completed');
+
   let nextRoundNumber: 1 | 2 | 3;
-  if (rounds.length === 0) {
+  if (completedRounds.length === 0) {
     nextRoundNumber = 1;
-  } else if (rounds.length === 1) {
+  } else if (completedRounds.length === 1) {
     nextRoundNumber = 2;
-  } else if (rounds.length === 2) {
+  } else if (completedRounds.length === 2) {
     nextRoundNumber = 3;
   } else {
     throw new CompetitionAllRoundsCompletedError();
@@ -652,6 +697,7 @@ export async function startNextCompetitionRound(
 
   return {
     ok: true,
+    existing: (result as { existing?: boolean }).existing ?? false,
     roundNumber: result.roundNumber,
     gameSessionId: result.gameSessionId,
     next: '/play',

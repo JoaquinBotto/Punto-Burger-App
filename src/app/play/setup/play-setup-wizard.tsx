@@ -37,9 +37,12 @@ interface CompetitionInfo {
   joinCutoffAt?: string | null;
 }
 
+import type { CompetitionStateResponse } from '@/modules/competitions/types';
+
 interface PlaySetupWizardProps {
   initialData: PlaySetupInitialData;
   competition?: CompetitionInfo | null;
+  competitionState?: CompetitionStateResponse | null;
 }
 
 interface ParticipantFormState {
@@ -51,15 +54,28 @@ interface ParticipantFormState {
 
 const NAME_SUGGESTIONS = ['Los Cracks', 'Mesa Picante', 'Los Bacon', 'Team Punto'];
 
-export default function PlaySetupWizard({ initialData, competition }: PlaySetupWizardProps) {
+export default function PlaySetupWizard({
+  initialData,
+  competition,
+  competitionState,
+}: PlaySetupWizardProps) {
   const router = useRouter();
   const { table, categories, existingSetup } = initialData;
+
+  const hasActiveGame = Boolean(competitionState?.activeGameSessionId);
+  const activeRoundNumber = competitionState?.entry?.currentRoundNumber || 1;
 
   const isCompetition = Boolean(
     competition && (competition.status === 'scheduled' || competition.status === 'active')
   );
 
-  const [step, setStep] = useState<1 | 2 | 3 | 'summary'>(existingSetup?.isSaved ? 'summary' : 1);
+  const [step, setStep] = useState<1 | 2 | 3 | 'summary'>(
+    hasActiveGame || existingSetup?.isSaved ? 'summary' : 1
+  );
+
+  const [setupSaved, setSetupSaved] = useState(
+    Boolean(hasActiveGame || existingSetup?.isSaved || competitionState?.entry)
+  );
 
   const [groupName, setGroupName] = useState(existingSetup?.groupName ?? '');
 
@@ -222,43 +238,69 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
     setPrepareError(null);
 
     try {
-      // 1. Guardar grupo y participantes
-      const payload = {
-        groupName: groupName.trim(),
-        participants: participants.map((p) => ({
-          alias: p.alias.trim(),
-          ageRange: p.ageRange,
-          educationLevel: p.educationLevel,
-        })),
-        categorySlug: categories[0]?.slug ?? 'cultura-general',
-      };
-
-      const setupRes = await fetch('/api/v1/games/setup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const setupData = await setupRes.json();
-      if (!setupRes.ok || !setupData.ok) {
-        setPrepareError(setupData?.error?.message || 'Error al guardar el equipo.');
-        setIsPreparing(false);
-        return;
+      // 1. Reconstrucción y recuperación del estado en el servidor
+      const stateRes = await fetch('/api/v1/competitions/current/state');
+      if (stateRes.ok) {
+        const stateData = await stateRes.json();
+        if (stateData.ok && stateData.activeGameSessionId) {
+          router.push('/play');
+          return;
+        }
       }
 
-      // 2. Unirse a la competencia
+      // 2. Guardar setup solo si aún no fue guardado
+      if (!setupSaved) {
+        const payload = {
+          groupName: groupName.trim(),
+          participants: participants.map((p) => ({
+            alias: p.alias.trim(),
+            ageRange: p.ageRange,
+            educationLevel: p.educationLevel,
+          })),
+          categorySlug: categories[0]?.slug ?? 'cultura-general',
+        };
+
+        const setupRes = await fetch('/api/v1/games/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const setupData = await setupRes.json();
+        if (!setupRes.ok || !setupData.ok) {
+          if (setupData?.error?.code === 'SETUP_ALREADY_LOCKED') {
+            setSetupSaved(true);
+            router.push('/play');
+            return;
+          }
+          const msg =
+            setupData?.error?.code === 'PRESENCE_REQUIRED'
+              ? 'Conectate al Wi-Fi de Punto Burger para continuar.'
+              : setupData?.error?.message || 'Error al guardar el equipo.';
+          setPrepareError(msg);
+          setIsPreparing(false);
+          return;
+        }
+        setSetupSaved(true);
+      }
+
+      // 3. Unirse a la competencia (idempotente)
       const joinRes = await fetch('/api/v1/competitions/current/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
       const joinData = await joinRes.json();
       if (!joinRes.ok || !joinData.ok) {
-        setPrepareError(joinData?.error?.message || 'Error al registrarse en la competencia.');
+        const msg =
+          joinData?.error?.code === 'PRESENCE_REQUIRED'
+            ? 'Conectate al Wi-Fi de Punto Burger para continuar.'
+            : joinData?.error?.message || 'Error al registrarse en la competencia.';
+        setPrepareError(msg);
         setIsPreparing(false);
         return;
       }
 
-      // 3. Si la competencia ya empezó, iniciar ciclo 1
+      // 4. Si la competencia ya empezó, iniciar ciclo 1
       if (isStarted) {
         const roundRes = await fetch('/api/v1/competitions/current/rounds/next', {
           method: 'POST',
@@ -266,7 +308,11 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
         });
         const roundData = await roundRes.json();
         if (!roundRes.ok || !roundData.ok) {
-          setPrepareError(roundData?.error?.message || 'Error al preparar el primer ciclo.');
+          const msg =
+            roundData?.error?.code === 'PRESENCE_REQUIRED'
+              ? 'Conectate al Wi-Fi de Punto Burger para continuar.'
+              : roundData?.error?.message || 'Error al preparar el primer ciclo.';
+          setPrepareError(msg);
           setIsPreparing(false);
           return;
         }
@@ -276,7 +322,7 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
         setIsPreparing(false);
       }
     } catch {
-      setPrepareError('Error de conexión al registrarse.');
+      setPrepareError('Error de conexión al registrarse. Por favor, reintentá.');
       setIsPreparing(false);
     }
   };
@@ -404,7 +450,7 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
             </div>
 
             {/* Botón de Modificación */}
-            {!isJoined && (
+            {!isJoined && !hasActiveGame && (
               <SecondaryButton type="button" onClick={() => setStep(1)} className="mt-6 w-full">
                 Modificar equipo {isCompetition ? '' : 'o categoría'}
               </SecondaryButton>
@@ -418,7 +464,16 @@ export default function PlaySetupWizard({ initialData, competition }: PlaySetupW
                 </div>
               )}
 
-              {isCompetition ? (
+              {hasActiveGame ? (
+                <div>
+                  <PrimaryButton type="button" onClick={() => router.push('/play')}>
+                    Continuar Ciclo {activeRoundNumber}
+                  </PrimaryButton>
+                  <p className="mt-2 text-[11px] text-pb-charcoal-light">
+                    Tu partida ya está preparada. Continuá jugando para no perder el progreso.
+                  </p>
+                </div>
+              ) : isCompetition ? (
                 <div>
                   {isJoined && !isStarted ? (
                     <div className="space-y-3">

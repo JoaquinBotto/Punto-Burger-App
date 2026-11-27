@@ -18,6 +18,17 @@ export async function getGameSessionByTableSessionId(
   return result[0] ?? null;
 }
 
+export async function getGameSessionsByTableSessionId(
+  db: DbClient,
+  tableSessionId: string
+): Promise<GameSession[]> {
+  return db
+    .select()
+    .from(gameSessions)
+    .where(eq(gameSessions.tableSessionId, tableSessionId))
+    .orderBy(desc(gameSessions.createdAt));
+}
+
 export async function getGameSessionWithCategory(
   db: DbClient,
   tableSessionId: string

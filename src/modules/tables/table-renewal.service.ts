@@ -112,16 +112,6 @@ export async function renewTable(
             .where(eq(gameSessions.id, gs.id));
         }
       }
-
-      // Si competition_entry está registered o active -> marcar abandoned
-      // NO modificar entries completed
-      if (compEntry && (compEntry.status === 'registered' || compEntry.status === 'active')) {
-        await tx
-          .update(competitionEntries)
-          .set({ status: 'abandoned', updatedAt: now })
-          .where(eq(competitionEntries.id, compEntry.id));
-        entryWasAbandoned = true;
-      }
     } else {
       // Sin --force (no había active game, pero puede haber created huérfano)
       for (const gs of sessionGames) {
@@ -132,6 +122,17 @@ export async function renewTable(
             .where(eq(gameSessions.id, gs.id));
         }
       }
+    }
+
+    // Tanto con --force como sin --force:
+    // Si table:renew cierra la table_session, cualquier competition_entry asociada en registered o active
+    // DEBE pasar a abandoned (NO tocar completed).
+    if (compEntry && (compEntry.status === 'registered' || compEntry.status === 'active')) {
+      await tx
+        .update(competitionEntries)
+        .set({ status: 'abandoned', updatedAt: now })
+        .where(eq(competitionEntries.id, compEntry.id));
+      entryWasAbandoned = true;
     }
 
     // 5. Cerrar correctamente sesión previa y limpiar cooldown

@@ -247,4 +247,82 @@ describe('TableRenewalService', () => {
       })
     );
   });
+
+  it('sin --force abandona competition_entry activa/registrada cuando el juego solo está created', async () => {
+    const fakeTable = {
+      id: 't-1',
+      code: 'mesa-01',
+      displayName: 'Mesa 01',
+      venueId: 'v-1',
+      status: 'in_use',
+    };
+
+    const fakeSession = {
+      id: 'ts-1',
+      tableId: 't-1',
+      status: 'active',
+      activeDeviceId: 'd-1',
+    };
+
+    const fakeCreatedGame = {
+      id: 'gs-1',
+      status: 'created',
+      tableSessionId: 'ts-1',
+    };
+
+    const fakeCompEntry = {
+      id: 'ce-1',
+      status: 'registered',
+      tableSessionId: 'ts-1',
+    };
+
+    let queryCount = 0;
+    const updateSpy = vi.fn().mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([]),
+      }),
+    });
+
+    const mockTx = {
+      select: vi.fn().mockImplementation(() => ({
+        from: vi.fn().mockImplementation(() => ({
+          where: vi.fn().mockImplementation(() => {
+            queryCount++;
+            if (queryCount === 1) return { for: vi.fn().mockResolvedValue([fakeTable]) };
+            if (queryCount === 2) return { limit: vi.fn().mockResolvedValue([fakeSession]) };
+            if (queryCount === 3) return Promise.resolve([fakeCreatedGame]);
+            return { limit: vi.fn().mockResolvedValue([fakeCompEntry]) };
+          }),
+        })),
+      })),
+      update: updateSpy,
+    };
+
+    const mockDb = {
+      transaction: vi.fn().mockImplementation(async (cb) => cb(mockTx)),
+    } as unknown as Database;
+
+    vi.spyOn(sessionsRepo, 'updateSessionStatus').mockResolvedValue({} as never);
+    vi.spyOn(sessionsRepo, 'revokeDevice').mockResolvedValue({} as never);
+    vi.spyOn(tablesRepo, 'updateTableStatus').mockResolvedValue({} as never);
+    const auditSpy = vi.spyOn(auditRepo, 'createAuditEvent').mockResolvedValue({} as never);
+
+    const result = await renewTable(mockDb, 'mesa-01', { force: false });
+
+    expect(result.ok).toBe(true);
+    expect(result.forced).toBe(false);
+
+    expect(auditSpy).toHaveBeenCalledWith(
+      mockTx,
+      expect.objectContaining({
+        eventType: 'competition_entry_abandoned_by_operator',
+        metadata: expect.objectContaining({
+          tableCode: 'mesa-01',
+          oldTableSessionId: 'ts-1',
+          oldCompetitionEntryId: 'ce-1',
+          forced: false,
+        }),
+      })
+    );
+  });
 });

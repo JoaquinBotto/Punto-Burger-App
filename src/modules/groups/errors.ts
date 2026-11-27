@@ -104,6 +104,17 @@ export class GameAlreadyStartedError extends DomainError {
   }
 }
 
+export class SetupAlreadyLockedError extends DomainError {
+  readonly code = 'SETUP_ALREADY_LOCKED';
+  readonly statusCode = 409;
+
+  constructor(
+    message = 'La partida ya fue preparada. Continuá jugando para no perder el progreso.'
+  ) {
+    super(message);
+  }
+}
+
 export class SetupCreationFailedError extends DomainError {
   readonly code = 'SETUP_CREATION_FAILED';
   readonly statusCode = 500;

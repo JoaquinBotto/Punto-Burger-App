@@ -25,29 +25,80 @@ export async function replaceGroupParticipants(
   groupId: string,
   items: ReplaceParticipantInput[]
 ): Promise<Participant[]> {
-  // Eliminar participantes previos del grupo de forma controlada
-  await db.delete(participants).where(eq(participants.groupId, groupId));
+  const existing = await getParticipantsByGroupId(db, groupId);
 
-  if (items.length === 0) {
-    return [];
+  // Si la lista es semánticamente idéntica, retornar la existente sin cambios ni queries innecesarias
+  if (existing.length === items.length) {
+    const isIdentical = items.every((item, idx) => {
+      const ex = existing[idx];
+      return (
+        ex &&
+        ex.alias.trim() === item.alias.trim() &&
+        ex.ageRange === item.ageRange &&
+        (ex.educationLevel ?? null) === (item.educationLevel ?? null) &&
+        ex.position === item.position
+      );
+    });
+
+    if (isIdentical) {
+      return existing;
+    }
   }
 
-  // Insertar nueva lista asegurando posiciones 1..N
-  const inserted = await db
-    .insert(participants)
-    .values(
-      items.map((item) => ({
-        groupId,
-        alias: item.alias,
-        ageRange: item.ageRange,
-        educationLevel: item.educationLevel ?? null,
-        position: item.position,
-      }))
-    )
-    .returning();
+  // Actualizar participantes en sus posiciones existentes para mantener IDs estables
+  const result: Participant[] = [];
+  const commonLength = Math.min(existing.length, items.length);
 
-  // Ordenar por position antes de devolver
-  return inserted.sort((a, b) => a.position - b.position);
+  for (let i = 0; i < commonLength; i++) {
+    const ex = existing[i]!;
+    const item = items[i]!;
+    const needsUpdate =
+      ex.alias.trim() !== item.alias.trim() ||
+      ex.ageRange !== item.ageRange ||
+      (ex.educationLevel ?? null) !== (item.educationLevel ?? null) ||
+      ex.position !== item.position;
+
+    if (needsUpdate) {
+      const [updated] = await db
+        .update(participants)
+        .set({
+          alias: item.alias.trim(),
+          ageRange: item.ageRange,
+          educationLevel: item.educationLevel ?? null,
+          position: item.position,
+        })
+        .where(eq(participants.id, ex.id))
+        .returning();
+      if (updated) {
+        result.push(updated);
+      }
+    } else {
+      result.push(ex);
+    }
+  }
+
+  // Si hay más items nuevos que existentes, insertar los adicionales
+  if (items.length > existing.length) {
+    const toInsert = items.slice(existing.length).map((item) => ({
+      groupId,
+      alias: item.alias.trim(),
+      ageRange: item.ageRange,
+      educationLevel: item.educationLevel ?? null,
+      position: item.position,
+    }));
+    const inserted = await db.insert(participants).values(toInsert).returning();
+    result.push(...inserted);
+  }
+
+  // Si hay menos items nuevos que existentes, eliminar los sobrantes
+  if (existing.length > items.length) {
+    const toRemove = existing.slice(items.length);
+    for (const p of toRemove) {
+      await db.delete(participants).where(eq(participants.id, p.id));
+    }
+  }
+
+  return result.sort((a, b) => a.position - b.position);
 }
 
 export async function getParticipantById(db: DbClient, id: string): Promise<Participant | null> {

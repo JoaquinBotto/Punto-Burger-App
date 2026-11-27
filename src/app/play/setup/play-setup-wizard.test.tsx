@@ -213,4 +213,63 @@ describe('PlaySetupWizard Component', () => {
       expect(mockPush).toHaveBeenCalledWith('/play');
     });
   });
+
+  it('cuando hay una partida activa de competencia (activeGameSessionId), muestra Continuar Ciclo y navega a /play', async () => {
+    const compState = {
+      competition: {
+        id: 'comp-1',
+        name: 'Competencia Abierta',
+        status: 'active' as const,
+        timingMode: 'open' as const,
+        localDate: null,
+        startsAt: null,
+        endsAt: null,
+        registrationOpensAt: null,
+        joinCutoffAt: null,
+        finalizationGraceUntil: null,
+        isTest: false,
+      },
+      entry: {
+        id: 'ce-1',
+        status: 'active' as const,
+        currentRoundNumber: 1,
+        currentRoundStatus: 'created' as const,
+        completedRounds: 0,
+        roundScores: [],
+        totalScore: 0,
+        joinedAt: new Date().toISOString(),
+        completedAt: null,
+      },
+      activeGameSessionId: 'gs-round-1',
+      presence: { mode: 'off' as const, verified: true, required: false },
+    };
+
+    render(
+      <PlaySetupWizard
+        initialData={{
+          ...mockInitialData,
+          existingSetup: {
+            groupName: 'Los Bacon',
+            participants: [
+              { alias: 'Joaco', ageRange: 'adult', educationLevel: null, position: 1 },
+            ],
+            categorySlug: 'deportes',
+            isSaved: true,
+          },
+        }}
+        competition={compState.competition}
+        competitionState={compState}
+      />
+    );
+
+    // No debe permitir modificar equipo
+    expect(screen.queryByText(/Modificar equipo/i)).toBeNull();
+
+    // Muestra botón Continuar Ciclo 1
+    const continueBtn = screen.getByRole('button', { name: /Continuar Ciclo 1/i });
+    expect(continueBtn).toBeDefined();
+
+    fireEvent.click(continueBtn);
+    expect(mockPush).toHaveBeenCalledWith('/play');
+  });
 });

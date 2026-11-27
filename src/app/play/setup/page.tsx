@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/db/client';
 import { TABLE_SESSION_COOKIE_NAME } from '@/modules/sessions';
 import { getPlaySetupData } from '@/modules/groups';
-import { getCurrentCompetition } from '@/modules/competitions';
+import { getCompetitionState } from '@/modules/competitions';
 import PlaySetupWizard from './play-setup-wizard';
 
 export default async function PlaySetupPage() {
@@ -16,24 +16,24 @@ export default async function PlaySetupPage() {
 
   let setupData = null;
   let competition = null;
+  let competitionState = null;
   const db = getDb();
 
   try {
     setupData = await getPlaySetupData(db, sessionCookie);
     if (setupData) {
-      const comp = await getCurrentCompetition(db, setupData.venue.id, { allowTest: true });
+      competitionState = await getCompetitionState(db, sessionCookie);
+      const comp = competitionState.competition;
       if (comp) {
         competition = {
           id: comp.id,
           name: comp.name,
           status: comp.status,
           timingMode: comp.timingMode,
-          startsAt: comp.startsAt ? comp.startsAt.toISOString() : null,
-          endsAt: comp.endsAt ? comp.endsAt.toISOString() : null,
-          registrationOpensAt: comp.registrationOpensAt
-            ? comp.registrationOpensAt.toISOString()
-            : null,
-          joinCutoffAt: comp.joinCutoffAt ? comp.joinCutoffAt.toISOString() : null,
+          startsAt: comp.startsAt,
+          endsAt: comp.endsAt,
+          registrationOpensAt: comp.registrationOpensAt,
+          joinCutoffAt: comp.joinCutoffAt,
         };
       }
     }
@@ -46,5 +46,11 @@ export default async function PlaySetupPage() {
     redirect('/');
   }
 
-  return <PlaySetupWizard initialData={setupData} competition={competition} />;
+  return (
+    <PlaySetupWizard
+      initialData={setupData}
+      competition={competition}
+      competitionState={competitionState}
+    />
+  );
 }

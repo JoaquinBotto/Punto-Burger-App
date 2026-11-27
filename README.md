@@ -26,7 +26,7 @@ El proyecto está organizado como un **Monolito Modular Full-Stack TypeScript** 
 ├── docs/
 │   ├── adr/                    # Architecture Decision Records (ADR 001)
 │   ├── deployment/             # Guías de infraestructura de producción (DonWeb)
-│   └── implementation/         # Informes de implementación (PPA-008 a PPA-LAUNCH-001)
+│   └── implementation/         # Informes de implementación (PPA-008 a PPA-HOTFIX-002)
 ├── specs/                      # Especificaciones funcionales y técnicas (SDD)
 ├── src/
 │   ├── app/                    # Next.js App Router (layout, landing, APIs, /t/[qrToken], /play, /ranking)
